@@ -185,25 +185,29 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         console.warn('Kakao Maps API가 로드되지 않았습니다. API 키를 확인해주세요.');
         return;
       }
-      const container = document.getElementById('map');
-      const options = {
-        center: new kakao.maps.LatLng(37.456, 126.705), // 인천 시청 중심
-        level: 8
-      };
-      const map = new kakao.maps.Map(container, options);
+      
+      // autoload=false 일 때는 load 함수를 명시적으로 호출해야 합니다.
+      kakao.maps.load(() => {
+        const container = document.getElementById('map');
+        const options = {
+          center: new kakao.maps.LatLng(37.456, 126.705), // 인천 시청 중심
+          level: 8
+        };
+        const map = new kakao.maps.Map(container, options);
 
-      hotspots.forEach(spot => {
-        const marker = new kakao.maps.Marker({
-          map: map,
-          position: new kakao.maps.LatLng(spot.lat, spot.lng)
+        hotspots.forEach(spot => {
+          const marker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(spot.lat, spot.lng)
+          });
+
+          const infowindow = new kakao.maps.InfoWindow({
+            content: `<div style="padding:5px; font-size:12px; color:#333;"><b>${spot.title}</b><br>누적 수거량: ${spot.count}개</div>`
+          });
+
+          kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
+          kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
         });
-
-        const infowindow = new kakao.maps.InfoWindow({
-          content: `<div style="padding:5px; font-size:12px; color:#333;"><b>${spot.title}</b><br>누적 수거량: ${spot.count}개</div>`
-        });
-
-        kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-        kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
       });
     }
 
