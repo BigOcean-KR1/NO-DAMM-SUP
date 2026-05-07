@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>노담 서포터즈 | 인천의 바닥을 바꾸는 1시간</title>
+  <meta name="description" content="노담 서포터즈는 인천의 꽁초를 줍는 청년 환경 플로깅 캠페인입니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Bebas+Neue&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  
+  <!-- Lenis for Smooth Scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@latest/dist/lenis.min.js"></script>
+
+  <!-- Kakao Maps API -->
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ca1b74dee88e9bb909ea0c5c8f41a15e"></script>
+
+  <!-- =========================================================
+       STYLE
+  ========================================================== -->
+  <link rel="stylesheet" href="nodamm_style.css" />
+</head>
+
+<body>
+
+  <!-- ====================================================
+       NAVIGATION
+  ==================================================== -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#hero">NODAM SUPPORTERS</a>
+      <ul class="nav-links">
+        <li><a href="#why">WHY</a></li>
+        <li><a href="#how">활동방식</a></li>
+        <li><a href="#gallery">활동사진</a></li>
+        <li><a href="#detail">디테일</a></li>
+        <li><a href="#reward">리워드</a></li>
+        <li><a href="#board">게시판</a></li>
+      </ul>
+      <button class="nav-cta"
+        onclick="lenis.scrollTo('#board')">지원하기</button>
+    </div>
+  </nav>
+
+  <!-- ====================================================
+       HERO
+  ==================================================== -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-circle"></div>
+    <div class="hero-deco-text">NO<br>DAM</div>
+
+    <div class="hero-content">
+      <span class="hero-badge">INCHEON CLEAN CAMPAIGN 2025</span>
+
+      <h1 class="hero-title display">
+        노담<br><span class="accent">서포터즈</span>
+      </h1>
+
+      <p class="hero-slogan">
+        인천의 바닥을 바꾸는 1시간,<br>
+        우리의 도시가 숨을 쉬게 할 수 있도록.
+      </p>
+
+      <div class="hero-tags">
+        <span class="hero-tag-item">#환경보호</span>
+        <span class="hero-tag-item">#인천사랑</span>
+        <span class="hero-tag-item">#청년네트워크</span>
+        <span class="hero-tag-item">#실천하는용기</span>
+      </div>
+
+      <div class="hero-buttons">
+        <button class="btn btn-primary" onclick="lenis.scrollTo('#board')">
+          <i class="ti ti-arrow-right" aria-hidden="true"></i> 지금 참여하기
+        </button>
+        <button class="btn btn-outline" onclick="lenis.scrollTo('#why')">
+          더 알아보기
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       WHY
+  ==================================================== -->
+  <section id="why" class="section section-alt">
+    <div class="container">
+      <span class="section-tag fade-up">WHY WE EXIST</span>
+      <h2 class="section-title fade-up">왜 시작했나요?</h2>
+      <p class="section-desc fade-up">우리가 이 캠페인을 시작한 이유입니다.</p>
+
+      <blockquote class="why-quote fade-up">
+        "처음에는 동네 친구들과 가볍게 시작했습니다. 우리가 자주 걷는 골목에 버려진 꽁초들이 눈에 밟혔거든요.
+        그런데 줍다 보니 깨달았습니다. 우리가 줍는 건 단순한 쓰레기가 아니라,
+        <strong>인천의 미소</strong>라는 것을요.
+        이제 우리는 친구의 손을 넘어, 인천 전역의 동료들과 함께하려 합니다.
+        <strong>당신의 1시간이 인천을 바꿉니다.</strong>"
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       HOW
+  ==================================================== -->
+  <section id="how" class="section">
+    <div class="container">
+      <span class="section-tag fade-up">WHAT WE DO</span>
+      <h2 class="section-title fade-up">활동 방식</h2>
+      <p class="section-desc fade-up">주 1회, 인천 곳곳에서 우리가 함께 움직입니다.</p>
+
+      <div class="card-grid">
+        <div class="how-card fade-up">
+          <div class="how-icon"><i class="ti ti-clock" aria-hidden="true"></i></div>
+          <h4>시간</h4>
+          <p>주 1회 진행<br>평일 저녁 또는 주말 오전<br>(선호도 조사 후 결정)</p>
+        </div>
+        <div class="how-card fade-up">
+          <div class="how-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
+          <h4>장소</h4>
+          <p>인천 8개 구 · 2개 군 순회<br>부평 테마거리, 구월동 로데오,<br>주안역 인근 등</p>
+        </div>
+        <div class="how-card fade-up">
+          <div class="how-icon"><i class="ti ti-run" aria-hidden="true"></i></div>
+          <h4>활동 방식</h4>
+          <p>1시간 꽁초 플로깅 후<br>수거량 측정 및<br>단체 사진 촬영</p>
+        </div>
+        <div class="how-card fade-up">
+          <div class="how-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <h4>팀 구성</h4>
+          <p>구역별 팀장 선정 후<br>인천 전역에서<br>동시 진행 가능</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       GALLERY
+  ==================================================== -->
+  <section id="gallery" class="section">
+    <div class="container">
+      <span class="section-tag fade-up">ACTIVITY SHOTS</span>
+      <h2 class="section-title fade-up">활동 사진</h2>
+      <p class="section-desc fade-up">인천 곳곳에서 변화를 만드는 우리의 순간들입니다.</p>
+
+      <div class="gallery-grid">
+        <div class="gallery-item fade-up">
+          <img src="Picture/Nodamm_1.jpg" alt="노담 서포터즈 활동 사진 1">
+          <div class="gallery-overlay">
+            <span>부평역 테마거리 플로깅</span>
+          </div>
+        </div>
+        <!-- 이미지가 더 있을 경우 추가 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       DETAIL
+  ==================================================== -->
+  <section id="detail" class="section section-alt">
+    <div class="container">
+      <span class="section-tag fade-up">HOW WE MEASURE</span>
+      <h2 class="section-title fade-up">활동의 디테일</h2>
+      <p class="section-desc fade-up">수거한 꽁초 하나하나가 데이터가 됩니다.</p>
+
+      <div class="detail-list">
+        <div class="detail-item fade-up">
+          <div class="detail-num">01</div>
+          <div>
+            <h4>꽁초 카운팅</h4>
+            <p>매주 수거한 꽁초의 무게·개수를 기록하여 "지금까지 우리가 구한 인천의 땅"이라는 수치로 시각화합니다. 예: 10,000개 돌파!</p>
+          </div>
+        </div>
+        <div class="detail-item fade-up">
+          <div class="detail-num">02</div>
+          <div>
+            <h4>꽁초 핫스팟 지도 (Map)</h4>
+            <p>인천에서 꽁초가 특히 많이 나오는 구역을 데이터화하여, 인천시청에 쓰레기통 설치 건의 자료로 직접 활용합니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="map-section" class="fade-up" style="margin-top: 50px; margin-bottom: 50px;">
+          <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 700;">📍 인천 꽁초 핫스팟 지도</h3>
+          <div id="map" style="width:100%; height:450px; border-radius:20px; border:1px solid var(--border); background-color: #f9f9f9; display: flex; align-items: center; justify-content: center;">
+              <p id="map-placeholder" style="color: #666; font-size: 14px;">카카오맵을 불러오는 중이거나 설정이 필요합니다.</p>
+          </div>
+      </div>
+
+      <!-- 통계 카드 -->
+      <div class="stats-grid">
+        <div class="stat-card fade-up">
+          <div class="stat-num" id="s1">0</div>
+          <div class="stat-label">목표 수거 개수</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num" id="s2">0</div>
+          <div class="stat-label">활동 구역 (개)</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num" id="s3">0<small style="font-size:.5em">H</small></div>
+          <div class="stat-label">1회 봉사 시간</div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-num" id="s4">0</div>
+          <div class="stat-label">인천 핫스팟 거점</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       REWARD
+  ==================================================== -->
+  <section id="reward" class="section">
+    <div class="container">
+      <span class="section-tag fade-up">WHAT YOU GET</span>
+      <h2 class="section-title fade-up">리워드</h2>
+      <p class="section-desc fade-up">참여하면 실질적인 혜택이 돌아옵니다.</p>
+
+      <div class="reward-grid">
+        <div class="reward-card fade-up">
+          <h4><i class="ti ti-certificate" aria-hidden="true"></i> 봉사시간 인증</h4>
+          <p>1365 자원봉사 포털과 연계하여 공식 봉사시간을 인증받을 수 있습니다. (가장 중요한 유인책)</p>
+        </div>
+        <div class="reward-card fade-up">
+          <h4><i class="ti ti-discount-2" aria-hidden="true"></i> 제휴 혜택</h4>
+          <p>인천 로컬 카페·식당과 협약하여 '노담 서포터즈' 인증 시 할인 혜택을 제공합니다.</p>
+        </div>
+        <div class="reward-card fade-up">
+          <h4><i class="ti ti-trophy" aria-hidden="true"></i> 이달의 꽁초 헌터</h4>
+          <p>매달 우수 서포터즈를 선정하여 특별 시상합니다.</p>
+        </div>
+        <div class="reward-card fade-up">
+          <h4><i class="ti ti-building-community" aria-hidden="true"></i> 지자체 협력</h4>
+          <p>인천시 환경과 등과 협력하여 캠페인 규모를 지속 확대합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       BOARD
+  ==================================================== -->
+  <section id="board" class="section section-alt">
+    <div class="container">
+      <span class="section-tag fade-up">COMMUNITY</span>
+      <h2 class="section-title fade-up">게시판</h2>
+      <p class="section-desc fade-up">참여 신청, 질문, 활동 후기 무엇이든 남겨주세요.</p>
+
+      <div class="board-wrapper fade-up">
+        <!-- 헤더 -->
+        <div class="board-head">
+          <span>전체 게시글</span>
+          <span class="total">총 <span id="post-count">5</span>개</span>
+        </div>
+
+        <!-- 필터 -->
+        <div class="board-filters">
+          <div class="filter-group">
+            <span class="filter-label">유형:</span>
+            <button class="filter-btn active" data-filter="all" onclick="filterPosts(this, 'all')">전체</button>
+            <button class="filter-btn" data-filter="join" onclick="filterPosts(this, 'join')">참여신청</button>
+            <button class="filter-btn" data-filter="q" onclick="filterPosts(this, 'q')">질문</button>
+            <button class="filter-btn" data-filter="review" onclick="filterPosts(this, 'review')">후기</button>
+          </div>
+          <div class="filter-group" style="margin-top: 0.5rem;">
+            <span class="filter-label">지역:</span>
+            <select class="form-select select-sm" id="filter-region" onchange="filterRegion(this.value)">
+              <option value="all">전체 지역</option>
+              <option value="중구">중구</option>
+              <option value="동구">동구</option>
+              <option value="미추홀구">미추홀구</option>
+              <option value="연수구">연수구</option>
+              <option value="남동구">남동구</option>
+              <option value="부평구">부평구</option>
+              <option value="계양구">계양구</option>
+              <option value="서구">서구</option>
+              <option value="강화군">강화군</option>
+              <option value="옹진군">옹진군</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 목록 -->
+        <ul class="board-list" id="board-list">
+          <!-- JS로 렌더링 -->
+        </ul>
+
+        <!-- 입력 폼 -->
+        <div class="board-form">
+          <select class="form-select" id="post-region">
+            <option value="부평구">부평구</option>
+            <option value="남동구">남동구</option>
+            <option value="연수구">연수구</option>
+            <option value="미추홀구">미추홀구</option>
+            <option value="서구">서구</option>
+            <option value="중구">중구</option>
+            <option value="동구">동구</option>
+            <option value="계양구">계양구</option>
+            <option value="강화군">강화군</option>
+            <option value="옹진군">옹진군</option>
+          </select>
+          <select class="form-select" id="post-type">
+            <option value="join">참여신청</option>
+            <option value="q">질문</option>
+            <option value="review">후기</option>
+          </select>
+          <input class="form-input" id="post-text" type="text" placeholder="내용을 입력하고 Enter 또는 등록 버튼을 누르세요" />
+          <button class="form-submit" onclick="addPost()">등록</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       FOOTER
+  ==================================================== -->
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="logo-text">NODAM SUPPORTERS</span>
+        <p>인천의 바닥을 바꾸는 1시간.<br>우리의 도시가 숨을 쉬게 할 수 있도록.</p>
+      </div>
+      <div class="footer-col">
+        <h5>캠페인</h5>
+        <ul>
+          <li><a href="#why">왜 시작했나요</a></li>
+          <li><a href="#how">활동 방식</a></li>
+          <li><a href="#detail">활동 디테일</a></li>
+          <li><a href="#reward">리워드</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>커뮤니티</h5>
+        <ul>
+          <li><a href="#board">게시판</a></li>
+          <li><a href="#board">참여 신청</a></li>
+          <li><a href="#board">질문하기</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>관련 기관</h5>
+        <ul>
+          <li><a href="https://www.1365.go.kr" target="_blank">1365 자원봉사</a></li>
+          <li><a href="https://www.incheon.go.kr" target="_blank">인천광역시</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Copyright © 2025 노담서포터즈 All Rights Reserved. | 인천광역시</p>
+      <div class="social-links">
+        <a class="social-btn" href="#" aria-label="Instagram"><i class="ti ti-brand-instagram"
+            aria-hidden="true"></i></a>
+        <a class="social-btn" href="#" aria-label="KakaoTalk"><i class="ti ti-brand-kakao" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================================================
+       SCRIPT
+  ==================================================== -->
+  <script src="nodamm_script.js"></script>
+
+</body>
+
+</html>
