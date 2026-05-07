@@ -156,7 +156,7 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
-      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     #navbar.nav-hidden {
@@ -281,20 +281,20 @@
       display: inline-block;
       background: var(--green-pale);
       color: var(--green);
-      font-size: 11px;
+      font-size: 14px;
       letter-spacing: 2px;
-      padding: 5px 14px;
+      padding: 6px 16px;
       border-radius: 20px;
       font-weight: 700;
-      margin-bottom: 1.4rem;
+      margin-bottom: 1.6rem;
     }
 
     .hero-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(60px, 10vw, 110px);
-      line-height: 1;
+      font-size: clamp(70px, 12vw, 125px);
+      line-height: 0.95;
       letter-spacing: 4px;
-      margin-bottom: 1.4rem;
+      margin-bottom: 1.8rem;
     }
 
     .hero-title .accent {
@@ -302,11 +302,12 @@
     }
 
     .hero-slogan {
-      font-size: 16px;
+      font-size: 20px;
+      font-weight: 400;
       color: var(--muted);
-      max-width: 440px;
-      line-height: 1.8;
-      margin-bottom: 2rem;
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
     }
 
     .hero-tags {
@@ -317,9 +318,9 @@
     }
 
     .hero-tag-item {
-      font-size: 12px;
-      padding: 4px 13px;
-      border: 1px solid var(--border);
+      font-size: 14px;
+      padding: 5px 15px;
+      border: 1.5px solid var(--border);
       border-radius: 20px;
       color: var(--muted);
       background: var(--white);

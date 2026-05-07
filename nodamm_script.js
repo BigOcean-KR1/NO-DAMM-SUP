@@ -164,9 +164,16 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       const currentScroll = window.scrollY;
-      if (currentScroll > lastScroll && currentScroll > 60) {
+      const scrollDiff = Math.abs(currentScroll - lastScroll);
+
+      // 너무 작은 스크롤에는 반응하지 않도록 임계값(5px) 추가
+      if (scrollDiff < 5) return;
+
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        // 내려갈 때: 100px 이상 내려갔을 때만 숨김
         navbar.classList.add('nav-hidden');
-      } else {
+      } else if (currentScroll < lastScroll) {
+        // 올라갈 때: 즉시 나타남
         navbar.classList.remove('nav-hidden');
       }
       lastScroll = currentScroll;
