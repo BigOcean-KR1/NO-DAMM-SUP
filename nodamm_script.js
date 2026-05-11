@@ -541,7 +541,7 @@ function initMap() {
   const map = new kakao.maps.Map(container, options);
 
   // 커스텀 마커 이미지 (Nodamm_MapPoint 사용)
-  const markerImageSrc = 'Picture/Nodamm_MapPoint.png';
+  const markerImageSrc = '/Picture/Nodamm_MapPoint.png';
   const markerImageSize = new kakao.maps.Size(47, 47);
   const markerImageOption = { offset: new kakao.maps.Point(23, 47) };
   const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
