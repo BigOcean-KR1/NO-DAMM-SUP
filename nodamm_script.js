@@ -223,6 +223,7 @@ async function addPost() {
     document.getElementById('post-author').value = '';
     document.getElementById('post-pw').value = '';
     document.getElementById('post-title').value = '';
+    window.closeWriteModal?.();
   } catch(e) {
     console.error(e);
     alert('등록 실패. 다시 시도해주세요.');
@@ -498,6 +499,20 @@ window.openReplyModal = openReplyModal;
 window.closeReplyModal = closeReplyModal;
 window.submitReply = submitReply;
 window.openDeleteReply = openDeleteReply;
+
+// 글쓰기 모달 열기/닫기
+window.openWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'block'; if(window.lenis) lenis.stop(); }
+};
+window.closeWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'none'; if(window.lenis) lenis.start(); }
+};
+// 글쓰기 모달 배경 클릭 시 닫기
+document.getElementById('writeModal')?.addEventListener('click', function(e) {
+  if (e.target === this) window.closeWriteModal();
+});
 window.filterRegion = filterRegion;
 window.addPost = addPost;
 window.changeMonth = changeMonth;
