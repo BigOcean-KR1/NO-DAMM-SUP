@@ -374,9 +374,9 @@ window.addEventListener('scroll', () => {
 
 // 마우스를 화면 위쪽 80px 영역에 가져가면 네비 표시
 document.addEventListener('mousemove', (e) => {
-  if (e.clientY < 80) {
+  if (e.clientY < 40) {
     navbar?.classList.remove('nav-hidden');
-  } else if (e.clientY > 120 && window.scrollY > 100) {
+  } else if (e.clientY > 60 && window.scrollY > 100) {
     // 마우스가 네비 영역 벗어나고 스크롤이 내려가 있을 때만 숨김
     navbar?.classList.add('nav-hidden');
   }
@@ -601,8 +601,7 @@ function initMap() {
     { title: '청라 커널웨이',      count: 0,   address: '인천 서구 청라동 162-12' },
     { title: '계양 문화의 거리',   count: 0,   address: '인천 계양구 작전동 935' },
     { title: '송도 인천대역',      count: 0,   address: '인천 연수구 송도동 8-32' },
-    { title: '동인천 북광장',      count: 0, address: '인천광역시 동구 화도진로 53' },
-    { title: '부평 문화의거리',      count: 124, address: '인천 부평구 경원대로 1376-3' },
+    { title: '동인천 북광장',      count: 124, address: '인천광역시 동구 화도진로 53' },
   ];
 
   const geocoder = new kakao.maps.services.Geocoder();
