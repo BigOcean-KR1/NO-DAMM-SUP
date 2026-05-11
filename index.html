@@ -36,33 +36,48 @@
       overflow-y: scroll;
       scrollbar-gutter: stable;
     }
+
     /* 스크롤바 스타일 */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f0f4f1; }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f0f4f1;
+    }
+
     ::-webkit-scrollbar-thumb {
       background: linear-gradient(180deg, #40916c, #2d6a4f);
       border-radius: 999px;
     }
-    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #52b788, #40916c); }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #52b788, #40916c);
+    }
 
     /* 활동 드롭다운 */
     .nav-dropdown {
       position: relative;
     }
-    .nav-dropdown > a {
+
+    .nav-dropdown>a {
       display: flex;
       align-items: center;
       gap: 4px;
-      position: relative; /* bridge를 위해 */
+      position: relative;
+      /* bridge를 위해 */
     }
-    .nav-dropdown > a::after {
+
+    .nav-dropdown>a::after {
       content: '▾';
       font-size: 10px;
       transition: transform 0.3s;
     }
-    .nav-dropdown:hover > a::after {
+
+    .nav-dropdown:hover>a::after {
       transform: rotate(180deg);
     }
+
     .dropdown-menu {
       position: absolute;
       top: 100%;
@@ -71,24 +86,28 @@
       background: #fff;
       border: 1px solid #e0e7e3;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
       padding: 8px 0;
-      padding-top: 16px; /* 위쪽 여백으로 브릿지 역할 */
+      padding-top: 16px;
+      /* 위쪽 여백으로 브릿지 역할 */
       min-width: 130px;
       opacity: 0;
       pointer-events: none;
-      margin-top: 0; /* gap 없이 바로 붙임 */
+      margin-top: 0;
+      /* gap 없이 바로 붙임 */
       transition: opacity 0.2s, transform 0.2s;
       transform: translateX(-50%) translateY(-4px);
       z-index: 200;
     }
+
     .nav-dropdown:hover .dropdown-menu {
       opacity: 1;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
+
     /* 드롭다운 위에 투명 브릿지로 hover 끊김 방지 */
-    .nav-dropdown > a::before {
+    .nav-dropdown>a::before {
       content: '';
       position: absolute;
       bottom: -16px;
@@ -96,6 +115,7 @@
       right: 0;
       height: 16px;
     }
+
     .dropdown-menu a {
       display: block;
       padding: 9px 20px;
@@ -106,6 +126,7 @@
       white-space: nowrap;
       transition: background 0.15s, color 0.15s;
     }
+
     .dropdown-menu a:hover {
       background: #d8f3dc;
       color: #2d6a4f;
@@ -119,8 +140,12 @@
       padding: 1.5rem;
       margin-top: 1.5rem;
     }
+
     /* 답글 영역 */
-    .reply-list { margin-top: 0.5rem; }
+    .reply-list {
+      margin-top: 0.5rem;
+    }
+
     .reply-item {
       background: #f0f7f3;
       border-left: 3px solid var(--green-light);
@@ -129,20 +154,78 @@
       margin-top: 6px;
       font-size: 13px;
     }
-    .reply-item .reply-author { font-weight:700; color:var(--green); margin-right:6px; }
-    .reply-item .reply-date { font-size:11px; color:var(--muted); margin-left:6px; }
-    .reply-item .reply-del { font-size:11px; color:#e74c3c; cursor:pointer; margin-left:8px; background:none; border:none; font-family:inherit; }
-    .reply-btn { font-size:12px; color:var(--green); background:none; border:1px solid var(--green-pale); border-radius:6px; padding:3px 8px; cursor:pointer; margin-left:8px; font-family:inherit; font-weight:600; }
-    .post-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-    .action-btn { font-size:11px; background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; cursor:pointer; color:var(--muted); font-family:inherit; transition:all 0.15s; }
-    .action-btn:hover { border-color:var(--green); color:var(--green); }
-    .action-btn.del:hover { border-color:#e74c3c; color:#e74c3c; }
+
+    .reply-item .reply-author {
+      font-weight: 700;
+      color: var(--green);
+      margin-right: 6px;
+    }
+
+    .reply-item .reply-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .reply-item .reply-del {
+      font-size: 11px;
+      color: #e74c3c;
+      cursor: pointer;
+      margin-left: 8px;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .reply-btn {
+      font-size: 12px;
+      color: var(--green);
+      background: none;
+      border: 1px solid var(--green-pale);
+      border-radius: 6px;
+      padding: 3px 8px;
+      cursor: pointer;
+      margin-left: 8px;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      font-size: 11px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .action-btn.del:hover {
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+
     .reward-card-deco {
       overflow: hidden;
       padding: 0 !important;
       border: none !important;
       position: relative;
     }
+
     .reward-card-deco img {
       width: 100%;
       height: 100%;
@@ -241,18 +324,10 @@
   </section>
 
   <!-- ====================================================
-       DETAIL
+       DETAIL (통계)
   ==================================================== -->
   <section id="detail" class="section section-alt">
     <div class="container">
-
-      <!-- ── Map Section ── -->
-      <div id="map-section" class="fade-up" style="margin-bottom: 5rem;">
-        <h2 class="section-title">활동 스팟</h2>
-        <div id="map" style="width:100%; height:450px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border);">
-        </div>
-      </div>
-
       <!-- 통계 카드 -->
       <div class="stats-grid">
         <div class="stat-card fade-up">
@@ -313,81 +388,6 @@
   </section>
 
   <!-- ====================================================
-       APPLY (NEW)
-  ==================================================== -->
-  <section id="apply" class="apply-section section section-alt">
-    <div class="container">
-      <div class="apply-container fade-up">
-        <div class="apply-header">
-          <span class="section-tag">JOIN US</span>
-          <h2 class="section-title">2026 노담 서포터즈 지원하기</h2>
-          <p class="section-desc">인천을 바꾸는 작은 발걸음, 지금 시작하세요!</p>
-        </div>
-
-        <form id="applyForm" class="apply-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="userName">이름 <span class="required">*</span></label>
-              <input type="text" id="userName" placeholder="성함을 입력해주세요" required>
-            </div>
-            <div class="form-group">
-              <label for="userAge">나이 <span class="required">*</span></label>
-              <input type="number" id="userAge" placeholder="예: 22" min="14" max="99" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="userGender">성별 <span class="required">*</span></label>
-              <select id="userGender" class="form-select" required>
-                <option value="" disabled selected>성별을 선택해주세요</option>
-                <option value="남성">남성</option>
-                <option value="여성">여성</option>
-                <option value="기타">기타 / 선택 안 함</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="userSmoking">흡연 여부 <span class="required">*</span></label>
-              <select id="userSmoking" class="form-select" required>
-                <option value="" disabled selected>선택해주세요</option>
-                <option value="비흡연">비흡연</option>
-                <option value="흡연">흡연</option>
-                <option value="금연중">금연 중</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="userArea">희망 활동 지역 <span class="required">*</span></label>
-            <select id="userArea" class="form-select" required>
-              <option value="전체">전체 (무관)</option>
-              <option value="남동구">남동구</option>
-              <option value="부평구">부평구</option>
-              <option value="미추홀구">미추홀구</option>
-              <option value="연수구">연수구</option>
-              <option value="계양구">계양구</option>
-              <option value="서구">서구</option>
-              <option value="중구">중구</option>
-              <option value="동구">동구</option>
-              <option value="강화군">강화군</option>
-              <option value="옹진군">옹진군</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="userMessage">지원 동기</label>
-            <textarea id="userMessage" placeholder="간단한 지원 동기를 적어주세요 (선택사항)"></textarea>
-          </div>
-
-          <button type="submit" class="btn btn-primary submit-btn">
-            <i class="ti ti-send" aria-hidden="true"></i> 신청서 제출하기
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====================================================
        BOARD
   ==================================================== -->
   <section id="board" class="section section-alt">
@@ -412,11 +412,16 @@
             <span class="filter-label">지역:</span>
             <select class="form-select select-sm" onchange="filterRegion(this.value)">
               <option value="all">전체 지역</option>
-              <option value="중구">중구</option><option value="동구">동구</option>
-              <option value="미추홀구">미추홀구</option><option value="연수구">연수구</option>
-              <option value="남동구">남동구</option><option value="부평구">부평구</option>
-              <option value="계양구">계양구</option><option value="서구">서구</option>
-              <option value="강화군">강화군</option><option value="옹진군">옹진군</option>
+              <option value="중구">중구</option>
+              <option value="동구">동구</option>
+              <option value="미추홀구">미추홀구</option>
+              <option value="연수구">연수구</option>
+              <option value="남동구">남동구</option>
+              <option value="부평구">부평구</option>
+              <option value="계양구">계양구</option>
+              <option value="서구">서구</option>
+              <option value="강화군">강화군</option>
+              <option value="옹진군">옹진군</option>
             </select>
           </div>
         </div>
@@ -429,22 +434,28 @@
       <div class="board-write-form fade-up">
         <h4 style="font-size:15px;font-weight:700;margin-bottom:1rem;color:var(--text);">✏️ 글 남기기</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
-          <input class="form-input" id="post-author" type="text" placeholder="이름 *" maxlength="20"/>
-          <input class="form-input" id="post-pw" type="password" placeholder="비밀번호 * (수정/삭제 시 필요)"/>
+          <input class="form-input" id="post-author" type="text" placeholder="이름 *" maxlength="20" />
+          <input class="form-input" id="post-pw" type="password" placeholder="비밀번호 * (수정/삭제 시 필요)" />
         </div>
         <div style="display:grid;grid-template-columns:auto auto 1fr auto;gap:0.7rem;align-items:center;">
           <select class="form-select" id="post-region">
-            <option value="부평구">부평구</option><option value="남동구">남동구</option>
-            <option value="연수구">연수구</option><option value="미추홀구">미추홀구</option>
-            <option value="서구">서구</option><option value="중구">중구</option>
-            <option value="동구">동구</option><option value="계양구">계양구</option>
-            <option value="강화군">강화군</option><option value="옹진군">옹진군</option>
+            <option value="부평구">부평구</option>
+            <option value="남동구">남동구</option>
+            <option value="연수구">연수구</option>
+            <option value="미추홀구">미추홀구</option>
+            <option value="서구">서구</option>
+            <option value="중구">중구</option>
+            <option value="동구">동구</option>
+            <option value="계양구">계양구</option>
+            <option value="강화군">강화군</option>
+            <option value="옹진군">옹진군</option>
           </select>
           <select class="form-select" id="post-type">
             <option value="q">질문</option>
             <option value="review">후기</option>
           </select>
-          <input class="form-input" id="post-title" type="text" placeholder="내용을 입력하세요" onkeydown="if(event.key==='Enter')addPost()"/>
+          <input class="form-input" id="post-title" type="text" placeholder="내용을 입력하세요"
+            onkeydown="if(event.key==='Enter')addPost()" />
           <button class="form-submit" onclick="addPost()">등록</button>
         </div>
         <p style="margin-top:0.8rem;font-size:11px;color:var(--muted);">* 관리자가 부적절한 게시글은 예고 없이 삭제할 수 있습니다.</p>
@@ -453,46 +464,67 @@
   </section>
 
   <!-- 수정 모달 -->
-  <div id="editModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeEditModal()" style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+  <div id="editModal"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
+      <button onclick="closeEditModal()"
+        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">게시글 수정</h3>
-      <input id="edit-content" type="text" class="form-input" placeholder="수정할 내용" style="width:100%;margin-bottom:0.8rem;"/>
-      <input id="edit-pw" type="password" class="form-input" placeholder="비밀번호 입력" style="width:100%;margin-bottom:1rem;"/>
+      <input id="edit-content" type="text" class="form-input" placeholder="수정할 내용"
+        style="width:100%;margin-bottom:0.8rem;" />
+      <input id="edit-pw" type="password" class="form-input" placeholder="비밀번호 입력"
+        style="width:100%;margin-bottom:1rem;" />
       <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitEdit()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">수정 완료</button>
-        <button onclick="closeEditModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
+        <button onclick="submitEdit()"
+          style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">수정
+          완료</button>
+        <button onclick="closeEditModal()"
+          style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
       </div>
     </div>
   </div>
 
   <!-- 삭제 확인 모달 -->
-  <div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:400px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeDeleteModal()" style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+  <div id="deleteModal"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:400px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
+      <button onclick="closeDeleteModal()"
+        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:0.5rem;">게시글 삭제</h3>
       <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">비밀번호를 입력하면 삭제됩니다.</p>
-      <input id="delete-pw" type="password" class="form-input" placeholder="비밀번호 또는 마스터 비밀번호" style="width:100%;margin-bottom:1rem;"/>
+      <input id="delete-pw" type="password" class="form-input" placeholder="비밀번호 또는 마스터 비밀번호"
+        style="width:100%;margin-bottom:1rem;" />
       <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitDelete()" style="flex:1;padding:10px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">삭제</button>
-        <button onclick="closeDeleteModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
+        <button onclick="submitDelete()"
+          style="flex:1;padding:10px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">삭제</button>
+        <button onclick="closeDeleteModal()"
+          style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
       </div>
     </div>
   </div>
 
   <!-- 답글 모달 -->
-  <div id="replyModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeReplyModal()" style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+  <div id="replyModal"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
+      <button onclick="closeReplyModal()"
+        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">💬 답글 달기</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
-        <input id="reply-author" type="text" class="form-input" placeholder="이름 *" maxlength="20"/>
-        <input id="reply-pw" type="password" class="form-input" placeholder="비밀번호 *"/>
+        <input id="reply-author" type="text" class="form-input" placeholder="이름 *" maxlength="20" />
+        <input id="reply-pw" type="password" class="form-input" placeholder="비밀번호 *" />
       </div>
-      <input id="reply-content" type="text" class="form-input" placeholder="답글 내용 *" style="width:100%;margin-bottom:1rem;"/>
+      <input id="reply-content" type="text" class="form-input" placeholder="답글 내용 *"
+        style="width:100%;margin-bottom:1rem;" />
       <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitReply()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">답글 등록</button>
-        <button onclick="closeReplyModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
+        <button onclick="submitReply()"
+          style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">답글
+          등록</button>
+        <button onclick="closeReplyModal()"
+          style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
       </div>
     </div>
   </div>
@@ -575,8 +607,12 @@
           background:linear-gradient(135deg,#2d6a4f,#1b4332); border-radius:14px;
           padding:1.8rem; margin-bottom:1.5rem; color:#fff; position:relative; overflow:hidden;
         ">
-          <div style="position:absolute;right:-10px;bottom:-20px;font-family:'Bebas Neue',sans-serif;font-size:5rem;color:rgba(255,255,255,0.07);pointer-events:none;">NODAM</div>
-          <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:0.8rem;">JOIN US · 2026</span>
+          <div
+            style="position:absolute;right:-10px;bottom:-20px;font-family:'Bebas Neue',sans-serif;font-size:5rem;color:rgba(255,255,255,0.07);pointer-events:none;">
+            NODAM</div>
+          <span
+            style="background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:0.8rem;">JOIN
+            US · 2026</span>
           <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.3rem;">노담 서포터즈 지원하기</h2>
           <p style="font-size:13px;opacity:0.85;">인천을 바꾸는 작은 발걸음, 지금 시작하세요 🌱</p>
         </div>
@@ -585,26 +621,38 @@
         <form id="modalApplyForm">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
             <div>
-              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">이름 <span style="color:#e74c3c">*</span></label>
-              <input id="m_userName" type="text" placeholder="성함" autocomplete="name" required style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">이름 <span
+                  style="color:#e74c3c">*</span></label>
+              <input id="m_userName" type="text" placeholder="성함" autocomplete="name" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
             </div>
             <div>
-              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">나이 <span style="color:#e74c3c">*</span></label>
-              <input id="m_userAge" type="number" placeholder="예: 22" min="14" max="99" required style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">나이 <span
+                  style="color:#e74c3c">*</span></label>
+              <input id="m_userAge" type="number" placeholder="예: 22" min="14" max="99" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
             <div>
-              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">성별 <span style="color:#e74c3c">*</span></label>
-              <select id="m_userGender" required style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">성별 <span
+                  style="color:#e74c3c">*</span></label>
+              <select id="m_userGender" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
                 <option value="" disabled selected>선택</option>
                 <option value="남성">남성</option>
                 <option value="여성">여성</option>
               </select>
             </div>
             <div>
-              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">흡연 여부 <span style="color:#e74c3c">*</span></label>
-              <select id="m_userSmoking" required style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">흡연 여부 <span
+                  style="color:#e74c3c">*</span></label>
+              <select id="m_userSmoking" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
                 <option value="" disabled selected>선택</option>
                 <option value="비흡연">비흡연</option>
                 <option value="흡연">흡연</option>
@@ -613,8 +661,11 @@
             </div>
           </div>
           <div style="margin-bottom:1rem;">
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">희망 활동 지역 <span style="color:#e74c3c">*</span></label>
-            <select id="m_userArea" required style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">희망 활동 지역 <span
+                style="color:#e74c3c">*</span></label>
+            <select id="m_userArea" required
+              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
               <option value="전체">전체 (무관)</option>
               <option value="남동구">남동구</option>
               <option value="부평구">부평구</option>
@@ -629,8 +680,11 @@
             </select>
           </div>
           <div style="margin-bottom:1.5rem;">
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">지원 동기 <span style="font-weight:400;color:#6b7c72;">(선택)</span></label>
-            <textarea id="m_userMessage" placeholder="간단한 지원 동기를 적어주세요" style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:none;height:80px;" onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'"></textarea>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">지원 동기 <span
+                style="font-weight:400;color:#6b7c72;">(선택)</span></label>
+            <textarea id="m_userMessage" placeholder="간단한 지원 동기를 적어주세요"
+              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:none;height:80px;"
+              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'"></textarea>
           </div>
           <button type="submit" id="modalSubmitBtn" style="
             width:100%;padding:13px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;
@@ -643,10 +697,13 @@
 
         <!-- 완료 메시지 (숨김) -->
         <div id="modalSuccess" style="display:none;text-align:center;padding:2rem 0;">
-          <div style="width:64px;height:64px;background:#d8f3dc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:#2d6a4f;">✓</div>
+          <div
+            style="width:64px;height:64px;background:#d8f3dc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:#2d6a4f;">
+            ✓</div>
           <h3 style="color:#2d6a4f;margin-bottom:0.5rem;">지원 완료!</h3>
           <p id="modalSuccessMsg" style="font-size:14px;color:#6b7c72;line-height:1.7;"></p>
-          <button onclick="closeApplyModal()" style="margin-top:1.2rem;padding:10px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">닫기</button>
+          <button onclick="closeApplyModal()"
+            style="margin-top:1.2rem;padding:10px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">닫기</button>
         </div>
       </div>
     </div>
@@ -654,8 +711,15 @@
 
   <style>
     @keyframes modalIn {
-      from { opacity:0; transform:scale(0.95) translateY(10px); }
-      to   { opacity:1; transform:scale(1) translateY(0); }
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
   </style>
 
@@ -682,7 +746,7 @@
       document.getElementById('modalApplyForm').reset();
     }
     // 배경 클릭 시 닫기
-    document.getElementById('applyModal').addEventListener('click', function(e) {
+    document.getElementById('applyModal').addEventListener('click', function (e) {
       if (e.target === this) closeApplyModal();
     });
   </script>
