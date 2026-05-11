@@ -426,18 +426,35 @@ function changeMonth(diff) {
   if (isChangingMonth) return;
   isChangingMonth = true;
   const wrapper = document.getElementById('schedule-wrapper');
-  const monthEl = document.getElementById('current-month');
   if (!wrapper) { isChangingMonth = false; return; }
 
+  // 슬라이드 아웃
+  const outX = diff > 0 ? '-40px' : '40px';
+  wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
   wrapper.style.opacity = '0';
+  wrapper.style.transform = `translateX(${outX})`;
+
   setTimeout(() => {
     currentViewMonth += diff;
     if (currentViewMonth < 1) currentViewMonth = 12;
     if (currentViewMonth > 12) currentViewMonth = 1;
     renderSchedule();
-    wrapper.style.opacity = '1';
-    isChangingMonth = false;
-  }, 250);
+
+    // 반대편에서 슬라이드 인 준비
+    const inX = diff > 0 ? '40px' : '-40px';
+    wrapper.style.transition = 'none';
+    wrapper.style.transform = `translateX(${inX})`;
+    wrapper.style.opacity = '0';
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        wrapper.style.opacity = '1';
+        wrapper.style.transform = 'translateX(0)';
+        isChangingMonth = false;
+      });
+    });
+  }, 220);
 }
 
 /* ── 7. 지원서 제출 (Firebase 연동) ── */
