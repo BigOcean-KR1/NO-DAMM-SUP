@@ -239,16 +239,6 @@ window.addEventListener('scroll', () => {
 
 // type="module"은 defer처럼 동작하므로 SDK가 이미 로드된 상태
 // window.kakao가 있으면 바로 실행, 없으면 폴링으로 대기
-function waitForKakaoAndInit() {
-  if (window.kakao && window.kakao.maps) {
-    initMap();
-  } else {
-    setTimeout(waitForKakaoAndInit, 100);
-  }
-}
-
-waitForKakaoAndInit();
-
 /* ── 6. 월별 활동 일정 ── */
 let currentViewMonth = 5;
 
@@ -365,82 +355,100 @@ window.changeMonth = changeMonth;
 renderPosts();
 renderSchedule();
 
-/* 5. 카카오맵 초기화 */
+
+/* 5. 카카오맵 초기화 - 주소로 좌표 자동 변환 */
 function initMap() {
   const container = document.getElementById('map');
   if (!container) return;
 
   const options = {
     center: new kakao.maps.LatLng(37.4566, 126.7052),
-    level: 8
+    level: 9
   };
   const map = new kakao.maps.Map(container, options);
 
-  // 커스텀 마커 이미지 (노담 서포터즈 로고)
-  const markerImageSrc = 'Picture/Nodamm_Mark.png';
+  // 커스텀 마커 이미지 (Nodamm_MapPoint 사용)
+  const markerImageSrc = 'Picture/Nodamm_MapPoint.png';
   const markerImageSize = new kakao.maps.Size(47, 47);
   const markerImageOption = { offset: new kakao.maps.Point(23, 47) };
   const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
 
-  const positions = [
-    { title: '부평 테마거리', count: 124, latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
-    { title: '구월동 로데오', count: 0, latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
-    { title: '주안역 인근', count: 0, latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
-    { title: '송도 센트럴파크', count: 0, latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
-    { title: '청라 커낼웨이', count: 0, latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
-    { title: '인하대 후문', count: 0, latlng: new kakao.maps.LatLng(37.4496, 126.6541) },
-    { title: '동인천역 북광장', count: 0, latlng: new kakao.maps.LatLng(37.4742, 126.6384) },
-    { title: '계양구청 광장', count: 0, latlng: new kakao.maps.LatLng(37.5376, 126.7378) },
+  // 주소 기반 스팟 목록 (주소로 좌표 자동 검색)
+  const spots = [
+    { title: '구월동 로데오거리', count: 0, address: '인천 남동구 구월동 1409-25' },
+    { title: '인하 문화의 거리', count: 0, address: '인천 미추홀구 경인남길30번길 45-1' },
+    { title: '주안역 주변', count: 0, address: '인천 미추홀구 주안동 188' },
+    { title: '청라 커널웨이', count: 0, address: '인천 서구 청라동 162-12' },
+    { title: '계양 문화의 거리', count: 0, address: '인천 계양구 작전동 935' },
+    { title: '송도 인천대역', count: 0, address: '인천 연수구 송도동 8-32' },
+    { title: '동인천 북광장', count: 124, address: '인천광역시 동구 화도진로 53' },
   ];
 
-  positions.forEach(pos => {
-    const marker = new kakao.maps.Marker({
-      map: map,
-      position: pos.latlng,
-      title: pos.title,
-      image: markerImage
-    });
+  const geocoder = new kakao.maps.services.Geocoder();
 
-    const infowindow = new kakao.maps.InfoWindow({
-      content: `<div style="padding:8px 12px; font-size:13px; font-weight:600; white-space:nowrap; line-height:1.8; border-radius:8px;">
-        📍 ${pos.title}<br>
-        <span style="color:#2d6a4f; font-size:12px;">🚬 수거량: <strong>${pos.count}개</strong></span>
-      </div>`,
-      removable: false
-    });
-
-    let isPinned = false;
-
-    // 마우스 올리면 표시
-    kakao.maps.event.addListener(marker, 'mouseover', () => {
-      if (!isPinned) infowindow.open(map, marker);
-    });
-
-    // 마우스 떠나면 고정 아닐 때 닫기
-    kakao.maps.event.addListener(marker, 'mouseout', () => {
-      if (!isPinned) infowindow.close();
-    });
-
-    // 클릭: 고정 토글 (한번 클릭 = 고정, 다시 클릭 = 해제)
-    kakao.maps.event.addListener(marker, 'click', () => {
-      if (isPinned) {
-        isPinned = false;
-        infowindow.close();
-      } else {
-        isPinned = true;
-        infowindow.open(map, marker);
+  spots.forEach(spot => {
+    geocoder.addressSearch(spot.address, (result, status) => {
+      if (status !== kakao.maps.services.Status.OK) {
+        console.warn(`주소 변환 실패: ${spot.address}`);
+        return;
       }
+
+      const latlng = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+      const marker = new kakao.maps.Marker({
+        map: map,
+        position: latlng,
+        title: spot.title,
+        image: markerImage
+      });
+
+      const infowindow = new kakao.maps.InfoWindow({
+        content: `<div style="padding:8px 12px; font-size:13px; font-weight:600; white-space:nowrap; line-height:1.8; border-radius:8px;">
+          📍 ${spot.title}<br>
+          <span style="color:#2d6a4f; font-size:12px;">🚬 수거량: <strong>${spot.count}개</strong></span>
+        </div>`,
+        removable: false
+      });
+
+      let isPinned = false;
+
+      kakao.maps.event.addListener(marker, 'mouseover', () => {
+        if (!isPinned) infowindow.open(map, marker);
+      });
+
+      kakao.maps.event.addListener(marker, 'mouseout', () => {
+        if (!isPinned) infowindow.close();
+      });
+
+      kakao.maps.event.addListener(marker, 'click', () => {
+        if (isPinned) {
+          isPinned = false;
+          infowindow.close();
+        } else {
+          isPinned = true;
+          infowindow.open(map, marker);
+        }
+      });
     });
   });
 }
 
-
-// 지도 위에서 휠할 때만 페이지 스크롤 차단 (lenis stop/start 제거)
+// 지도 위에서 휠할 때만 페이지 스크롤 차단
 document.addEventListener('DOMContentLoaded', () => {
   const mapContainer = document.getElementById('map');
   if (!mapContainer) return;
 
   mapContainer.addEventListener('wheel', (e) => {
-    e.stopPropagation(); // lenis로 이벤트 전파 차단
+    e.stopPropagation();
   }, { passive: true });
 });
+
+// 카카오 SDK 로드 대기 후 실행
+function waitForKakaoAndInit() {
+  if (window.kakao && window.kakao.maps) {
+    initMap();
+  } else {
+    setTimeout(waitForKakaoAndInit, 100);
+  }
+}
+waitForKakaoAndInit();
