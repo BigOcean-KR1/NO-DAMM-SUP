@@ -542,8 +542,8 @@ function initMap() {
 
   // 커스텀 마커 이미지 (Nodamm_MapPoint 사용)
   const markerImageSrc = '/Picture/Nodamm_MapPoint.png';
-  const markerImageSize = new kakao.maps.Size(47, 47);
-  const markerImageOption = { offset: new kakao.maps.Point(23, 47) };
+  const markerImageSize = new kakao.maps.Size(80, 80);
+  const markerImageOption = { offset: new kakao.maps.Point(40, 80) };
   const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
 
   // 주소 기반 스팟 목록 (주소로 좌표 자동 검색)
