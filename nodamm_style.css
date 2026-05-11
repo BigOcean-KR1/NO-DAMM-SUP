@@ -408,6 +408,7 @@
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
+      word-break: keep-all;
     }
 
     /* ====================================================
