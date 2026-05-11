@@ -463,7 +463,7 @@
 
   <!-- 글쓰기 모달 -->
   <div id="writeModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);overflow-y:auto;padding:2rem 1rem;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:500px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
+    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:660px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
       <button onclick="closeWriteModal()" style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">✏️ 글 남기기</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
@@ -482,7 +482,7 @@
           <option value="review">후기</option>
         </select>
       </div>
-      <input class="form-input" id="post-title" type="text" placeholder="내용을 입력하세요" style="width:100%;margin-bottom:1rem;" onkeydown="if(event.key==='Enter'){addPost();closeWriteModal();}"/>
+      <textarea class="form-input" id="post-title" placeholder="내용을 입력하세요 (Ctrl+Enter로 등록)" style="width:100%;margin-bottom:1rem;min-height:120px;resize:none;font-family:inherit;font-size:14px;line-height:1.6;" onkeydown="if(event.ctrlKey&&event.key==='Enter'){addPost();}"></textarea>
       <div style="display:flex;gap:0.5rem;">
         <button onclick="addPost()" style="flex:1;padding:11px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">등록</button>
         <button onclick="closeWriteModal()" style="flex:1;padding:11px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
