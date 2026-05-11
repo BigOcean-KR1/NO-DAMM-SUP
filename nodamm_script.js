@@ -378,8 +378,8 @@ function initMap() {
 
   // 커스텀 마커 이미지 (노담 서포터즈 로고)
   const markerImageSrc = 'Picture/Nodamm_Mark.png';
-  const markerImageSize = new kakao.maps.Size(36, 36);
-  const markerImageOption = { offset: new kakao.maps.Point(18, 36) };
+  const markerImageSize = new kakao.maps.Size(47, 47);
+  const markerImageOption = { offset: new kakao.maps.Point(23, 47) };
   const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
 
   const positions = [

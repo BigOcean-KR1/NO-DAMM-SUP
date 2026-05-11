@@ -31,6 +31,30 @@
   ========================================================== -->
   <link rel="stylesheet" href="nodamm_style.css" />
   <style>
+    /* 스크롤바 공간을 항상 확보해서 레이아웃 흔들림 방지 */
+    html {
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
+
+    /* 스크롤바 스타일 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f0f4f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #40916c, #2d6a4f);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #52b788, #40916c);
+    }
+
     .reward-card-deco {
       background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%) !important;
       border: none !important;
