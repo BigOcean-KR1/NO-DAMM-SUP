@@ -97,22 +97,21 @@ const statsObserver = new IntersectionObserver(entries => {
 const detailSection = document.getElementById('detail');
 if (detailSection) statsObserver.observe(detailSection);
 
-/* ── 3. 게시판 (Firebase Firestore 실시간 연동) ── */
+
+/* ── 3. 게시판 (Firebase Firestore - 이름/비번/내용/수정/삭제/답글/관리자) ── */
+const MASTER_PW = '3141592';
+
 const BADGE = {
   q: { label: '질문', cls: 'badge-q' },
   review: { label: '후기', cls: 'badge-review' },
 };
 
-// Firestore 연결 전 보여줄 기본 샘플 데이터
-const defaultPosts = [
-  { type: 'q', region: '연수구', title: '봉사시간 인증은 어떻게 받나요?', date: '2026.06.29' },
-  { type: 'q', region: '남동구', title: '장갑이나 집게는 제공되나요?', date: '2026.06.25' },
-  { type: 'review', region: '부평구', title: '부평 활동 정말 좋았어요! 다음에도 참여할게요 😊', date: '2026.06.20' },
-];
-
-let firestorePosts = null; // null = 아직 로딩 중, [] = 로드됐지만 비어있음
+let firestorePosts = null;
 let currentFilter = 'all';
 let currentRegion = 'all';
+let pendingEditId = null;
+let pendingDeleteId = null;
+let pendingReplyId = null;
 
 function formatDate(timestamp) {
   if (!timestamp) return '';
@@ -125,11 +124,7 @@ function renderPosts() {
   const countEl = document.getElementById('post-count');
   if (!list || !countEl) return;
 
-  // Firestore 데이터가 아직 없으면 샘플 사용
-  const source = (firestorePosts !== null && firestorePosts.length > 0)
-    ? firestorePosts
-    : (firestorePosts === null ? defaultPosts : []);
-
+  const source = firestorePosts ?? [];
   const filtered = source.filter(p => {
     const matchType = currentFilter === 'all' || p.type === currentFilter;
     const matchRegion = currentRegion === 'all' || p.region === currentRegion;
@@ -139,20 +134,41 @@ function renderPosts() {
   countEl.textContent = filtered.length;
 
   if (filtered.length === 0) {
-    list.innerHTML = '<li class="empty-msg" style="padding:40px; text-align:center; color:#999; list-style:none;">일치하는 게시글이 없습니다. 첫 번째로 남겨보세요!</li>';
+    list.innerHTML = '<li style="padding:40px;text-align:center;color:#999;list-style:none;">첫 번째 글을 남겨보세요!</li>';
     return;
   }
 
-  list.innerHTML = filtered.map(p => `
-    <li class="board-item">
-      <div class="item-left">
-        <span class="badge ${BADGE[p.type]?.cls || 'badge-join'}">${BADGE[p.type]?.label || p.type}</span>
-        <span class="item-region">[${p.region}]</span>
-        <span class="item-title">${p.title}</span>
-      </div>
-      <span class="item-date">${p.date}</span>
-    </li>
-  `).join('');
+  list.innerHTML = filtered.map(p => {
+    const repliesHtml = (p.replies || []).map((r, ri) => `
+      <div class="reply-item">
+        <span class="reply-author">↳ ${r.author}</span>
+        <span>${r.content}</span>
+        <span class="reply-date">${r.date}</span>
+        <button class="reply-del" onclick="openDeleteReply('${p.id}',${ri})">삭제</button>
+      </div>`).join('');
+
+    const replyBtn = p.type === 'q'
+      ? `<button class="reply-btn" onclick="openReplyModal('${p.id}')">💬 답글</button>` : '';
+
+    return `
+      <li class="board-item" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;">
+          <div class="item-left">
+            <span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span>
+            <span class="item-region">[${p.region}]</span>
+            <span class="item-author" style="font-weight:600;font-size:13px;color:var(--green);">${p.author}</span>
+            <span class="item-title">${p.title}</span>
+          </div>
+          <div class="post-actions">
+            <span class="item-date" style="font-size:12px;color:var(--muted);">${p.date}</span>
+            ${replyBtn}
+            <button class="action-btn" onclick="openEditModal('${p.id}','${p.title.replace(/'/g, "\\'")}')">수정</button>
+            <button class="action-btn del" onclick="openDeleteModal('${p.id}')">삭제</button>
+          </div>
+        </div>
+        ${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}
+      </li>`;
+  }).join('');
 }
 
 function filterPosts(btn, type) {
@@ -167,59 +183,186 @@ function filterRegion(region) {
   renderPosts();
 }
 
-// Firestore 실시간 리스너 (새 글 자동 반영)
+// 실시간 리스너
 function setupBoardListener() {
-  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
   onSnapshot(q, (snapshot) => {
     firestorePosts = snapshot.docs.map(doc => {
-      const data = doc.data();
+      const d = doc.data();
       return {
         id: doc.id,
-        type: data.type,
-        region: data.region,
-        title: data.title,
-        date: formatDate(data.createdAt),
+        type: d.type, region: d.region,
+        author: d.author || '익명',
+        title: d.title,
+        pw: d.pw || '',
+        replies: d.replies || [],
+        date: formatDate(d.createdAt),
       };
     });
     renderPosts();
-  }, (error) => {
-    console.warn("Firestore 리스너 오류, 샘플 데이터로 표시합니다:", error);
-    firestorePosts = null;
+  }, (err) => {
+    console.warn('Firestore 오류:', err);
+    firestorePosts = [];
     renderPosts();
   });
 }
 
+// 글 등록
 async function addPost() {
-  const typeEl = document.getElementById('post-type');
-  const regionEl = document.getElementById('post-region');
-  const titleEl = document.getElementById('post-title');
+  const author = document.getElementById('post-author')?.value?.trim();
+  const pw = document.getElementById('post-pw')?.value?.trim();
+  const type = document.getElementById('post-type')?.value;
+  const region = document.getElementById('post-region')?.value;
+  const title = document.getElementById('post-title')?.value?.trim();
 
-  if (!typeEl || !regionEl || !titleEl) return;
-
-  const type = typeEl.value;
-  const region = regionEl.value;
-  const title = titleEl.value.trim();
-
+  if (!author) return alert('이름을 입력해주세요.');
+  if (!pw) return alert('비밀번호를 입력해주세요.');
   if (!title) return alert('내용을 입력해주세요.');
 
-  const submitBtn = document.querySelector('.board-form .form-submit');
-  if (submitBtn) submitBtn.disabled = true;
+  const btn = document.querySelector('.board-write-form .form-submit');
+  if (btn) btn.disabled = true;
 
   try {
-    await addDoc(collection(db, "posts"), {
-      type,
-      region,
-      title,
+    await addDoc(collection(db, 'posts'), {
+      type, region, author, title, pw,
+      replies: [],
       createdAt: serverTimestamp(),
     });
-    titleEl.value = '';
-  } catch (error) {
-    console.error("게시글 등록 오류:", error);
-    alert("게시글 등록에 실패했습니다. 다시 시도해주세요.");
+    document.getElementById('post-author').value = '';
+    document.getElementById('post-pw').value = '';
+    document.getElementById('post-title').value = '';
+  } catch (e) {
+    console.error(e);
+    alert('등록 실패. 다시 시도해주세요.');
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
+
+// 수정 모달
+function openEditModal(id, content) {
+  pendingEditId = id;
+  document.getElementById('edit-content').value = content;
+  document.getElementById('edit-pw').value = '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  pendingEditId = null;
+}
+async function submitEdit() {
+  const pw = document.getElementById('edit-pw').value.trim();
+  const content = document.getElementById('edit-content').value.trim();
+  if (!pw || !content) return alert('비밀번호와 내용을 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingEditId);
+  if (!post) return;
+
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    const { doc: fsDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    await updateDoc(fsDoc(db, 'posts', pendingEditId), { title: content });
+    closeEditModal();
+  } catch (e) {
+    console.error(e);
+    alert('수정 실패.');
+  }
+}
+
+// 삭제 모달
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  document.getElementById('delete-pw').value = '';
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  pendingDeleteId = null;
+}
+async function submitDelete() {
+  const pw = document.getElementById('delete-pw').value.trim();
+  if (!pw) return alert('비밀번호를 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingDeleteId);
+  if (!post) return;
+
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    const { doc: fsDoc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    await deleteDoc(fsDoc(db, 'posts', pendingDeleteId));
+    closeDeleteModal();
+  } catch (e) {
+    console.error(e);
+    alert('삭제 실패.');
+  }
+}
+
+// 답글 모달 (질문 글 전용)
+function openReplyModal(id) {
+  pendingReplyId = id;
+  document.getElementById('reply-author').value = '';
+  document.getElementById('reply-pw').value = '';
+  document.getElementById('reply-content').value = '';
+  document.getElementById('replyModal').style.display = 'flex';
+}
+function closeReplyModal() {
+  document.getElementById('replyModal').style.display = 'none';
+  pendingReplyId = null;
+}
+async function submitReply() {
+  const author = document.getElementById('reply-author').value.trim();
+  const pw = document.getElementById('reply-pw').value.trim();
+  const content = document.getElementById('reply-content').value.trim();
+  if (!author || !pw || !content) return alert('모든 항목을 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingReplyId);
+  if (!post) return;
+
+  const now = new Date();
+  const date = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+  const newReply = { author, pw, content, date };
+
+  try {
+    const { doc: fsDoc, updateDoc, arrayUnion } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    await updateDoc(fsDoc(db, 'posts', pendingReplyId), { replies: arrayUnion(newReply) });
+    closeReplyModal();
+  } catch (e) {
+    console.error(e);
+    alert('답글 등록 실패.');
+  }
+}
+
+// 답글 삭제
+async function openDeleteReply(postId, replyIdx) {
+  const pw = prompt('비밀번호를 입력하세요 (작성자 비번 또는 마스터 비번):');
+  if (!pw) return;
+
+  const post = firestorePosts.find(p => p.id === postId);
+  if (!post) return;
+  const reply = post.replies[replyIdx];
+  if (!reply) return;
+
+  if (pw !== MASTER_PW && pw !== reply.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  const newReplies = post.replies.filter((_, i) => i !== replyIdx);
+  try {
+    const { doc: fsDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    await updateDoc(fsDoc(db, 'posts', postId), { replies: newReplies });
+  } catch (e) {
+    console.error(e);
+    alert('답글 삭제 실패.');
+  }
+}
+
+// 모달 배경 클릭 닫기
+['editModal', 'deleteModal', 'replyModal'].forEach(id => {
+  document.getElementById(id)?.addEventListener('click', function (e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+});
+
 
 /* ── 4. 스크롤 네비게이션 숨김/표시 ── */
 let lastScroll = 0;
@@ -347,6 +490,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 전역 함수 노출 (type="module" 환경 대응)
 window.filterPosts = filterPosts;
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.submitEdit = submitEdit;
+window.openDeleteModal = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.submitDelete = submitDelete;
+window.openReplyModal = openReplyModal;
+window.closeReplyModal = closeReplyModal;
+window.submitReply = submitReply;
+window.openDeleteReply = openDeleteReply;
 window.filterRegion = filterRegion;
 window.addPost = addPost;
 window.changeMonth = changeMonth;
