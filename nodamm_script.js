@@ -1,16 +1,24 @@
 /* ── Firebase 통합 (Modular SDK v10) ── */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase 설정 (이미지 정보 반영)
+// Firebase 설정
 const firebaseConfig = {
-    apiKey: "AIzaSyDohqK6enK4y1RSjkYnDGlxtHb5eSo3TWs",
-    authDomain: "no-damm-sup.firebaseapp.com",
-    projectId: "no-damm-sup",
-    storageBucket: "no-damm-sup.firebasestorage.app",
-    messagingSenderId: "1072430359524",
-    appId: "1:1072430359524:web:5bf91b96c3d907726a5df1",
-    measurementId: "G-ZWK7RG5Q5C"
+  apiKey: "AIzaSyDohqK6enK4y1RSjkYnDGlxtHb5eSo3TWs",
+  authDomain: "no-damm-sup.firebaseapp.com",
+  projectId: "no-damm-sup",
+  storageBucket: "no-damm-sup.firebasestorage.app",
+  messagingSenderId: "1072430359524",
+  appId: "1:1072430359524:web:5bf91b96c3d907726a5df1",
+  measurementId: "G-ZWK7RG5Q5C"
 };
 
 // Firebase 초기화
@@ -34,8 +42,10 @@ function raf(time) {
   lenis.raf(time);
   requestAnimationFrame(raf);
 }
-
 requestAnimationFrame(raf);
+
+// html의 onclick="lenis.scrollTo(...)"에서 접근할 수 있도록 전역 노출
+window.lenis = lenis;
 
 // Anchor link smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -87,14 +97,15 @@ const statsObserver = new IntersectionObserver(entries => {
 const detailSection = document.getElementById('detail');
 if (detailSection) statsObserver.observe(detailSection);
 
-/* ── 3. 게시판 데이터 & 렌더링 ── */
+/* ── 3. 게시판 (Firebase Firestore 실시간 연동) ── */
 const BADGE = {
   join: { label: '참여신청', cls: 'badge-join' },
   q: { label: '질문', cls: 'badge-q' },
   review: { label: '후기', cls: 'badge-review' },
 };
 
-let posts = [
+// Firestore 연결 전 보여줄 기본 샘플 데이터
+const defaultPosts = [
   { type: 'join', region: '부평구', title: '저도 함께하고 싶어요! 신청합니다 😊', date: '2026.07.01' },
   { type: 'q', region: '연수구', title: '봉사시간 인증은 어떻게 받나요?', date: '2026.06.29' },
   { type: 'join', region: '부평구', title: '부평 지역으로 신청하고 싶습니다!', date: '2026.06.27' },
@@ -102,15 +113,27 @@ let posts = [
   { type: 'join', region: '남동구', title: '인천 남동구에서 팀장 맡고 싶습니다.', date: '2026.06.23' },
 ];
 
+let firestorePosts = null; // null = 아직 로딩 중, [] = 로드됐지만 비어있음
 let currentFilter = 'all';
 let currentRegion = 'all';
+
+function formatDate(timestamp) {
+  if (!timestamp) return '';
+  const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function renderPosts() {
   const list = document.getElementById('board-list');
   const countEl = document.getElementById('post-count');
-  if(!list || !countEl) return;
+  if (!list || !countEl) return;
 
-  const filtered = posts.filter(p => {
+  // Firestore 데이터가 아직 없으면 샘플 사용
+  const source = (firestorePosts !== null && firestorePosts.length > 0)
+    ? firestorePosts
+    : (firestorePosts === null ? defaultPosts : []);
+
+  const filtered = source.filter(p => {
     const matchType = currentFilter === 'all' || p.type === currentFilter;
     const matchRegion = currentRegion === 'all' || p.region === currentRegion;
     return matchType && matchRegion;
@@ -126,7 +149,7 @@ function renderPosts() {
   list.innerHTML = filtered.map(p => `
     <li class="board-item">
       <div class="item-left">
-        <span class="badge ${BADGE[p.type].cls}">${BADGE[p.type].label}</span>
+        <span class="badge ${BADGE[p.type]?.cls || 'badge-join'}">${BADGE[p.type]?.label || p.type}</span>
         <span class="item-region">[${p.region}]</span>
         <span class="item-title">${p.title}</span>
       </div>
@@ -147,18 +170,58 @@ function filterRegion(region) {
   renderPosts();
 }
 
-function addPost() {
-  const type = document.getElementById('post-type').value;
-  const region = document.getElementById('post-region').value;
-  const title = document.getElementById('post-title').value;
+// Firestore 실시간 리스너 (새 글 자동 반영)
+function setupBoardListener() {
+  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshot) => {
+    firestorePosts = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        type: data.type,
+        region: data.region,
+        title: data.title,
+        date: formatDate(data.createdAt),
+      };
+    });
+    renderPosts();
+  }, (error) => {
+    console.warn("Firestore 리스너 오류, 샘플 데이터로 표시합니다:", error);
+    firestorePosts = null;
+    renderPosts();
+  });
+}
+
+async function addPost() {
+  const typeEl = document.getElementById('post-type');
+  const regionEl = document.getElementById('post-region');
+  const titleEl = document.getElementById('post-title');
+
+  if (!typeEl || !regionEl || !titleEl) return;
+
+  const type = typeEl.value;
+  const region = regionEl.value;
+  const title = titleEl.value.trim();
+
   if (!title) return alert('내용을 입력해주세요.');
 
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+  const submitBtn = document.querySelector('.board-form .form-submit');
+  if (submitBtn) submitBtn.disabled = true;
 
-  posts.unshift({ type, region, title, date: dateStr });
-  document.getElementById('post-title').value = '';
-  renderPosts();
+  try {
+    await addDoc(collection(db, "posts"), {
+      type,
+      region,
+      title,
+      createdAt: serverTimestamp(),
+    });
+    titleEl.value = '';
+  } catch (error) {
+    console.error("게시글 등록 오류:", error);
+    alert("게시글 등록에 실패했습니다. 다시 시도해주세요.");
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
 }
 
 /* ── 4. 스크롤 네비게이션 숨김/표시 ── */
@@ -181,32 +244,52 @@ function initMap() {
   const container = document.getElementById('map');
   if (!container || !window.kakao) return;
 
+  // placeholder 제거 후 직접 맵 렌더
+  container.innerHTML = '';
+  container.style.height = '450px';
+  container.style.borderRadius = 'var(--radius-lg)';
+  container.style.overflow = 'hidden';
+
   const options = {
-    center: new kakao.maps.LatLng(37.456, 126.705),
-    level: 3
+    center: new kakao.maps.LatLng(37.4566, 126.7052),
+    level: 8
   };
   const map = new kakao.maps.Map(container, options);
 
   const positions = [
     { title: '부평 테마거리', latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
     { title: '구월동 로데오', latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
-    { title: '주안역', latlng: new kakao.maps.LatLng(37.4646, 126.6795) }
+    { title: '주안역', latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
+    { title: '송도 센트럴파크', latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
+    { title: '청라 커낼웨이', latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
   ];
 
   positions.forEach(pos => {
-    new kakao.maps.Marker({
+    const marker = new kakao.maps.Marker({
       map: map,
       position: pos.latlng,
       title: pos.title
     });
+
+    const infowindow = new kakao.maps.InfoWindow({
+      content: `<div style="padding:6px 10px; font-size:13px; font-weight:600; white-space:nowrap;">${pos.title}</div>`
+    });
+
+    kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
+    kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
   });
 }
 
+// SDK 비동기 로드 대응
 if (window.kakao && window.kakao.maps) {
   kakao.maps.load(initMap);
+} else {
+  window.addEventListener('load', () => {
+    if (window.kakao && window.kakao.maps) kakao.maps.load(initMap);
+  });
 }
 
-/* ── 6. 월별 활동 일정 데이터 & 렌더링 ── */
+/* ── 6. 월별 활동 일정 ── */
 let currentViewMonth = 5;
 
 const scheduleByMonth = {
@@ -230,7 +313,7 @@ function renderSchedule() {
   if (!body || !monthText) return;
 
   monthText.textContent = `2026년 ${currentViewMonth}월`;
-  
+
   const data = scheduleByMonth[currentViewMonth] || [];
   body.innerHTML = data.map(item => `
     <tr class="${item.active ? 'active-row' : ''}">
@@ -254,7 +337,7 @@ function changeMonth(diff) {
     currentViewMonth += diff;
     if (currentViewMonth < 1) currentViewMonth = 12;
     if (currentViewMonth > 12) currentViewMonth = 1;
-    
+
     renderSchedule();
     wrapper.classList.remove(slideOutClass);
     const slideInClass = diff > 0 ? 'slide-in-right' : 'slide-in-left';
@@ -262,39 +345,62 @@ function changeMonth(diff) {
   }, 300);
 }
 
-// 초기 호출
-renderPosts();
-renderSchedule();
+/* ── 7. 지원서 제출 (Firebase 연동) ── */
+document.addEventListener('DOMContentLoaded', () => {
 
-// 전역 함수 노출 (type="module" 대응)
+  // 게시판 Firestore 실시간 리스너 시작
+  setupBoardListener();
+
+  const applyForm = document.getElementById('applyForm');
+  if (applyForm) {
+    applyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name    = document.getElementById('userName')?.value?.trim();
+      const age     = document.getElementById('userAge')?.value?.trim();
+      const gender  = document.getElementById('userGender')?.value;
+      const smoking = document.getElementById('userSmoking')?.value;
+      const area    = document.getElementById('userArea')?.value;
+      const message = document.getElementById('userMessage')?.value?.trim();
+
+      if (!name || !age || !gender || !smoking || !area) {
+        alert('필수 항목(*)을 모두 입력해주세요.');
+        return;
+      }
+
+      const submitBtn = applyForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const userData = {
+        name,
+        age: Number(age),
+        gender,
+        smoking,
+        area,
+        message: message || '',
+        date: new Date().toISOString(),
+      };
+
+      try {
+        await addDoc(collection(db, "applicants"), userData);
+        alert(`${name}님, 2026 노담 서포터즈 지원이 완료되었습니다!\n확인 후 연락드리겠습니다. 🌱`);
+        applyForm.reset();
+      } catch (error) {
+        console.error("Firebase Error:", error);
+        alert("제출에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
+});
+
+// 전역 함수 노출 (type="module" 환경 대응)
 window.filterPosts = filterPosts;
 window.filterRegion = filterRegion;
 window.addPost = addPost;
 window.changeMonth = changeMonth;
 
-/* ── 7. 지원서 제출 핸들러 (Firebase 연동) ── */
-document.addEventListener('DOMContentLoaded', () => {
-  const applyForm = document.getElementById('applyForm');
-  if (applyForm) {
-    applyForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const userData = {
-          name: document.getElementById('userName').value,
-          phone: document.getElementById('userPhone').value,
-          area: document.getElementById('userArea').value,
-          message: document.getElementById('userMessage').value,
-          date: new Date().toISOString()
-      };
-
-      try {
-          await addDoc(collection(db, "applicants"), userData);
-          alert(`${userData.name}님, 2026 노담 서포터즈 지원이 완료되었습니다!\n확인 후 연락드리겠습니다.`);
-          applyForm.reset();
-      } catch (error) {
-          console.error("Firebase Error: ", error);
-          alert("제출에 실패했습니다. Firebase 설정을 확인하거나 다시 시도해주세요.");
-      }
-    });
-  }
-});
+// 초기 렌더링
+renderPosts();
+renderSchedule();

@@ -83,7 +83,7 @@
       </div>
 
       <div class="hero-buttons">
-        <button class="btn btn-primary" onclick="window.open('https://forms.gle/your-form-url', '_blank')">
+        <button class="btn btn-primary" onclick="lenis.scrollTo('#apply')">
           <i class="ti ti-arrow-right" aria-hidden="true"></i> 지금 참여하기
         </button>
         <button class="btn btn-outline" onclick="lenis.scrollTo('#intro')">
@@ -305,18 +305,40 @@
         <form id="applyForm" class="apply-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="userName">이름</label>
+              <label for="userName">이름 <span class="required">*</span></label>
               <input type="text" id="userName" placeholder="성함을 입력해주세요" required>
             </div>
             <div class="form-group">
-              <label for="userPhone">연락처</label>
-              <input type="tel" id="userPhone" placeholder="010-1234-5678" required>
+              <label for="userAge">나이 <span class="required">*</span></label>
+              <input type="number" id="userAge" placeholder="예: 22" min="14" max="99" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="userGender">성별 <span class="required">*</span></label>
+              <select id="userGender" class="form-select" required>
+                <option value="" disabled selected>성별을 선택해주세요</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+                <option value="기타">기타 / 선택 안 함</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="userSmoking">흡연 여부 <span class="required">*</span></label>
+              <select id="userSmoking" class="form-select" required>
+                <option value="" disabled selected>선택해주세요</option>
+                <option value="비흡연">비흡연</option>
+                <option value="흡연">흡연</option>
+                <option value="금연중">금연 중</option>
+              </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="userArea">희망 활동 지역</label>
-            <select id="userArea" class="form-select">
+            <label for="userArea">희망 활동 지역 <span class="required">*</span></label>
+            <select id="userArea" class="form-select" required>
+              <option value="전체">전체 (무관)</option>
               <option value="남동구">남동구</option>
               <option value="부평구">부평구</option>
               <option value="미추홀구">미추홀구</option>
@@ -325,6 +347,8 @@
               <option value="서구">서구</option>
               <option value="중구">중구</option>
               <option value="동구">동구</option>
+              <option value="강화군">강화군</option>
+              <option value="옹진군">옹진군</option>
             </select>
           </div>
 
@@ -409,7 +433,8 @@
           <option value="q">질문</option>
           <option value="review">후기</option>
         </select>
-        <input class="form-input" id="post-text" type="text" placeholder="내용을 입력하고 Enter 또는 등록 버튼을 누르세요" />
+        <input class="form-input" id="post-title" type="text" placeholder="내용을 입력하고 Enter 또는 등록 버튼을 누르세요"
+          onkeydown="if(event.key==='Enter'){addPost();}" />
         <button class="form-submit" onclick="addPost()">등록</button>
       </div>
     </div>
