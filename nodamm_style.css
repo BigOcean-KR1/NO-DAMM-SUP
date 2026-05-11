@@ -554,21 +554,6 @@
       overflow: hidden;
     }
     
-    #reward::after {
-      content: '';
-      position: absolute;
-      left: -80px; /* 오른쪽에서 왼쪽으로 이동 */
-      bottom: -80px;
-      width: 400px;
-      height: 400px;
-      background: url('Picture/Nodamm_Mark.png') no-repeat center center;
-      background-size: contain;
-      opacity: 0.15; /* 15~20% 정도의 은은한 투명도 */
-      pointer-events: none;
-      z-index: 0;
-      filter: grayscale(1) brightness(1.2); /* 배경색과 잘 어우러지도록 살짝 조정 */
-    }
-    
     #reward .container {
       position: relative;
       z-index: 1;
