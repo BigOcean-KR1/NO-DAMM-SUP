@@ -70,16 +70,21 @@ const observer = new IntersectionObserver(entries => {
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
 /* ── 2. 숫자 카운터 애니메이션 ── */
-function countUp(id, target, suffix) {
+function countUp(id, target, suffix, prefix) {
   const el = document.getElementById(id);
   if (!el) return;
+  el.textContent = (prefix || '') + '0' + (suffix || '');
   let current = 0;
-  const step = Math.ceil(target / 50);
+  const duration = 1200; // 총 1.2초
+  const steps = 60;
+  const stepTime = duration / steps;
+  const increment = target / steps;
   const timer = setInterval(() => {
-    current = Math.min(current + step, target);
-    el.textContent = current.toLocaleString() + (suffix || '');
+    current = Math.min(current + increment, target);
+    const display = Math.floor(current).toLocaleString();
+    el.textContent = (prefix || '') + display + (suffix || '');
     if (current >= target) clearInterval(timer);
-  }, 35);
+  }, stepTime);
 }
 
 // 통계 카운터는 switchTab('spot') 에서 실행됨
@@ -103,7 +108,7 @@ let pendingReplyId = null;
 function formatDate(timestamp) {
   if (!timestamp) return '';
   const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function renderPosts() {
@@ -149,7 +154,7 @@ function renderPosts() {
           <div class="post-actions">
             <span class="item-date" style="font-size:12px;color:var(--muted);">${p.date}</span>
             ${replyBtn}
-            <button class="action-btn" onclick="openEditModal('${p.id}','${p.title.replace(/'/g, "\\'")}')">수정</button>
+            <button class="action-btn" onclick="openEditModal('${p.id}','${p.title.replace(/'/g,"\\'")}')">수정</button>
             <button class="action-btn del" onclick="openDeleteModal('${p.id}')">삭제</button>
           </div>
         </div>
@@ -197,14 +202,14 @@ function setupBoardListener() {
 // 글 등록
 async function addPost() {
   const author = document.getElementById('post-author')?.value?.trim();
-  const pw = document.getElementById('post-pw')?.value?.trim();
-  const type = document.getElementById('post-type')?.value;
+  const pw     = document.getElementById('post-pw')?.value?.trim();
+  const type   = document.getElementById('post-type')?.value;
   const region = document.getElementById('post-region')?.value;
-  const title = document.getElementById('post-title')?.value?.trim();
+  const title  = document.getElementById('post-title')?.value?.trim();
 
   if (!author) return alert('이름을 입력해주세요.');
-  if (!pw) return alert('비밀번호를 입력해주세요.');
-  if (!title) return alert('내용을 입력해주세요.');
+  if (!pw)     return alert('비밀번호를 입력해주세요.');
+  if (!title)  return alert('내용을 입력해주세요.');
 
   const btn = document.querySelector('.board-write-form .form-submit');
   if (btn) btn.disabled = true;
@@ -218,7 +223,7 @@ async function addPost() {
     document.getElementById('post-author').value = '';
     document.getElementById('post-pw').value = '';
     document.getElementById('post-title').value = '';
-  } catch (e) {
+  } catch(e) {
     console.error(e);
     alert('등록 실패. 다시 시도해주세요.');
   } finally {
@@ -238,7 +243,7 @@ function closeEditModal() {
   pendingEditId = null;
 }
 async function submitEdit() {
-  const pw = document.getElementById('edit-pw').value.trim();
+  const pw      = document.getElementById('edit-pw').value.trim();
   const content = document.getElementById('edit-content').value.trim();
   if (!pw || !content) return alert('비밀번호와 내용을 입력해주세요.');
 
@@ -251,7 +256,7 @@ async function submitEdit() {
     const { doc: fsDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     await updateDoc(fsDoc(db, 'posts', pendingEditId), { title: content });
     closeEditModal();
-  } catch (e) {
+  } catch(e) {
     console.error(e);
     alert('수정 실패.');
   }
@@ -280,7 +285,7 @@ async function submitDelete() {
     const { doc: fsDoc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     await deleteDoc(fsDoc(db, 'posts', pendingDeleteId));
     closeDeleteModal();
-  } catch (e) {
+  } catch(e) {
     console.error(e);
     alert('삭제 실패.');
   }
@@ -299,8 +304,8 @@ function closeReplyModal() {
   pendingReplyId = null;
 }
 async function submitReply() {
-  const author = document.getElementById('reply-author').value.trim();
-  const pw = document.getElementById('reply-pw').value.trim();
+  const author  = document.getElementById('reply-author').value.trim();
+  const pw      = document.getElementById('reply-pw').value.trim();
   const content = document.getElementById('reply-content').value.trim();
   if (!author || !pw || !content) return alert('모든 항목을 입력해주세요.');
 
@@ -308,14 +313,14 @@ async function submitReply() {
   if (!post) return;
 
   const now = new Date();
-  const date = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+  const date = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
   const newReply = { author, pw, content, date };
 
   try {
     const { doc: fsDoc, updateDoc, arrayUnion } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     await updateDoc(fsDoc(db, 'posts', pendingReplyId), { replies: arrayUnion(newReply) });
     closeReplyModal();
-  } catch (e) {
+  } catch(e) {
     console.error(e);
     alert('답글 등록 실패.');
   }
@@ -337,15 +342,15 @@ async function openDeleteReply(postId, replyIdx) {
   try {
     const { doc: fsDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     await updateDoc(fsDoc(db, 'posts', postId), { replies: newReplies });
-  } catch (e) {
+  } catch(e) {
     console.error(e);
     alert('답글 삭제 실패.');
   }
 }
 
 // 모달 배경 클릭 닫기
-['editModal', 'deleteModal', 'replyModal'].forEach(id => {
-  document.getElementById(id)?.addEventListener('click', function (e) {
+['editModal','deleteModal','replyModal'].forEach(id => {
+  document.getElementById(id)?.addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
   });
 });
@@ -364,6 +369,13 @@ window.addEventListener('scroll', () => {
     navbar?.classList.remove('nav-hidden');
   }
   lastScroll = currentScroll;
+});
+
+// 마우스를 화면 위쪽 80px 영역에 가져가면 네비 표시
+document.addEventListener('mousemove', (e) => {
+  if (e.clientY < 80) {
+    navbar?.classList.remove('nav-hidden');
+  }
 });
 
 
@@ -435,11 +447,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const name = document.getElementById('userName')?.value?.trim();
-      const age = document.getElementById('userAge')?.value?.trim();
-      const gender = document.getElementById('userGender')?.value;
+      const name    = document.getElementById('userName')?.value?.trim();
+      const age     = document.getElementById('userAge')?.value?.trim();
+      const gender  = document.getElementById('userGender')?.value;
       const smoking = document.getElementById('userSmoking')?.value;
-      const area = document.getElementById('userArea')?.value;
+      const area    = document.getElementById('userArea')?.value;
       const message = document.getElementById('userMessage')?.value?.trim();
 
       if (!name || !age || !gender || !smoking || !area) {
@@ -494,14 +506,14 @@ window.changeMonth = changeMonth;
 let statsAnimated = false;
 let mapInitialized = false;
 
-window.switchTab = function (tabName) {
+window.switchTab = function(tabName) {
   // 탭 버튼 active 처리
   document.querySelectorAll('.act-tab').forEach(t => t.classList.remove('active'));
   const activeBtn = document.querySelector(`.act-tab[onclick="switchTab('${tabName}')"]`);
   if (activeBtn) activeBtn.classList.add('active');
 
   // 콘텐츠 전환
-  ['info', 'schedule', 'spot', 'gallery'].forEach(t => {
+  ['info','schedule','spot','gallery'].forEach(t => {
     const el = document.getElementById(`tab-${t}`);
     if (el) el.style.display = t === tabName ? 'block' : 'none';
   });
@@ -515,9 +527,9 @@ window.switchTab = function (tabName) {
     if (!statsAnimated) {
       statsAnimated = true;
       setTimeout(() => {
-        countUp('s1', 124, '/10000');
+        countUp('s1', 124, '/10000'); // 124만 올라가고 /10000 붙음
         countUp('s2', 10, '');
-        countUp('s3', 1, '');
+        countUp('s3', 1, 'H');
         countUp('s4', 10, '');
       }, 200);
     }
@@ -542,19 +554,19 @@ function initMap() {
 
   // 커스텀 마커 이미지 (Nodamm_MapPoint 사용)
   const markerImageSrc = '/Picture/Nodamm_MapPoint.png';
-  const markerImageSize = new kakao.maps.Size(80, 105);
-  const markerImageOption = { offset: new kakao.maps.Point(40, 105) };
+  const markerImageSize = new kakao.maps.Size(80, 100);
+  const markerImageOption = { offset: new kakao.maps.Point(40, 100) };
   const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
 
   // 주소 기반 스팟 목록 (주소로 좌표 자동 검색)
   const spots = [
-    { title: '구월동 로데오거리', count: 0, address: '인천 남동구 구월동 1409-25' },
-    { title: '인하 문화의 거리', count: 0, address: '인천 미추홀구 경인남길30번길 45-1' },
-    { title: '주안역 주변', count: 0, address: '인천 미추홀구 주안동 188' },
-    { title: '청라 커널웨이', count: 0, address: '인천 서구 청라동 162-12' },
-    { title: '계양 문화의 거리', count: 0, address: '인천 계양구 작전동 935' },
-    { title: '송도 인천대역', count: 0, address: '인천 연수구 송도동 8-32' },
-    { title: '동인천 북광장', count: 124, address: '인천광역시 동구 화도진로 53' },
+    { title: '구월동 로데오거리',  count: 0,   address: '인천 남동구 구월동 1409-25' },
+    { title: '인하 문화의 거리',   count: 0,   address: '인천 미추홀구 경인남길30번길 45-1' },
+    { title: '주안역 주변',        count: 0,   address: '인천 미추홀구 주안동 188' },
+    { title: '청라 커널웨이',      count: 0,   address: '인천 서구 청라동 162-12' },
+    { title: '계양 문화의 거리',   count: 0,   address: '인천 계양구 작전동 935' },
+    { title: '송도 인천대역',      count: 0,   address: '인천 연수구 송도동 8-32' },
+    { title: '동인천 북광장',      count: 124, address: '인천광역시 동구 화도진로 53' },
   ];
 
   const geocoder = new kakao.maps.services.Geocoder();
@@ -634,11 +646,11 @@ document.addEventListener('DOMContentLoaded', () => {
   modalForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById('m_userName')?.value?.trim();
-    const age = document.getElementById('m_userAge')?.value?.trim();
-    const gender = document.getElementById('m_userGender')?.value;
+    const name    = document.getElementById('m_userName')?.value?.trim();
+    const age     = document.getElementById('m_userAge')?.value?.trim();
+    const gender  = document.getElementById('m_userGender')?.value;
     const smoking = document.getElementById('m_userSmoking')?.value;
-    const area = document.getElementById('m_userArea')?.value;
+    const area    = document.getElementById('m_userArea')?.value;
     const message = document.getElementById('m_userMessage')?.value?.trim();
 
     if (!name || !age || !gender || !smoking || !area) {
