@@ -219,6 +219,154 @@
       color: #e74c3c;
     }
 
+    /* 활동 탭 */
+    .activity-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .act-tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .act-tab:hover {
+      color: var(--green);
+    }
+
+    .act-tab.active {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .tab-content {
+      animation: tabFadeIn 0.3s ease;
+    }
+
+    @keyframes tabFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-btn-dark {
+      background: #f0f7f3;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--green);
+      transition: background 0.2s;
+      font-size: 16px;
+    }
+
+    .nav-btn-dark:hover {
+      background: var(--green-pale);
+    }
+
+    .current-month-text-dark {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 120px;
+      text-align: center;
+    }
+
+    #schedule-body tr {
+      background: #fff;
+    }
+
+    #schedule-body tr:nth-child(even) {
+      background: #f8faf8;
+    }
+
+    #schedule-body td {
+      padding: 13px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #schedule-body tr.active-row td {
+      background: #d8f3dc;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 4/3;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+      display: flex;
+      align-items: flex-end;
+      padding: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .gallery-overlay span {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
     .reward-card-deco {
       overflow: hidden;
       padding: 0 !important;
@@ -251,12 +399,12 @@
       <ul class="nav-links">
         <li><a href="#intro">소개</a></li>
         <li class="nav-dropdown">
-          <a href="#">활동</a>
+          <a href="#activity-section">활동</a>
           <div class="dropdown-menu">
-            <a href="activities.html">활동 정보</a>
-            <a href="activities.html#schedule">활동 일정</a>
-            <a href="activities.html#gallery">활동 사진</a>
-            <a href="activities.html#spot">활동 스팟</a>
+            <a href="#activity-section" onclick="switchTab('info')">활동 정보</a>
+            <a href="#activity-section" onclick="switchTab('schedule')">활동 일정</a>
+            <a href="#activity-section" onclick="switchTab('spot')">활동 스팟</a>
+            <a href="#activity-section" onclick="switchTab('gallery')">활동 사진</a>
           </div>
         </li>
         <li><a href="#reward">리워드</a></li>
@@ -324,29 +472,123 @@
   </section>
 
   <!-- ====================================================
-       DETAIL (통계)
+       ACTIVITY (탭 방식 - 정보/일정/스팟/사진)
   ==================================================== -->
-  <section id="detail" class="section section-alt">
+  <section id="activity-section" class="section">
     <div class="container">
-      <!-- 통계 카드 -->
-      <div class="stats-grid">
-        <div class="stat-card fade-up">
-          <div class="stat-num" id="s1">0</div>
-          <div class="stat-label">캠페인 달성 현황</div>
-        </div>
-        <div class="stat-card fade-up">
-          <div class="stat-num" id="s2">0</div>
-          <div class="stat-label">활동 구역 (개)</div>
-        </div>
-        <div class="stat-card fade-up">
-          <div class="stat-num" id="s3">0<small style="font-size:.5em">H</small></div>
-          <div class="stat-label">1회 봉사 시간</div>
-        </div>
-        <div class="stat-card fade-up">
-          <div class="stat-num" id="s4">0</div>
-          <div class="stat-label">인천 핫스팟 거점</div>
+
+      <!-- 탭 헤더 -->
+      <div class="activity-tabs fade-up">
+        <button class="act-tab active" onclick="switchTab('info')">활동 정보</button>
+        <button class="act-tab" onclick="switchTab('schedule')">활동 일정</button>
+        <button class="act-tab" onclick="switchTab('spot')">활동 스팟</button>
+        <button class="act-tab" onclick="switchTab('gallery')">활동 사진</button>
+      </div>
+
+      <!-- 활동 정보 -->
+      <div id="tab-info" class="tab-content active-tab">
+        <div class="card-grid" style="margin-top:2rem;">
+          <div class="how-card fade-up">
+            <div class="how-icon"><i class="ti ti-clock"></i></div>
+            <h4>시간</h4>
+            <p>매주 1시간, 우리 동네가 깨끗해지는 시간<br><strong>매주 토요일 오전 10:00</strong></p>
+          </div>
+          <div class="how-card fade-up">
+            <div class="how-icon"><i class="ti ti-map-pin"></i></div>
+            <h4>장소</h4>
+            <p>인천 8개 구 · 2개 군 순회<br>구월동 로데오, 주안역, 청라 커널웨이 등</p>
+            <p style="margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:700;">인천 전역 핫스팟 순회 중</p>
+          </div>
+          <div class="how-card fade-up">
+            <div class="how-icon"><i class="ti ti-run"></i></div>
+            <h4>활동 내용</h4>
+            <p>1시간 꽁초 플로깅 후<br>수거량 측정 및 인증샷 타임</p>
+          </div>
+          <div class="how-card fade-up">
+            <div class="how-icon"><i class="ti ti-users"></i></div>
+            <h4>팀 구성</h4>
+            <p>구역별 팀장 선정 후 인천 전역에서 동시 진행<br>
+              <span
+                style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">🔥
+                미추홀구 팀장 모집 중!</span>
+            </p>
+          </div>
         </div>
       </div>
+
+      <!-- 활동 일정 -->
+      <div id="tab-schedule" class="tab-content" style="display:none;">
+        <div style="margin-top:2rem;">
+          <div class="month-nav" style="justify-content:center;margin-bottom:1.5rem;">
+            <button class="nav-btn-dark" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+            <span id="current-month" class="current-month-text-dark">2026년 5월</span>
+            <button class="nav-btn-dark" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div id="schedule-wrapper"
+            style="border-radius:16px;overflow:hidden;border:1px solid var(--border);transition:opacity 0.25s ease;">
+            <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+              <colgroup>
+                <col style="width:35%">
+                <col style="width:12%">
+                <col style="width:15%">
+                <col style="width:38%">
+              </colgroup>
+              <thead>
+                <tr style="background:var(--green);">
+                  <th style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">날짜</th>
+                  <th style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">시간</th>
+                  <th style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">지역</th>
+                  <th style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">상세 장소</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 활동 스팟 + 통계 -->
+      <div id="tab-spot" class="tab-content" style="display:none;">
+        <div style="margin-top:2rem;">
+          <div id="map"
+            style="width:100%;height:450px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);">
+          </div>
+          <!-- 통계 카드 -->
+          <div class="stats-grid" style="margin-top:2.5rem;">
+            <div class="stat-card">
+              <div class="stat-num" id="s1">0</div>
+              <div class="stat-label">캠페인 달성 현황</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" id="s2">0</div>
+              <div class="stat-label">활동 구역 (개)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" id="s3">0</div>
+              <div class="stat-label">1회 봉사 시간 (H)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num" id="s4">0</div>
+              <div class="stat-label">인천 핫스팟 거점</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 활동 사진 -->
+      <div id="tab-gallery" class="tab-content" style="display:none;">
+        <div class="gallery-grid" style="margin-top:2rem;">
+          <div class="gallery-item fade-up">
+            <img src="Picture/Nodamm_1.jpg" alt="노담 서포터즈 활동 사진 1">
+            <div class="gallery-overlay"><span>부평역 테마거리 플로깅</span></div>
+          </div>
+          <div class="gallery-item fade-up">
+            <img src="Picture/Nodamm_2.png" alt="노담 서포터즈 활동 사진 2">
+            <div class="gallery-overlay"><span>구월동 로데오 광장 정화 활동</span></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 

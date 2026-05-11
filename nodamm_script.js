@@ -82,20 +82,7 @@ function countUp(id, target, suffix) {
   }, 35);
 }
 
-const statsObserver = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      countUp('s1', 124, '/10000');
-      countUp('s2', 10, '');
-      countUp('s3', 1, 'H');
-      countUp('s4', 15, '');
-      statsObserver.disconnect();
-    }
-  });
-}, { threshold: 0.3 });
-
-const detailSection = document.getElementById('detail');
-if (detailSection) statsObserver.observe(detailSection);
+// 통계 카운터는 switchTab('spot') 에서 실행됨
 
 
 /* ── 3. 게시판 (Firebase Firestore - 이름/비번/내용/수정/삭제/답글/관리자) ── */
@@ -418,24 +405,23 @@ function renderSchedule() {
   `).join('');
 }
 
+let isChangingMonth = false;
 function changeMonth(diff) {
-  const wrapper = document.querySelector('.schedule-table-wrapper');
-  if (!wrapper) return;
+  if (isChangingMonth) return;
+  isChangingMonth = true;
+  const wrapper = document.getElementById('schedule-wrapper');
+  const monthEl = document.getElementById('current-month');
+  if (!wrapper) { isChangingMonth = false; return; }
 
-  wrapper.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
-  const slideOutClass = diff > 0 ? 'slide-out-left' : 'slide-out-right';
-  wrapper.classList.add(slideOutClass);
-
+  wrapper.style.opacity = '0';
   setTimeout(() => {
     currentViewMonth += diff;
     if (currentViewMonth < 1) currentViewMonth = 12;
     if (currentViewMonth > 12) currentViewMonth = 1;
-
     renderSchedule();
-    wrapper.classList.remove(slideOutClass);
-    const slideInClass = diff > 0 ? 'slide-in-right' : 'slide-in-left';
-    wrapper.classList.add(slideInClass);
-  }, 300);
+    wrapper.style.opacity = '1';
+    isChangingMonth = false;
+  }, 250);
 }
 
 /* ── 7. 지원서 제출 (Firebase 연동) ── */
@@ -503,6 +489,40 @@ window.openDeleteReply = openDeleteReply;
 window.filterRegion = filterRegion;
 window.addPost = addPost;
 window.changeMonth = changeMonth;
+
+// 탭 전환 함수
+let statsAnimated = false;
+let mapInitialized = false;
+
+window.switchTab = function (tabName) {
+  // 탭 버튼 active 처리
+  document.querySelectorAll('.act-tab').forEach(t => t.classList.remove('active'));
+  const activeBtn = document.querySelector(`.act-tab[onclick="switchTab('${tabName}')"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  // 콘텐츠 전환
+  ['info', 'schedule', 'spot', 'gallery'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`);
+    if (el) el.style.display = t === tabName ? 'block' : 'none';
+  });
+
+  // 스팟 탭 - 지도 초기화 & 통계 카운터
+  if (tabName === 'spot') {
+    if (!mapInitialized) {
+      mapInitialized = true;
+      waitForKakaoAndInit();
+    }
+    if (!statsAnimated) {
+      statsAnimated = true;
+      setTimeout(() => {
+        countUp('s1', 124, '/10000');
+        countUp('s2', 10, '');
+        countUp('s3', 1, '');
+        countUp('s4', 10, '');
+      }, 200);
+    }
+  }
+};
 
 // 초기 렌더링
 renderPosts();
@@ -604,7 +624,7 @@ function waitForKakaoAndInit() {
     setTimeout(waitForKakaoAndInit, 100);
   }
 }
-waitForKakaoAndInit();
+// waitForKakaoAndInit은 switchTab(spot)에서 호출됨
 
 /* 모달 지원서 Firebase 제출 */
 document.addEventListener('DOMContentLoaded', () => {
