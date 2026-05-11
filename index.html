@@ -151,16 +151,16 @@
         <li class="nav-dropdown">
           <a href="#">활동</a>
           <div class="dropdown-menu">
-            <a href="#activities">정보</a>
-            <a href="#schedule">일정</a>
-            <a href="#gallery">사진</a>
-            <a href="#detail">스팟</a>
+            <a href="activities.html" target="_blank">활동 정보</a>
+            <a href="activities.html#schedule" target="_blank">활동 일정</a>
+            <a href="activities.html#gallery" target="_blank">활동 사진</a>
+            <a href="activities.html#spot" target="_blank">활동 스팟</a>
           </div>
         </li>
         <li><a href="#reward">리워드</a></li>
         <li><a href="#board">게시판</a></li>
       </ul>
-      <button class="nav-cta" onclick="window.open('apply.html', '_blank')">지원하기</button>
+      <button class="nav-cta" onclick="openApplyModal()">지원하기</button>
     </div>
   </nav>
 
@@ -192,7 +192,7 @@
       </div>
 
       <div class="hero-buttons">
-        <button class="btn btn-primary" onclick="window.open('apply.html', '_blank')">
+        <button class="btn btn-primary" onclick="openApplyModal()">
           <i class="ti ti-arrow-right" aria-hidden="true"></i> 지금 참여하기
         </button>
         <button class="btn btn-outline" onclick="lenis.scrollTo('#intro')">
@@ -334,7 +334,7 @@
 
       <!-- ── Map Section ── -->
       <div id="map-section" class="fade-up" style="margin-bottom: 5rem;">
-        <h2 class="section-title">인천 꽁초 스팟</h2>
+        <h2 class="section-title">활동 스팟</h2>
         <div id="map"
           style="width:100%; height:450px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border);">
         </div>
@@ -599,9 +599,177 @@
   </footer>
 
   <!-- ====================================================
+       지원하기 모달
+  ==================================================== -->
+  <div id="applyModal" style="
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.5); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+  ">
+    <div style="
+      background:#fff; border-radius:20px; width:100%; max-width:560px;
+      max-height:90vh; overflow-y:auto; margin:1rem;
+      box-shadow:0 20px 60px rgba(0,0,0,0.2); position:relative;
+      animation: modalIn 0.3s ease;
+    ">
+      <!-- X 버튼 -->
+      <button onclick="closeApplyModal()" style="
+        position:sticky; top:0; float:right; margin:16px 16px 0 0;
+        background:#f3f4f6; border:none; border-radius:50%; width:36px; height:36px;
+        font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+        color:#555; transition:background 0.2s; z-index:10;
+      " onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f3f4f6'">✕</button>
+
+      <div style="padding:2rem;">
+        <!-- 배너 -->
+        <div style="
+          background:linear-gradient(135deg,#2d6a4f,#1b4332); border-radius:14px;
+          padding:1.8rem; margin-bottom:1.5rem; color:#fff; position:relative; overflow:hidden;
+        ">
+          <div
+            style="position:absolute;right:-10px;bottom:-20px;font-family:'Bebas Neue',sans-serif;font-size:5rem;color:rgba(255,255,255,0.07);pointer-events:none;">
+            NODAM</div>
+          <span
+            style="background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:0.8rem;">JOIN
+            US · 2026</span>
+          <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.3rem;">노담 서포터즈 지원하기</h2>
+          <p style="font-size:13px;opacity:0.85;">인천을 바꾸는 작은 발걸음, 지금 시작하세요 🌱</p>
+        </div>
+
+        <!-- 폼 -->
+        <form id="modalApplyForm">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">이름 <span
+                  style="color:#e74c3c">*</span></label>
+              <input id="m_userName" type="text" placeholder="성함" autocomplete="name" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">나이 <span
+                  style="color:#e74c3c">*</span></label>
+              <input id="m_userAge" type="number" placeholder="예: 22" min="14" max="99" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">성별 <span
+                  style="color:#e74c3c">*</span></label>
+              <select id="m_userGender" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+                <option value="" disabled selected>선택</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">흡연 여부 <span
+                  style="color:#e74c3c">*</span></label>
+              <select id="m_userSmoking" required
+                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+                <option value="" disabled selected>선택</option>
+                <option value="비흡연">비흡연</option>
+                <option value="흡연">흡연</option>
+                <option value="금연중">금연 중</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">희망 활동 지역 <span
+                style="color:#e74c3c">*</span></label>
+            <select id="m_userArea" required
+              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
+              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
+              <option value="전체">전체 (무관)</option>
+              <option value="남동구">남동구</option>
+              <option value="부평구">부평구</option>
+              <option value="미추홀구">미추홀구</option>
+              <option value="연수구">연수구</option>
+              <option value="계양구">계양구</option>
+              <option value="서구">서구</option>
+              <option value="중구">중구</option>
+              <option value="동구">동구</option>
+              <option value="강화군">강화군</option>
+              <option value="옹진군">옹진군</option>
+            </select>
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">지원 동기 <span
+                style="font-weight:400;color:#6b7c72;">(선택)</span></label>
+            <textarea id="m_userMessage" placeholder="간단한 지원 동기를 적어주세요"
+              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px;"
+              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'"></textarea>
+          </div>
+          <button type="submit" id="modalSubmitBtn" style="
+            width:100%;padding:13px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;
+            font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;
+          " onmouseover="this.style.background='#40916c'" onmouseout="this.style.background='#2d6a4f'">
+            <i class="ti ti-send"></i> 신청서 제출하기
+          </button>
+        </form>
+
+        <!-- 완료 메시지 (숨김) -->
+        <div id="modalSuccess" style="display:none;text-align:center;padding:2rem 0;">
+          <div
+            style="width:64px;height:64px;background:#d8f3dc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:#2d6a4f;">
+            ✓</div>
+          <h3 style="color:#2d6a4f;margin-bottom:0.5rem;">지원 완료!</h3>
+          <p id="modalSuccessMsg" style="font-size:14px;color:#6b7c72;line-height:1.7;"></p>
+          <button onclick="closeApplyModal()"
+            style="margin-top:1.2rem;padding:10px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+  </style>
+
+  <!-- ====================================================
        SCRIPT
   ==================================================== -->
   <script type="module" src="nodamm_script.js"></script>
+  <script>
+    // 모달 열기/닫기
+    function openApplyModal() {
+      const modal = document.getElementById('applyModal');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (window.lenis) lenis.stop();
+    }
+    function closeApplyModal() {
+      const modal = document.getElementById('applyModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      if (window.lenis) lenis.start();
+      // 폼 초기화
+      document.getElementById('modalApplyForm').style.display = 'block';
+      document.getElementById('modalSuccess').style.display = 'none';
+      document.getElementById('modalApplyForm').reset();
+    }
+    // 배경 클릭 시 닫기
+    document.getElementById('applyModal').addEventListener('click', function (e) {
+      if (e.target === this) closeApplyModal();
+    });
+  </script>
 
 </body>
 

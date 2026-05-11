@@ -452,3 +452,48 @@ function waitForKakaoAndInit() {
   }
 }
 waitForKakaoAndInit();
+
+/* 모달 지원서 Firebase 제출 */
+document.addEventListener('DOMContentLoaded', () => {
+  const modalForm = document.getElementById('modalApplyForm');
+  if (!modalForm) return;
+
+  modalForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('m_userName')?.value?.trim();
+    const age = document.getElementById('m_userAge')?.value?.trim();
+    const gender = document.getElementById('m_userGender')?.value;
+    const smoking = document.getElementById('m_userSmoking')?.value;
+    const area = document.getElementById('m_userArea')?.value;
+    const message = document.getElementById('m_userMessage')?.value?.trim();
+
+    if (!name || !age || !gender || !smoking || !area) {
+      alert('필수 항목(*)을 모두 입력해주세요.');
+      return;
+    }
+
+    const btn = document.getElementById('modalSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '제출 중...'; }
+
+    try {
+      await addDoc(collection(db, 'applicants'), {
+        name, age: Number(age), gender, smoking, area,
+        message: message || '',
+        date: new Date().toISOString(),
+      });
+
+      modalForm.style.display = 'none';
+      const successEl = document.getElementById('modalSuccess');
+      const successMsg = document.getElementById('modalSuccessMsg');
+      if (successMsg) successMsg.innerHTML = `<strong>${name}</strong>님의 지원이 접수되었습니다.<br>확인 후 연락드리겠습니다. 🌱`;
+      if (successEl) successEl.style.display = 'block';
+
+    } catch (err) {
+      console.error(err);
+      alert('제출에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> 신청서 제출하기'; }
+    }
+  });
+});
