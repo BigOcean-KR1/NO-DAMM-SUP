@@ -236,46 +236,6 @@ window.addEventListener('scroll', () => {
   lastScroll = currentScroll;
 });
 
-/* ── 5. 카카오맵 초기화 ── */
-function initMap() {
-  const container = document.getElementById('map');
-  if (!container) return;
-
-  const options = {
-    center: new kakao.maps.LatLng(37.4566, 126.7052),
-    level: 8
-  };
-  const map = new kakao.maps.Map(container, options);
-
-  // 인천 주요 담배꽁초 수거 스팟
-  const positions = [
-    { title: '부평 테마거리', count: 247, latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
-    { title: '구월동 로데오', count: 183, latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
-    { title: '주안역 인근', count: 312, latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
-    { title: '송도 센트럴파크', count: 98, latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
-    { title: '청라 커낼웨이', count: 134, latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
-    { title: '인하대 후문', count: 221, latlng: new kakao.maps.LatLng(37.4496, 126.6541) },
-    { title: '동인천역 북광장', count: 289, latlng: new kakao.maps.LatLng(37.4742, 126.6384) },
-    { title: '계양구청 광장', count: 76, latlng: new kakao.maps.LatLng(37.5376, 126.7378) },
-  ];
-
-  positions.forEach(pos => {
-    const marker = new kakao.maps.Marker({
-      map: map,
-      position: pos.latlng,
-      title: pos.title
-    });
-
-    const infowindow = new kakao.maps.InfoWindow({
-      content: `<div style="padding:8px 12px; font-size:13px; font-weight:600; white-space:nowrap; line-height:1.6;">
-        📍 ${pos.title}<br>
-        <span style="color:#e74c3c; font-size:12px;">🚬 수거량: ${pos.count}개</span>
-      </div>`
-    });
-
-    kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
-  });
-}
 
 // type="module"은 defer처럼 동작하므로 SDK가 이미 로드된 상태
 // window.kakao가 있으면 바로 실행, 없으면 폴링으로 대기
@@ -404,3 +364,72 @@ window.changeMonth = changeMonth;
 // 초기 렌더링
 renderPosts();
 renderSchedule();
+
+/* 5. 카카오맵 초기화 */
+function initMap() {
+  const container = document.getElementById('map');
+  if (!container) return;
+
+  const options = {
+    center: new kakao.maps.LatLng(37.4566, 126.7052),
+    level: 8
+  };
+  const map = new kakao.maps.Map(container, options);
+
+  // 커스텀 마커 이미지 (노담 서포터즈 로고)
+  const markerImageSrc = 'Picture/Nodamm_Mark.png';
+  const markerImageSize = new kakao.maps.Size(36, 36);
+  const markerImageOption = { offset: new kakao.maps.Point(18, 36) };
+  const markerImage = new kakao.maps.MarkerImage(markerImageSrc, markerImageSize, markerImageOption);
+
+  const positions = [
+    { title: '부평 테마거리', count: 124, latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
+    { title: '구월동 로데오', count: 0, latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
+    { title: '주안역 인근', count: 0, latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
+    { title: '송도 센트럴파크', count: 0, latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
+    { title: '청라 커낼웨이', count: 0, latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
+    { title: '인하대 후문', count: 0, latlng: new kakao.maps.LatLng(37.4496, 126.6541) },
+    { title: '동인천역 북광장', count: 0, latlng: new kakao.maps.LatLng(37.4742, 126.6384) },
+    { title: '계양구청 광장', count: 0, latlng: new kakao.maps.LatLng(37.5376, 126.7378) },
+  ];
+
+  positions.forEach(pos => {
+    const marker = new kakao.maps.Marker({
+      map: map,
+      position: pos.latlng,
+      title: pos.title,
+      image: markerImage
+    });
+
+    const infowindow = new kakao.maps.InfoWindow({
+      content: `<div style="padding:8px 12px; font-size:13px; font-weight:600; white-space:nowrap; line-height:1.8; border-radius:8px;">
+        📍 ${pos.title}<br>
+        <span style="color:#2d6a4f; font-size:12px;">🚬 수거량: <strong>${pos.count}개</strong></span>
+      </div>`,
+      removable: false
+    });
+
+    let isPinned = false;
+
+    // 마우스 올리면 표시
+    kakao.maps.event.addListener(marker, 'mouseover', () => {
+      if (!isPinned) infowindow.open(map, marker);
+    });
+
+    // 마우스 떠나면 고정 아닐 때 닫기
+    kakao.maps.event.addListener(marker, 'mouseout', () => {
+      if (!isPinned) infowindow.close();
+    });
+
+    // 클릭: 고정 토글 (한번 클릭 = 고정, 다시 클릭 = 해제)
+    kakao.maps.event.addListener(marker, 'click', () => {
+      if (isPinned) {
+        isPinned = false;
+        infowindow.close();
+      } else {
+        isPinned = true;
+        infowindow.open(map, marker);
+      }
+    });
+  });
+}
