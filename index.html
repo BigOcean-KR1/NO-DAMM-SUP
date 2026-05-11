@@ -377,8 +377,14 @@
   <!-- ====================================================
        REWARD
   ==================================================== -->
-  <section id="reward" class="section">
-    <div class="container">
+  <section id="reward" class="section" style="position:relative; overflow:hidden;">
+    <!-- 배경 로고 장식 -->
+    <img src="Picture/Nodamm_Mark.png" alt="" aria-hidden="true" style="
+      position:absolute; left:-40px; bottom:-20px;
+      width:320px; opacity:0.07; filter:grayscale(100%);
+      pointer-events:none; user-select:none;
+    ">
+    <div class="container" style="position:relative;">
       <span class="section-tag fade-up">WHAT YOU GET</span>
       <h2 class="section-title fade-up">리워드</h2>
       <p class="section-desc fade-up">참여하면 실질적인 혜택이 돌아옵니다.</p>
@@ -403,9 +409,6 @@
         <div class="reward-card fade-up">
           <h4><i class="ti ti-users-group" aria-hidden="true"></i> 선한 영향력</h4>
           <p>혼자가 아니라 함께하기에 더 즐겁습니다. 같은 뜻을 가진 동료들과 땀 흘리며 나누는 유대감과 선한 영향력의 가치를 경험할 수 있습니다.</p>
-        </div>
-        <div class="reward-card reward-card-deco fade-up">
-          <img src="Picture/Nodamm_Mark.png" alt="노담 서포터즈">
         </div>
       </div>
     </div>
@@ -440,7 +443,6 @@
               <option value="미추홀구">미추홀구</option><option value="연수구">연수구</option>
               <option value="남동구">남동구</option><option value="부평구">부평구</option>
               <option value="계양구">계양구</option><option value="서구">서구</option>
-              <option value="강화군">강화군</option><option value="옹진군">옹진군</option>
             </select>
           </div>
         </div>
@@ -474,7 +476,6 @@
           <option value="연수구">연수구</option><option value="미추홀구">미추홀구</option>
           <option value="서구">서구</option><option value="중구">중구</option>
           <option value="동구">동구</option><option value="계양구">계양구</option>
-          <option value="강화군">강화군</option><option value="옹진군">옹진군</option>
         </select>
         <select class="form-select" id="post-type">
           <option value="q">질문</option>
@@ -661,8 +662,6 @@
               <option value="서구">서구</option>
               <option value="중구">중구</option>
               <option value="동구">동구</option>
-              <option value="강화군">강화군</option>
-              <option value="옹진군">옹진군</option>
             </select>
           </div>
           <div style="margin-bottom:1.5rem;">
