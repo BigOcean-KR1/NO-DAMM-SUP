@@ -1288,3 +1288,222 @@
     #map:hover {
         transform: translateY(-5px); /* 살짝 떠오르는 효과 */
     }
+
+/* ====================================================
+   MOBILE RESPONSIVE - 종합 모바일 대응
+==================================================== */
+
+/* 태블릿 (768px 이하) */
+@media (max-width: 768px) {
+
+  /* 네비게이션 */
+  .nav-inner {
+    padding: 0 1rem;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .nav-logo {
+    font-size: 1rem;
+  }
+  .nav-logo-img {
+    height: 36px !important;
+  }
+  .nav-cta {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+
+  /* 히어로 */
+  .hero-content {
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+  .hero-title {
+    font-size: 56px !important;
+  }
+  .hero-slogan {
+    font-size: 15px !important;
+  }
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .hero-buttons .btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+  .hero-tags {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .hero-deco-text {
+    display: none;
+  }
+
+  /* 섹션 공통 */
+  .section {
+    padding: 3rem 0 !important;
+  }
+  .container {
+    padding: 0 1.2rem !important;
+  }
+  .section-title {
+    font-size: 1.6rem !important;
+  }
+
+  /* 카드 그리드 */
+  .card-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .how-card {
+    padding: 1.4rem !important;
+  }
+
+  /* 활동 탭 */
+  .activity-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .activity-tabs::-webkit-scrollbar { display: none; }
+  .act-tab {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+  }
+
+  /* 일정 테이블 */
+  #schedule-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #schedule-body td {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+  }
+  .month-nav {
+    justify-content: center;
+  }
+
+  /* 통계 카드 */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  .stat-num {
+    font-size: 1.8rem !important;
+  }
+
+  /* 리워드 */
+  .reward-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .reward-card-deco {
+    display: none !important;
+  }
+
+  /* 게시판 */
+  .board-filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .board-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  .item-left {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .post-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .item-title {
+    font-size: 13px !important;
+  }
+
+  /* 모달 공통 */
+  #applyModal > div,
+  #writeModal > div,
+  #editModal > div,
+  #deleteModal > div,
+  #replyModal > div {
+    margin: 0.5rem !important;
+    padding: 1.5rem !important;
+  }
+  #applyModal .form-row,
+  #writeModal .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 갤러리 */
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 지도 */
+  #map {
+    height: 300px !important;
+  }
+
+  /* 푸터 */
+  .footer-top {
+    grid-template-columns: 1fr !important;
+    padding: 2rem 1.2rem !important;
+    gap: 1.5rem !important;
+  }
+  .footer-bottom {
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+    padding: 1rem 1.2rem !important;
+    text-align: center;
+  }
+
+  /* 인트로 인용구 */
+  .why-quote {
+    font-size: 14px !important;
+    padding: 1.2rem !important;
+  }
+}
+
+/* 소형 모바일 (480px 이하) */
+@media (max-width: 480px) {
+
+  .hero-title {
+    font-size: 42px !important;
+  }
+  .hero-badge {
+    font-size: 10px !important;
+  }
+  .nav-cta {
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+  }
+  .section-title {
+    font-size: 1.4rem !important;
+  }
+  .stat-num {
+    font-size: 1.5rem !important;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* 글쓰기 모달 폼 2열 → 1열 */
+  #writeModal [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 일정 테이블 작게 */
+  #schedule-body td {
+    font-size: 11px !important;
+    padding: 8px 8px !important;
+  }
+}
