@@ -321,6 +321,7 @@
                 <option value="" disabled selected>성별을 선택해주세요</option>
                 <option value="남성">남성</option>
                 <option value="여성">여성</option>
+                <option value="기타">기타 / 선택 안 함</option>
               </select>
             </div>
             <div class="form-group">
@@ -371,7 +372,7 @@
     <div class="container">
       <span class="section-tag fade-up">COMMUNITY</span>
       <h2 class="section-title fade-up">게시판</h2>
-      <p class="section-desc fade-up">참여 신청, 질문, 활동 후기 무엇이든 남겨주세요.</p>
+      <p class="section-desc fade-up">질문, 활동 후기 무엇이든 남겨주세요.</p>
 
       <div class="board-wrapper fade-up">
         <!-- 헤더 -->
@@ -385,7 +386,6 @@
           <div class="filter-group">
             <span class="filter-label">유형:</span>
             <button class="filter-btn active" data-filter="all" onclick="filterPosts(this, 'all')">전체</button>
-            <button class="filter-btn" data-filter="join" onclick="filterPosts(this, 'join')">참여신청</button>
             <button class="filter-btn" data-filter="q" onclick="filterPosts(this, 'q')">질문</button>
             <button class="filter-btn" data-filter="review" onclick="filterPosts(this, 'review')">후기</button>
           </div>
@@ -428,7 +428,6 @@
           <option value="옹진군">옹진군</option>
         </select>
         <select class="form-select" id="post-type">
-          <option value="join">참여신청</option>
           <option value="q">질문</option>
           <option value="review">후기</option>
         </select>

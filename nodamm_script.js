@@ -99,18 +99,15 @@ if (detailSection) statsObserver.observe(detailSection);
 
 /* ── 3. 게시판 (Firebase Firestore 실시간 연동) ── */
 const BADGE = {
-  join: { label: '참여신청', cls: 'badge-join' },
   q: { label: '질문', cls: 'badge-q' },
   review: { label: '후기', cls: 'badge-review' },
 };
 
 // Firestore 연결 전 보여줄 기본 샘플 데이터
 const defaultPosts = [
-  { type: 'join', region: '부평구', title: '저도 함께하고 싶어요! 신청합니다 😊', date: '2026.07.01' },
   { type: 'q', region: '연수구', title: '봉사시간 인증은 어떻게 받나요?', date: '2026.06.29' },
-  { type: 'join', region: '부평구', title: '부평 지역으로 신청하고 싶습니다!', date: '2026.06.27' },
   { type: 'q', region: '남동구', title: '장갑이나 집게는 제공되나요?', date: '2026.06.25' },
-  { type: 'join', region: '남동구', title: '인천 남동구에서 팀장 맡고 싶습니다.', date: '2026.06.23' },
+  { type: 'review', region: '부평구', title: '부평 활동 정말 좋았어요! 다음에도 참여할게요 😊', date: '2026.06.20' },
 ];
 
 let firestorePosts = null; // null = 아직 로딩 중, [] = 로드됐지만 비어있음
@@ -356,11 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const name    = document.getElementById('userName')?.value?.trim();
-      const age     = document.getElementById('userAge')?.value?.trim();
-      const gender  = document.getElementById('userGender')?.value;
+      const name = document.getElementById('userName')?.value?.trim();
+      const age = document.getElementById('userAge')?.value?.trim();
+      const gender = document.getElementById('userGender')?.value;
       const smoking = document.getElementById('userSmoking')?.value;
-      const area    = document.getElementById('userArea')?.value;
+      const area = document.getElementById('userArea')?.value;
       const message = document.getElementById('userMessage')?.value?.trim();
 
       if (!name || !age || !gender || !smoking || !area) {
