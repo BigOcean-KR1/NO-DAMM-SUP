@@ -434,16 +434,13 @@ function initMap() {
   });
 }
 
-// 지도 위에 마우스가 있을 때만 휠 줌 활성화, 벗어나면 스크롤로 복귀
+
+// 지도 위에서 휠할 때만 페이지 스크롤 차단 (lenis stop/start 제거)
 document.addEventListener('DOMContentLoaded', () => {
   const mapContainer = document.getElementById('map');
   if (!mapContainer) return;
 
-  mapContainer.addEventListener('mouseenter', () => {
-    lenis.stop();
-  });
-
-  mapContainer.addEventListener('mouseleave', () => {
-    lenis.start();
-  });
+  mapContainer.addEventListener('wheel', (e) => {
+    e.stopPropagation(); // lenis로 이벤트 전파 차단
+  }, { passive: true });
 });
