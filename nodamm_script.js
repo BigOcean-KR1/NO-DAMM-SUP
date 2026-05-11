@@ -602,7 +602,7 @@ function initMap() {
     { title: '계양 문화의 거리',   count: 0,   address: '인천 계양구 작전동 935' },
     { title: '송도 인천대역',      count: 0,   address: '인천 연수구 송도동 8-32' },
     { title: '동인천 북광장',      count: 0, address: '인천광역시 동구 화도진로 53' },
-    { title: '부평 로데오거리',      count: 124, address: '인천 부평구 경원대로 1376-3' },
+    { title: '부평 문화의거리',      count: 124, address: '인천 부평구 경원대로 1376-3' },
   ];
 
   const geocoder = new kakao.maps.services.Geocoder();
