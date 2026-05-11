@@ -277,8 +277,17 @@ function initMap() {
   });
 }
 
-// autoload=false 이므로 반드시 kakao.maps.load()로 감싸야 함
-kakao.maps.load(initMap);
+// type="module"은 defer처럼 동작하므로 SDK가 이미 로드된 상태
+// window.kakao가 있으면 바로 실행, 없으면 폴링으로 대기
+function waitForKakaoAndInit() {
+  if (window.kakao && window.kakao.maps) {
+    initMap();
+  } else {
+    setTimeout(waitForKakaoAndInit, 100);
+  }
+}
+
+waitForKakaoAndInit();
 
 /* ── 6. 월별 활동 일정 ── */
 let currentViewMonth = 5;
