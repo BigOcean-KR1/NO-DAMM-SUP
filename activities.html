@@ -11,7 +11,6 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="icon" href="Picture/favicon_io/favicon.ico" type="image/x-icon">
-  <script src="https://cdn.jsdelivr.net/npm/lenis@latest/dist/lenis.min.js"></script>
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ca1b74dee88e9bb909ea0c5c8f41a15e&libraries=services"></script>
 
@@ -29,7 +28,7 @@
       --green-light: #40916c;
       --green-pale: #d8f3dc;
       --bg: #f8faf8;
-      --surface: #ffffff;
+      --surface: #fff;
       --border: #e0e7e3;
       --text: #1a2e22;
       --muted: #6b7c72;
@@ -61,7 +60,6 @@
       color: var(--text);
     }
 
-    /* Header */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -91,10 +89,29 @@
       height: 32px;
     }
 
-    /* 탭 네비게이션 */
+    .home-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .home-btn:hover {
+      background: var(--green-light);
+    }
+
     .tab-nav {
       display: flex;
-      gap: 0;
       border-bottom: 2px solid var(--border);
       background: #fff;
       position: sticky;
@@ -119,29 +136,6 @@
       border-color: var(--green);
     }
 
-    /* 홈으로 버튼 */
-    .home-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s;
-      font-family: inherit;
-    }
-
-    .home-btn:hover {
-      background: var(--green-light);
-    }
-
-    /* Sections */
     .section {
       padding: 5rem 0;
     }
@@ -217,7 +211,7 @@
       line-height: 1.7;
     }
 
-    /* 일정 테이블 */
+    /* 일정 */
     .schedule-section {
       background: #1a2e22;
       color: #fff;
@@ -269,18 +263,37 @@
       text-align: center;
     }
 
+    /* 테이블 고정 레이아웃 - 글자 위치 흔들림 방지 */
     .schedule-table-wrapper {
-      overflow-x: auto;
       border-radius: var(--radius-lg);
       margin-top: 2rem;
+      overflow: hidden;
+      position: relative;
+      min-height: 200px;
+      /* 높이 고정으로 레이아웃 흔들림 방지 */
     }
 
     .schedule-table {
       width: 100%;
       border-collapse: collapse;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
+      table-layout: fixed;
+    }
+
+    .schedule-table colgroup col:nth-child(1) {
+      width: 38%;
+    }
+
+    .schedule-table colgroup col:nth-child(2) {
+      width: 12%;
+    }
+
+    .schedule-table colgroup col:nth-child(3) {
+      width: 15%;
+    }
+
+    .schedule-table colgroup col:nth-child(4) {
+      width: 35%;
     }
 
     .schedule-table th {
@@ -297,12 +310,28 @@
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       font-size: 14px;
       color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .schedule-table tr.active-row td {
       background: rgba(116, 198, 157, 0.15);
       color: #74c69d;
       font-weight: 600;
+    }
+
+    /* 슬라이드 애니메이션 - 부드럽게 */
+    .schedule-table-wrapper {
+      transition: opacity 0.3s ease;
+    }
+
+    .schedule-fade-out {
+      opacity: 0;
+    }
+
+    .schedule-fade-in {
+      opacity: 1;
     }
 
     /* 갤러리 */
@@ -351,67 +380,11 @@
       font-weight: 600;
     }
 
-    /* 스팟 지도 */
     #act-map {
       width: 100%;
       height: 450px;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
-    }
-
-    /* 슬라이드 애니메이션 */
-    .slide-out-left {
-      animation: slideOutLeft 0.3s forwards;
-    }
-
-    .slide-out-right {
-      animation: slideOutRight 0.3s forwards;
-    }
-
-    .slide-in-left {
-      animation: slideInLeft 0.3s forwards;
-    }
-
-    .slide-in-right {
-      animation: slideInRight 0.3s forwards;
-    }
-
-    @keyframes slideOutLeft {
-      to {
-        opacity: 0;
-        transform: translateX(-30px);
-      }
-    }
-
-    @keyframes slideOutRight {
-      to {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-    }
-
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(-30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
     }
   </style>
 </head>
@@ -423,17 +396,14 @@
       <img src="Picture/Nodamm_Mark.png" alt="노담" onerror="this.style.display='none'">
       NODAM SUPPORTERS
     </a>
-    <a class="home-btn" href="index.html">
-      <i class="ti ti-home"></i> 홈으로
-    </a>
+    <a class="home-btn" href="index.html"><i class="ti ti-home"></i> 홈으로</a>
   </header>
 
-  <!-- 탭 네비게이션 -->
   <nav class="tab-nav">
     <a href="#info" class="active" onclick="setTab(this)">활동 정보</a>
     <a href="#schedule" onclick="setTab(this)">활동 일정</a>
-    <a href="#gallery" onclick="setTab(this)">활동 사진</a>
     <a href="#spot" onclick="setTab(this)">활동 스팟</a>
+    <a href="#gallery" onclick="setTab(this)">활동 사진</a>
   </nav>
 
   <!-- 활동 정보 -->
@@ -457,16 +427,15 @@
         <div class="how-card">
           <div class="how-icon"><i class="ti ti-run"></i></div>
           <h4>활동 내용</h4>
-          <p>1시간 꽁초 플로깅 후<br>수거량 측정 및<br>인증샷 타임</p>
+          <p>1시간 꽁초 플로깅 후<br>수거량 측정 및 인증샷 타임</p>
         </div>
         <div class="how-card">
           <div class="how-icon"><i class="ti ti-users"></i></div>
           <h4>팀 구성</h4>
-          <p>구역별 팀장 선정 후<br>인천 전역에서 동시 진행<br>
+          <p>구역별 팀장 선정 후 인천 전역에서 동시 진행<br>
             <span
-              style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">
-              🔥 미추홀구 팀장 모집 중!
-            </span>
+              style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">🔥
+              미추홀구 팀장 모집 중!</span>
           </p>
         </div>
       </div>
@@ -486,6 +455,12 @@
       </div>
       <div class="schedule-table-wrapper" id="schedule-wrapper">
         <table class="schedule-table">
+          <colgroup>
+            <col>
+            <col>
+            <col>
+            <col>
+          </colgroup>
           <thead>
             <tr>
               <th>날짜</th>
@@ -500,8 +475,18 @@
     </div>
   </section>
 
-  <!-- 활동 사진 -->
-  <section id="gallery" class="section">
+  <!-- 활동 스팟 -->
+  <section id="spot" class="section">
+    <div class="container">
+      <span class="section-tag">SPOTS</span>
+      <h2 class="section-title">활동 스팟</h2>
+      <p class="section-desc">인천 주요 꽁초 수거 거점입니다. 마커를 클릭해보세요.</p>
+      <div id="act-map"></div>
+    </div>
+  </section>
+
+  <!-- 활동 사진 (맨 아래) -->
+  <section id="gallery" class="section section-alt">
     <div class="container">
       <span class="section-tag">ACTIVITY SHOTS</span>
       <h2 class="section-title">활동 사진</h2>
@@ -519,24 +504,11 @@
     </div>
   </section>
 
-  <!-- 활동 스팟 -->
-  <section id="spot" class="section section-alt">
-    <div class="container">
-      <span class="section-tag">SPOTS</span>
-      <h2 class="section-title">활동 스팟</h2>
-      <p class="section-desc">인천 주요 꽁초 수거 거점입니다. 마커를 클릭해보세요.</p>
-      <div id="act-map"></div>
-    </div>
-  </section>
-
   <script>
-    // 탭 클릭 시 active 표시
     function setTab(el) {
       document.querySelectorAll('.tab-nav a').forEach(a => a.classList.remove('active'));
       el.classList.add('active');
     }
-
-    // 해시 기반 탭 자동 활성화
     window.addEventListener('load', () => {
       const hash = location.hash;
       if (hash) {
@@ -545,7 +517,6 @@
       }
     });
 
-    // 일정 데이터
     let currentViewMonth = 5;
     const scheduleByMonth = {
       1: [{ date: '1월 10일 (토)', time: '10:00', region: '남동구', place: '남동구청 앞 광장' }, { date: '1월 17일 (토)', time: '10:00', region: '부평구', place: '부평 문화의 거리' }, { date: '1월 24일 (토)', time: '10:00', region: '미추홀구', place: '주안역 1번 출구' }],
@@ -574,18 +545,24 @@
         </tr>`).join('');
     }
 
+    let isChanging = false;
     function changeMonth(diff) {
+      if (isChanging) return;
+      isChanging = true;
       const wrapper = document.getElementById('schedule-wrapper');
-      const slideOut = diff > 0 ? 'slide-out-left' : 'slide-out-right';
-      wrapper.classList.add(slideOut);
+      // fade out
+      wrapper.style.opacity = '0';
+      wrapper.style.transition = 'opacity 0.25s ease';
+
       setTimeout(() => {
         currentViewMonth += diff;
         if (currentViewMonth < 1) currentViewMonth = 12;
         if (currentViewMonth > 12) currentViewMonth = 1;
         renderSchedule();
-        wrapper.classList.remove(slideOut);
-        wrapper.classList.add(diff > 0 ? 'slide-in-right' : 'slide-in-left');
-      }, 300);
+        // fade in
+        wrapper.style.opacity = '1';
+        isChanging = false;
+      }, 250);
     }
 
     renderSchedule();
@@ -598,13 +575,11 @@
         center: new kakao.maps.LatLng(37.4566, 126.7052),
         level: 9
       });
-
       const markerImage = new kakao.maps.MarkerImage(
         'Picture/Nodamm_MapPoint.png',
         new kakao.maps.Size(47, 47),
         { offset: new kakao.maps.Point(23, 47) }
       );
-
       const spots = [
         { title: '구월동 로데오거리', count: 0, address: '인천 남동구 구월동 1409-25' },
         { title: '인하 문화의 거리', count: 0, address: '인천 미추홀구 경인남길30번길 45-1' },
@@ -614,7 +589,6 @@
         { title: '송도 인천대역', count: 0, address: '인천 연수구 송도동 8-32' },
         { title: '동인천 북광장', count: 124, address: '인천광역시 동구 화도진로 53' },
       ];
-
       const geocoder = new kakao.maps.services.Geocoder();
       spots.forEach(spot => {
         geocoder.addressSearch(spot.address, (result, status) => {
@@ -622,10 +596,8 @@
           const latlng = new kakao.maps.LatLng(result[0].y, result[0].x);
           const marker = new kakao.maps.Marker({ map, position: latlng, title: spot.title, image: markerImage });
           const iw = new kakao.maps.InfoWindow({
-            content: `<div style="padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.8;">
-              📍 ${spot.title}<br>
-              <span style="color:#2d6a4f;font-size:12px;">🚬 수거량: <strong>${spot.count}개</strong></span>
-            </div>`, removable: false
+            content: `<div style="padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.8;">📍 ${spot.title}<br><span style="color:#2d6a4f;font-size:12px;">🚬 수거량: <strong>${spot.count}개</strong></span></div>`,
+            removable: false
           });
           let pinned = false;
           kakao.maps.event.addListener(marker, 'mouseover', () => { if (!pinned) iw.open(map, marker); });
@@ -633,17 +605,14 @@
           kakao.maps.event.addListener(marker, 'click', () => { pinned = !pinned; pinned ? iw.open(map, marker) : iw.close(); });
         });
       });
-
       container.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
     }
-
     function waitAndInit() {
       if (window.kakao && window.kakao.maps) initMap();
       else setTimeout(waitAndInit, 100);
     }
     waitAndInit();
   </script>
-
 </body>
 
 </html>
