@@ -239,13 +239,7 @@ window.addEventListener('scroll', () => {
 /* ── 5. 카카오맵 초기화 ── */
 function initMap() {
   const container = document.getElementById('map');
-  if (!container || !window.kakao) return;
-
-  // placeholder 제거 후 직접 맵 렌더
-  container.innerHTML = '';
-  container.style.height = '450px';
-  container.style.borderRadius = 'var(--radius-lg)';
-  container.style.overflow = 'hidden';
+  if (!container) return;
 
   const options = {
     center: new kakao.maps.LatLng(37.4566, 126.7052),
@@ -253,12 +247,16 @@ function initMap() {
   };
   const map = new kakao.maps.Map(container, options);
 
+  // 인천 주요 담배꽁초 수거 스팟
   const positions = [
-    { title: '부평 테마거리', latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
-    { title: '구월동 로데오', latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
-    { title: '주안역', latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
-    { title: '송도 센트럴파크', latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
-    { title: '청라 커낼웨이', latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
+    { title: '부평 테마거리', count: 247, latlng: new kakao.maps.LatLng(37.4919, 126.7241) },
+    { title: '구월동 로데오', count: 183, latlng: new kakao.maps.LatLng(37.4449, 126.7029) },
+    { title: '주안역 인근', count: 312, latlng: new kakao.maps.LatLng(37.4646, 126.6795) },
+    { title: '송도 센트럴파크', count: 98, latlng: new kakao.maps.LatLng(37.3929, 126.6522) },
+    { title: '청라 커낼웨이', count: 134, latlng: new kakao.maps.LatLng(37.5374, 126.6469) },
+    { title: '인하대 후문', count: 221, latlng: new kakao.maps.LatLng(37.4496, 126.6541) },
+    { title: '동인천역 북광장', count: 289, latlng: new kakao.maps.LatLng(37.4742, 126.6384) },
+    { title: '계양구청 광장', count: 76, latlng: new kakao.maps.LatLng(37.5376, 126.7378) },
   ];
 
   positions.forEach(pos => {
@@ -269,22 +267,18 @@ function initMap() {
     });
 
     const infowindow = new kakao.maps.InfoWindow({
-      content: `<div style="padding:6px 10px; font-size:13px; font-weight:600; white-space:nowrap;">${pos.title}</div>`
+      content: `<div style="padding:8px 12px; font-size:13px; font-weight:600; white-space:nowrap; line-height:1.6;">
+        📍 ${pos.title}<br>
+        <span style="color:#e74c3c; font-size:12px;">🚬 수거량: ${pos.count}개</span>
+      </div>`
     });
 
-    kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-    kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
+    kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
   });
 }
 
-// SDK 비동기 로드 대응
-if (window.kakao && window.kakao.maps) {
-  kakao.maps.load(initMap);
-} else {
-  window.addEventListener('load', () => {
-    if (window.kakao && window.kakao.maps) kakao.maps.load(initMap);
-  });
-}
+// autoload=false 이므로 반드시 kakao.maps.load()로 감싸야 함
+kakao.maps.load(initMap);
 
 /* ── 6. 월별 활동 일정 ── */
 let currentViewMonth = 5;
