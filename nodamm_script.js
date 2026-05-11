@@ -433,3 +433,17 @@ function initMap() {
     });
   });
 }
+
+// 지도 위에 마우스가 있을 때만 휠 줌 활성화, 벗어나면 스크롤로 복귀
+document.addEventListener('DOMContentLoaded', () => {
+  const mapContainer = document.getElementById('map');
+  if (!mapContainer) return;
+
+  mapContainer.addEventListener('mouseenter', () => {
+    lenis.stop();
+  });
+
+  mapContainer.addEventListener('mouseleave', () => {
+    lenis.start();
+  });
+});
