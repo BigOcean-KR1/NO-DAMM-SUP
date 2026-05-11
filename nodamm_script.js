@@ -376,6 +376,9 @@ window.addEventListener('scroll', () => {
 document.addEventListener('mousemove', (e) => {
   if (e.clientY < 80) {
     navbar?.classList.remove('nav-hidden');
+  } else if (e.clientY > 120 && window.scrollY > 100) {
+    // 마우스가 네비 영역 벗어나고 스크롤이 내려가 있을 때만 숨김
+    navbar?.classList.add('nav-hidden');
   }
 });
 
