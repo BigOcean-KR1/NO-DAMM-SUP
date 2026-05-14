@@ -384,6 +384,7 @@ function initMap() {
     { title: '계양 문화의 거리',   count: 0,   lat: 37.5378,            lng: 126.7384            },
     { title: '송도 인천대역',      count: 0,   lat: 37.3836,            lng: 126.6561            },
     { title: '부평 문화의 거리',   count: 124, lat: 37.49415397230344,  lng: 126.72428100316051  },
+    { title: '월미 문화의 거리',   count: 0,   lat: 37.474050,            lng:126.597014         },
   ];
 
   spots.forEach(spot => {
