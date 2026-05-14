@@ -39,22 +39,28 @@
     ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #40916c, #2d6a4f); border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #52b788, #40916c); }
 
-    /* ── 활동 드롭다운 ── */
+    /* ── 활동 드롭다운 (클릭 고정 방식) ── */
     .nav-dropdown { position: relative; }
-    .nav-dropdown > a { display: flex; align-items: center; gap: 4px; position: relative; }
-    .nav-dropdown > a::after { content: '▾'; font-size: 10px; transition: transform 0.3s; }
-    .nav-dropdown:hover > a::after { transform: rotate(180deg); }
+    .nav-dropdown-btn {
+      display: flex; align-items: center; gap: 4px;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: .5px;
+      transition: color .2s; padding: 0;
+    }
+    .nav-dropdown-btn:hover { color: var(--green); }
+    .nav-dropdown-btn::after { content: '▾'; font-size: 10px; transition: transform 0.3s; }
+    .nav-dropdown.open .nav-dropdown-btn { color: var(--green); }
+    .nav-dropdown.open .nav-dropdown-btn::after { transform: rotate(180deg); }
     .dropdown-menu {
-      position: absolute; top: 100%; left: 50%;
+      position: absolute; top: calc(100% + 8px); left: 50%;
       transform: translateX(-50%) translateY(-4px);
       background: #fff; border: 1px solid #e0e7e3; border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.10);
-      padding: 16px 0 8px; min-width: 130px;
-      opacity: 0; pointer-events: none; margin-top: 0;
+      padding: 8px 0; min-width: 130px;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.2s, transform 0.2s; z-index: 200;
     }
-    .nav-dropdown:hover .dropdown-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-    .nav-dropdown > a::before { content: ''; position: absolute; bottom: -16px; left: 0; right: 0; height: 16px; }
+    .nav-dropdown.open .dropdown-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
     .dropdown-menu a { display: block; padding: 9px 20px; font-size: 13px; font-weight: 500; color: #1a2e22; text-decoration: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
     .dropdown-menu a:hover { background: #d8f3dc; color: #2d6a4f; }
 
@@ -163,13 +169,13 @@
       <!-- PC 메뉴 -->
       <ul class="nav-links">
         <li><a href="#intro">소개</a></li>
-        <li class="nav-dropdown">
-          <a href="#activity-section">활동</a>
-          <div class="dropdown-menu">
-            <a href="#activity-section" onclick="switchTab('info')">활동 정보</a>
-            <a href="#activity-section" onclick="switchTab('schedule')">활동 일정</a>
-            <a href="#activity-section" onclick="switchTab('spot')">활동 스팟</a>
-            <a href="#activity-section" onclick="switchTab('gallery')">활동 사진</a>
+        <li class="nav-dropdown" id="activityDropdown">
+          <button class="nav-dropdown-btn" id="activityDropdownBtn" aria-haspopup="true" aria-expanded="false">활동</button>
+          <div class="dropdown-menu" role="menu">
+            <a href="#activity-section" role="menuitem" onclick="switchTab('info');   closeActivityDropdown();">활동 정보</a>
+            <a href="#activity-section" role="menuitem" onclick="switchTab('schedule'); closeActivityDropdown();">활동 일정</a>
+            <a href="#activity-section" role="menuitem" onclick="switchTab('spot');   closeActivityDropdown();">활동 스팟</a>
+            <a href="#activity-section" role="menuitem" onclick="switchTab('gallery'); closeActivityDropdown();">활동 사진</a>
           </div>
         </li>
         <li><a href="#reward">리워드</a></li>
@@ -743,25 +749,42 @@
       if (e.target === this) closeApplyModal();
     });
 
-    /* ── 햄버거 메뉴 토글 ── */
+    /* ── 활동 드롭다운 클릭 제어 ── */
+    function closeActivityDropdown() {
+      const dropdown = document.getElementById('activityDropdown');
+      const btn      = document.getElementById('activityDropdownBtn');
+      dropdown.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    document.getElementById('activityDropdownBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const dropdown = document.getElementById('activityDropdown');
+      const isOpen   = dropdown.classList.toggle('open');
+      this.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    /* 햄버거 메뉴 토글 */
     function closeMobileNav() {
-      const btn = document.getElementById('hamburgerBtn');
+      const btn   = document.getElementById('hamburgerBtn');
       const panel = document.getElementById('mobileNavPanel');
       btn.classList.remove('open');
       btn.setAttribute('aria-expanded', 'false');
       panel.classList.remove('open');
     }
     document.getElementById('hamburgerBtn').addEventListener('click', function() {
-      const panel = document.getElementById('mobileNavPanel');
+      const panel  = document.getElementById('mobileNavPanel');
       const isOpen = panel.classList.toggle('open');
       this.classList.toggle('open', isOpen);
       this.setAttribute('aria-expanded', String(isOpen));
     });
-    /* 패널 바깥 클릭 시 닫기 */
+
+    /* 바깥 클릭 시 드롭다운 + 모바일 패널 모두 닫기 */
     document.addEventListener('click', function(e) {
-      const btn = document.getElementById('hamburgerBtn');
-      const panel = document.getElementById('mobileNavPanel');
-      if (!btn.contains(e.target) && !panel.contains(e.target)) closeMobileNav();
+      const dropdown = document.getElementById('activityDropdown');
+      const hambBtn  = document.getElementById('hamburgerBtn');
+      const panel    = document.getElementById('mobileNavPanel');
+      if (!dropdown.contains(e.target)) closeActivityDropdown();
+      if (!hambBtn.contains(e.target) && !panel.contains(e.target)) closeMobileNav();
     });
 
     /* ── 모달 배경 클릭 닫기 (나머지 모달) ── */
