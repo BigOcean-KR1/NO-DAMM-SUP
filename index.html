@@ -211,47 +211,33 @@
       position: absolute;
       right: 0;
       top: 0; bottom: 0;
-      width: 42%;
+      width: 46%;
       z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3rem 3rem 3rem 1rem;
+      padding: 3rem 4rem 3rem 1rem;
     }
 
     .slideshow-track {
       position: relative;
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
     }
 
     @keyframes heroFloat {
       0%, 100% { transform: translateY(0px); }
-      50%       { transform: translateY(-12px); }
+      50%       { transform: translateY(-14px); }
     }
 
-    /* 슬라이드 카드 */
+    /* ── 스택 카드 ── */
     .slide-card {
       position: absolute;
-      inset: 0;
-      border-radius: 22px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-      opacity: 0;
-      transform: translateX(60px) scale(0.96);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-      pointer-events: none;
-    }
-    .slide-card.active {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-      pointer-events: auto;
-    }
-    .slide-card.exit {
-      opacity: 0;
-      transform: translateX(-60px) scale(0.96);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .slide-card img {
       width: 100%; height: 100%;
@@ -259,10 +245,39 @@
       display: block;
     }
 
+    /* 앞 카드 (active) */
+    .slide-card.pos-front {
+      inset: 0;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      z-index: 3;
+      opacity: 1;
+      transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+    }
+
+    /* 뒤 카드 1 */
+    .slide-card.pos-back1 {
+      inset: 0;
+      z-index: 2;
+      opacity: 0.55;
+      transform: translateX(22px) translateY(-14px) scale(0.9) rotate(4deg);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+      filter: brightness(0.8);
+    }
+
+    /* 뒤 카드 2 */
+    .slide-card.pos-back2 {
+      inset: 0;
+      z-index: 1;
+      opacity: 0.3;
+      transform: translateX(40px) translateY(-26px) scale(0.82) rotate(8deg);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      filter: brightness(0.65);
+    }
+
     /* 도트 인디케이터 */
     .slide-dots {
       position: absolute;
-      bottom: -28px;
+      bottom: -32px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -277,13 +292,11 @@
     }
     .slide-dot.active {
       background: var(--green);
-      transform: scale(1.3);
+      transform: scale(1.35);
     }
 
-    /* hover 시 부유 멈춤 */
     .slideshow-track:hover { animation-play-state: paused; }
 
-    /* 모바일에서 숨김 */
     @media (max-width: 960px) {
       .hero-slideshow { display: none; }
     }
@@ -347,46 +360,48 @@
   </section>
 
   <script>
-    /* ── 히어로 슬라이드쇼 ── */
+    /* ── 히어로 스택 슬라이드쇼 ── */
     (function() {
-      const cards = document.querySelectorAll('.slide-card');
-      const dots  = document.querySelectorAll('.slide-dot');
-      let current = 0;
+      const cards   = document.querySelectorAll('.slide-card');
+      const dots    = document.querySelectorAll('.slide-dot');
+      const total   = cards.length;
+      let current   = 0;
       let timer;
 
-      function goSlide(next) {
-        cards[current].classList.remove('active');
-        cards[current].classList.add('exit');
-        dots[current].classList.remove('active');
-
-        setTimeout(() => {
-          cards[current].classList.remove('exit');
-          current = next;
-          cards[current].classList.add('active');
-          dots[current].classList.add('active');
-        }, 50);
+      function updatePositions() {
+        cards.forEach((card, i) => {
+          card.classList.remove('pos-front', 'pos-back1', 'pos-back2');
+          const offset = (i - current + total) % total;
+          if (offset === 0) card.classList.add('pos-front');
+          else if (offset === 1) card.classList.add('pos-back1');
+          else card.classList.add('pos-back2');
+        });
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === current);
+        });
       }
 
       function nextSlide() {
-        goSlide((current + 1) % cards.length);
+        current = (current + 1) % total;
+        updatePositions();
       }
 
       function startTimer() {
         timer = setInterval(nextSlide, 3000);
       }
 
-      // 도트 클릭 시 타이머 리셋
       window.goSlide = function(idx) {
         clearInterval(timer);
-        goSlide(idx);
+        current = idx;
+        updatePositions();
         startTimer();
       };
 
-      // hover 시 멈춤
       const track = document.getElementById('slideshowTrack');
       track.addEventListener('mouseenter', () => clearInterval(timer));
       track.addEventListener('mouseleave', startTimer);
 
+      updatePositions();
       startTimer();
     })();
   </script>
