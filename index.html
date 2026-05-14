@@ -225,10 +225,8 @@
       max-width: 540px;
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
-      cursor: grab;
       user-select: none;
     }
-    .slideshow-track:active { cursor: grabbing; }
 
     @keyframes heroFloat {
       0%, 100% { transform: translateY(0px); }
@@ -240,6 +238,7 @@
       border-radius: 20px;
       overflow: hidden;
       transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
     }
     .slide-card img {
       width: 100%; height: 100%;
@@ -280,10 +279,12 @@
     .slide-dots {
       position: absolute;
       bottom: -34px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0; right: 0;
       display: flex;
-      gap: 8px;
+      justify-content: center;
+      gap: 10px;
+      z-index: 10;
+      pointer-events: auto;
     }
     .slide-dot {
       width: 8px; height: 8px;
@@ -291,8 +292,7 @@
       background: rgba(45,106,79,0.25);
       transition: background 0.3s, transform 0.3s;
       cursor: pointer;
-      padding: 6px;
-      margin: -6px;
+      flex-shrink: 0;
     }
     .slide-dot.active {
       background: var(--green);
@@ -588,7 +588,36 @@
 
       <!-- ── 활동 사진 ── -->
       <div id="tab-gallery" class="tab-content" style="display:none;" role="tabpanel">
-        <div class="gallery-grid" style="margin-top:2rem;">
+
+        <style>
+          .gallery-page { display:none; }
+          .gallery-page.active { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; margin-top:2rem; }
+          .gallery-pagination {
+            display:flex; justify-content:center; align-items:center;
+            gap:8px; margin-top:1.8rem;
+          }
+          .gallery-page-btn {
+            width:36px; height:36px; border-radius:50%;
+            border:1.5px solid var(--border); background:#fff;
+            font-size:14px; font-weight:700; cursor:pointer;
+            color:var(--muted); font-family:inherit;
+            transition:all 0.2s; display:flex; align-items:center; justify-content:center;
+          }
+          .gallery-page-btn:hover { border-color:var(--green); color:var(--green); }
+          .gallery-page-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+          .gallery-page-arrow {
+            width:36px; height:36px; border-radius:50%;
+            border:1.5px solid var(--border); background:#fff;
+            font-size:16px; cursor:pointer; color:var(--green);
+            font-family:inherit; transition:all 0.2s;
+            display:flex; align-items:center; justify-content:center;
+          }
+          .gallery-page-arrow:hover { background:var(--green-pale); }
+          .gallery-page-arrow:disabled { opacity:0.3; cursor:default; }
+        </style>
+
+        <!-- 1페이지 -->
+        <div class="gallery-page active" id="gpage-1">
           <div class="gallery-item fade-up">
             <img src="Picture/Nodamm_1.jpg" alt="부평역 테마거리에서 진행된 노담 서포터즈 플로깅 활동" loading="lazy">
             <div class="gallery-overlay"><span>부평역 테마거리 플로깅</span></div>
@@ -613,6 +642,10 @@
             <img src="Picture/Nodamm_9.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy">
             <div class="gallery-overlay"><span>인하대 후문</span></div>
           </div>
+        </div>
+
+        <!-- 2페이지 -->
+        <div class="gallery-page" id="gpage-2">
           <div class="gallery-item fade-up">
             <img src="Picture/Nodamm_10.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy">
             <div class="gallery-overlay"><span>인하대 후문</span></div>
@@ -625,7 +658,50 @@
             <img src="Picture/Nodamm_12.png" alt="월미 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy">
             <div class="gallery-overlay"><span>월미도 플로깅</span></div>
           </div>
+          <div class="gallery-item fade-up">
+            <img src="Picture/Nodamm_13.png" alt="을왕리 해수욕장에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <div class="gallery-overlay"><span>을왕리 해수욕장</span></div>
+          </div>
+          <div class="gallery-item fade-up">
+            <img src="Picture/Nodamm_14.png" alt="차이나타운에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <div class="gallery-overlay"><span>차이나타운</span></div>
+          </div>
         </div>
+
+        <!-- 페이지네이션 -->
+        <div class="gallery-pagination">
+          <button class="gallery-page-arrow" id="gprev" onclick="galleryPage(-1)" aria-label="이전 페이지">
+            <i class="ti ti-chevron-left" aria-hidden="true"></i>
+          </button>
+          <button class="gallery-page-btn active" onclick="galleryGoPage(1)">1</button>
+          <button class="gallery-page-btn" onclick="galleryGoPage(2)">2</button>
+          <button class="gallery-page-arrow" id="gnext" onclick="galleryPage(1)" aria-label="다음 페이지">
+            <i class="ti ti-chevron-right" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <script>
+          (function() {
+            let cur = 1;
+            const total = 2;
+
+            function render() {
+              for (let i = 1; i <= total; i++) {
+                document.getElementById('gpage-' + i).classList.toggle('active', i === cur);
+              }
+              document.querySelectorAll('.gallery-page-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i + 1 === cur);
+              });
+              document.getElementById('gprev').disabled = cur === 1;
+              document.getElementById('gnext').disabled = cur === total;
+            }
+
+            window.galleryGoPage = function(n) { cur = n; render(); };
+            window.galleryPage   = function(d) { cur = Math.min(Math.max(cur + d, 1), total); render(); };
+
+            render();
+          })();
+        </script>
       </div>
 
     </div>
