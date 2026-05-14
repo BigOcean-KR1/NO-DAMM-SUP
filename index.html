@@ -39,7 +39,7 @@
     ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #40916c, #2d6a4f); border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #52b788, #40916c); }
 
-    /* ── 활동 드롭다운 (클릭 고정 방식) ── */
+    /* ── 활동 드롭다운 (hover 방식, 브릿지로 끊김 방지) ── */
     .nav-dropdown { position: relative; }
     .nav-dropdown-btn {
       display: flex; align-items: center; gap: 4px;
@@ -49,18 +49,24 @@
     }
     .nav-dropdown-btn:hover { color: var(--green); }
     .nav-dropdown-btn::after { content: '▾'; font-size: 10px; transition: transform 0.3s; }
-    .nav-dropdown.open .nav-dropdown-btn { color: var(--green); }
-    .nav-dropdown.open .nav-dropdown-btn::after { transform: rotate(180deg); }
+    .nav-dropdown:hover .nav-dropdown-btn { color: var(--green); }
+    .nav-dropdown:hover .nav-dropdown-btn::after { transform: rotate(180deg); }
     .dropdown-menu {
-      position: absolute; top: calc(100% + 8px); left: 50%;
-      transform: translateX(-50%) translateY(-4px);
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
       background: #fff; border: 1px solid #e0e7e3; border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.10);
       padding: 8px 0; min-width: 130px;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.2s, transform 0.2s; z-index: 200;
+      transition: opacity 0.2s; z-index: 200;
+      /* 버튼과 메뉴 사이 투명 브릿지 — 마우스가 gap을 지날 때 hover 유지 */
+      margin-top: 0;
     }
-    .nav-dropdown.open .dropdown-menu { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .dropdown-menu::before {
+      content: ''; position: absolute;
+      top: -12px; left: 0; right: 0; height: 12px;
+    }
+    .nav-dropdown:hover .dropdown-menu { opacity: 1; pointer-events: auto; }
     .dropdown-menu a { display: block; padding: 9px 20px; font-size: 13px; font-weight: 500; color: #1a2e22; text-decoration: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
     .dropdown-menu a:hover { background: #d8f3dc; color: #2d6a4f; }
 
@@ -749,20 +755,6 @@
       if (e.target === this) closeApplyModal();
     });
 
-    /* ── 활동 드롭다운 클릭 제어 ── */
-    function closeActivityDropdown() {
-      const dropdown = document.getElementById('activityDropdown');
-      const btn      = document.getElementById('activityDropdownBtn');
-      dropdown.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-    }
-    document.getElementById('activityDropdownBtn').addEventListener('click', function(e) {
-      e.stopPropagation();
-      const dropdown = document.getElementById('activityDropdown');
-      const isOpen   = dropdown.classList.toggle('open');
-      this.setAttribute('aria-expanded', String(isOpen));
-    });
-
     /* 햄버거 메뉴 토글 */
     function closeMobileNav() {
       const btn   = document.getElementById('hamburgerBtn');
@@ -778,12 +770,10 @@
       this.setAttribute('aria-expanded', String(isOpen));
     });
 
-    /* 바깥 클릭 시 드롭다운 + 모바일 패널 모두 닫기 */
+    /* 바깥 클릭 시 모바일 패널 닫기 */
     document.addEventListener('click', function(e) {
-      const dropdown = document.getElementById('activityDropdown');
-      const hambBtn  = document.getElementById('hamburgerBtn');
-      const panel    = document.getElementById('mobileNavPanel');
-      if (!dropdown.contains(e.target)) closeActivityDropdown();
+      const hambBtn = document.getElementById('hamburgerBtn');
+      const panel   = document.getElementById('mobileNavPanel');
       if (!hambBtn.contains(e.target) && !panel.contains(e.target)) closeMobileNav();
     });
 
