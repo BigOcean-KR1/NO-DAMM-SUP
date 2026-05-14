@@ -411,6 +411,7 @@ function initMap() {
       isPinned = !isPinned;
       isPinned ? infowindow.open(map, marker) ;
       map.panTo(latlng) ;
+      } else {
         infowindow.close();
     });
   });
