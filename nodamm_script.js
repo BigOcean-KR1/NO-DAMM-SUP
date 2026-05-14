@@ -1,6 +1,11 @@
 /* ── Firebase 통합 (Modular SDK v10) ── */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
+  doc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
   getFirestore,
   collection,
   addDoc,
