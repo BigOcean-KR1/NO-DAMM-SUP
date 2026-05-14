@@ -211,73 +211,70 @@
       position: absolute;
       right: 0;
       top: 0; bottom: 0;
-      width: 46%;
+      width: 50%;
       z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3rem 4rem 3rem 1rem;
+      padding: 2rem 5rem 2rem 1rem;
     }
 
     .slideshow-track {
       position: relative;
       width: 100%;
-      max-width: 460px;
+      max-width: 540px;
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
+      cursor: grab;
+      user-select: none;
     }
+    .slideshow-track:active { cursor: grabbing; }
 
     @keyframes heroFloat {
       0%, 100% { transform: translateY(0px); }
       50%       { transform: translateY(-14px); }
     }
 
-    /* ── 스택 카드 ── */
     .slide-card {
       position: absolute;
       border-radius: 20px;
       overflow: hidden;
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .slide-card img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
+      pointer-events: none;
     }
 
-    /* 앞 카드 (active) */
     .slide-card.pos-front {
       inset: 0;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      box-shadow: 0 28px 72px rgba(0,0,0,0.30);
       z-index: 3;
       opacity: 1;
       transform: translateX(0) translateY(0) scale(1) rotate(0deg);
     }
-
-    /* 뒤 카드 1 */
     .slide-card.pos-back1 {
       inset: 0;
       z-index: 2;
       opacity: 0.55;
-      transform: translateX(22px) translateY(-14px) scale(0.9) rotate(4deg);
+      transform: translateX(26px) translateY(-16px) scale(0.88) rotate(4deg);
       box-shadow: 0 12px 32px rgba(0,0,0,0.15);
-      filter: brightness(0.8);
+      filter: brightness(0.78);
     }
-
-    /* 뒤 카드 2 */
     .slide-card.pos-back2 {
       inset: 0;
       z-index: 1;
-      opacity: 0.3;
-      transform: translateX(40px) translateY(-26px) scale(0.82) rotate(8deg);
+      opacity: 0.28;
+      transform: translateX(48px) translateY(-30px) scale(0.78) rotate(8deg);
       box-shadow: 0 8px 20px rgba(0,0,0,0.10);
-      filter: brightness(0.65);
+      filter: brightness(0.6);
     }
 
-    /* 도트 인디케이터 */
     .slide-dots {
       position: absolute;
-      bottom: -32px;
+      bottom: -34px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -360,46 +357,72 @@
   </section>
 
   <script>
-    /* ── 히어로 스택 슬라이드쇼 ── */
+    /* ── 히어로 스택 슬라이드쇼 (드래그/스와이프 지원) ── */
     (function() {
-      const cards   = document.querySelectorAll('.slide-card');
-      const dots    = document.querySelectorAll('.slide-dot');
-      const total   = cards.length;
-      let current   = 0;
+      const cards  = document.querySelectorAll('.slide-card');
+      const dots   = document.querySelectorAll('.slide-dot');
+      const track  = document.getElementById('slideshowTrack');
+      const total  = cards.length;
+      let current  = 0;
       let timer;
 
       function updatePositions() {
         cards.forEach((card, i) => {
           card.classList.remove('pos-front', 'pos-back1', 'pos-back2');
           const offset = (i - current + total) % total;
-          if (offset === 0) card.classList.add('pos-front');
+          if (offset === 0)      card.classList.add('pos-front');
           else if (offset === 1) card.classList.add('pos-back1');
-          else card.classList.add('pos-back2');
+          else                   card.classList.add('pos-back2');
         });
-        dots.forEach((dot, i) => {
-          dot.classList.toggle('active', i === current);
-        });
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
       }
 
-      function nextSlide() {
-        current = (current + 1) % total;
+      function go(idx) {
+        current = (idx + total) % total;
         updatePositions();
       }
 
-      function startTimer() {
-        timer = setInterval(nextSlide, 3000);
-      }
+      function startTimer() { timer = setInterval(() => go(current + 1), 3000); }
+      function stopTimer()  { clearInterval(timer); }
 
-      window.goSlide = function(idx) {
-        clearInterval(timer);
-        current = idx;
-        updatePositions();
+      window.goSlide = function(idx) { stopTimer(); go(idx); startTimer(); };
+
+      /* ── 드래그 / 스와이프 ── */
+      let startX = 0, isDragging = false, moved = false;
+
+      function onStart(x) {
+        startX = x; isDragging = true; moved = false;
+        stopTimer();
+        track.style.animationPlayState = 'paused';
+      }
+      function onMove(x) {
+        if (!isDragging) return;
+        if (Math.abs(x - startX) > 8) moved = true;
+      }
+      function onEnd(x) {
+        if (!isDragging) return;
+        isDragging = false;
+        const diff = startX - x;
+        if (Math.abs(diff) > 40) {
+          diff > 0 ? go(current + 1) : go(current - 1);
+        }
+        track.style.animationPlayState = '';
         startTimer();
-      };
+      }
 
-      const track = document.getElementById('slideshowTrack');
-      track.addEventListener('mouseenter', () => clearInterval(timer));
-      track.addEventListener('mouseleave', startTimer);
+      /* 마우스 */
+      track.addEventListener('mousedown',  e => onStart(e.clientX));
+      window.addEventListener('mousemove', e => { if (isDragging) onMove(e.clientX); });
+      window.addEventListener('mouseup',   e => onEnd(e.clientX));
+
+      /* 터치 */
+      track.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
+      track.addEventListener('touchmove',  e => onMove(e.touches[0].clientX),  { passive: true });
+      track.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX));
+
+      /* hover 부유 멈춤 */
+      track.addEventListener('mouseenter', stopTimer);
+      track.addEventListener('mouseleave', () => { if (!isDragging) startTimer(); });
 
       updatePositions();
       startTimer();
