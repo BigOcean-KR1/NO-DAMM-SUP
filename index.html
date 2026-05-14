@@ -363,13 +363,14 @@
   </section>
 
   <script>
-    /* ── 히어로 스택 슬라이드쇼 (드래그/스와이프 지원) ── */
+    /* ── 히어로 스택 슬라이드쇼 ── */
     (function() {
-      const cards  = document.querySelectorAll('.slide-card');
-      const dots   = document.querySelectorAll('.slide-dot');
-      const track  = document.getElementById('slideshowTrack');
-      const total  = cards.length;
-      let current  = 0;
+      const cards     = document.querySelectorAll('.slide-card');
+      const dots      = document.querySelectorAll('.slide-dot');
+      const slideshow = document.querySelector('.hero-slideshow');
+      const track     = document.getElementById('slideshowTrack');
+      const total     = cards.length;
+      let current     = 0;
       let timer;
 
       function updatePositions() {
@@ -393,59 +394,43 @@
 
       window.goSlide = function(idx) { stopTimer(); go(idx); startTimer(); };
 
-      /* ── 드래그 / 스와이프 ── */
-      let startX = 0, isDragging = false;
+      /* ── 드래그: hero-slideshow 영역 전체에서 잡기 ── */
+      let startX = 0, dragging = false;
 
-      function onStart(x) {
-        startX = x;
-        isDragging = true;
+      slideshow.addEventListener('mousedown', e => {
+        if (e.target.closest('.slide-dot')) return;
+        dragging = true;
+        startX = e.clientX;
         stopTimer();
         track.style.animationPlayState = 'paused';
-      }
-      function onEnd(x) {
-        if (!isDragging) return;
-        isDragging = false;
-        const diff = startX - x;
-        if (Math.abs(diff) > 40) {
-          diff > 0 ? go(current + 1) : go(current - 1);
-        }
-        track.style.animationPlayState = '';
-        startTimer();
-      }
-
-      // pos-front 카드에 이벤트 직접 등록하는 함수
-      function bindDragToFront() {
-        const front = document.querySelector('.slide-card.pos-front');
-        if (!front) return;
-
-        front.onmousedown = e => {
-          if (e.target.closest('.slide-dot')) return;
-          e.preventDefault();
-          onStart(e.clientX);
-        };
-        front.ontouchstart = e => {
-          if (e.target.closest('.slide-dot')) return;
-          onStart(e.touches[0].clientX);
-        };
-      }
-
-      // 포지션 업데이트 후 항상 재바인딩
-      const _origUpdate = updatePositions;
-      updatePositions = function() {
-        _origUpdate();
-        setTimeout(bindDragToFront, 0);
-      };
-
-      window.addEventListener('mousemove', e => {
-        if (!isDragging) return;
         e.preventDefault();
       });
+
       window.addEventListener('mouseup', e => {
-        if (isDragging) onEnd(e.clientX);
+        if (!dragging) return;
+        dragging = false;
+        const diff = startX - e.clientX;
+        if (Math.abs(diff) > 40) diff > 0 ? go(current + 1) : go(current - 1);
+        track.style.animationPlayState = '';
+        startTimer();
       });
-      window.addEventListener('touchmove', e => {}, { passive: true });
+
+      /* 터치 */
+      slideshow.addEventListener('touchstart', e => {
+        if (e.target.closest('.slide-dot')) return;
+        dragging = true;
+        startX = e.touches[0].clientX;
+        stopTimer();
+        track.style.animationPlayState = 'paused';
+      }, { passive: true });
+
       window.addEventListener('touchend', e => {
-        if (isDragging) onEnd(e.changedTouches[0].clientX);
+        if (!dragging) return;
+        dragging = false;
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) diff > 0 ? go(current + 1) : go(current - 1);
+        track.style.animationPlayState = '';
+        startTimer();
       });
 
       updatePositions();
