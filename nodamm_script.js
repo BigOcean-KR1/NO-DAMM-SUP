@@ -377,14 +377,15 @@ function initMap() {
 
   // ── 스팟 목록 (위경도 직접 지정) ──
   const spots = [
-    { title: '구월동 로데오거리',  count: 0,   lat: 37.4519,            lng: 126.7316            },
-    { title: '인하 문화의 거리',   count: 0,   lat: 37.4508,            lng: 126.6572            },
-    { title: '주안역 주변',        count: 0,   lat: 37.4611,            lng: 126.6765            },
-    { title: '청라 커널웨이',      count: 0,   lat: 37.5391,            lng: 126.6478            },
-    { title: '계양 문화의 거리',   count: 0,   lat: 37.5378,            lng: 126.7384            },
-    { title: '송도 인천대역',      count: 0,   lat: 37.3836,            lng: 126.6561            },
-    { title: '부평 문화의 거리',   count: 124, lat: 37.49415397230344,  lng: 126.72428100316051  },
-    { title: '월미 문화의 거리',   count: 0,   lat: 37.474050,            lng:126.597014         },
+    { title: '구월동 로데오거리',    count: 0,   lat: 37.4519,           lng: 126.7316           },
+    { title: '인하 문화의 거리',     count: 0,   lat: 37.4508,           lng: 126.6572           },
+    { title: '주안역 주변',          count: 0,   lat: 37.4611,           lng: 126.6765           },
+    { title: '청라 커널웨이',        count: 0,   lat: 37.5391,           lng: 126.6478           },
+    { title: '계양 문화의 거리',     count: 0,   lat: 37.5378,           lng: 126.7384           },
+    { title: '송도 인천대역',        count: 0,   lat: 37.3836,           lng: 126.6561           },
+    { title: '부평 문화의 거리',     count: 124, lat: 37.49415397230344, lng: 126.72428100316051 },
+    { title: '을왕리 해수욕장',      count: 0,   lat: 37.445826,         lng: 126.372846         },
+    { title: '차이나타운',           count: 0,   lat: 37.476964,         lng: 126.619091         },
   ];
 
   spots.forEach(spot => {
