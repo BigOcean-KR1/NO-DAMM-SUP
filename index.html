@@ -222,7 +222,6 @@
     .slideshow-track {
       position: relative;
       width: 100%;
-      max-width: 540px;
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
       user-select: none;
@@ -277,14 +276,11 @@
     }
 
     .slide-dots {
-      position: absolute;
-      bottom: -34px;
-      left: 0; right: 0;
       display: flex;
       justify-content: center;
       gap: 10px;
+      margin-top: 16px;
       z-index: 10;
-      pointer-events: auto;
     }
     .slide-dot {
       width: 8px; height: 8px;
@@ -315,20 +311,23 @@
 
     <!-- 우측 슬라이드쇼 -->
     <div class="hero-slideshow" aria-hidden="true">
-      <div class="slideshow-track" id="slideshowTrack">
-        <div class="slide-card active">
-          <img src="Picture/Nodamm_3.jpg" alt="">
+      <div style="position:relative; width:100%; max-width:540px;">
+        <div class="slideshow-track" id="slideshowTrack">
+          <div class="slide-card">
+            <img src="Picture/Nodamm_3.jpg" alt="">
+          </div>
+          <div class="slide-card">
+            <img src="Picture/Nodamm_4.jpg" alt="">
+          </div>
+          <div class="slide-card">
+            <img src="Picture/Nodamm_5.jpg" alt="">
+          </div>
         </div>
-        <div class="slide-card">
-          <img src="Picture/Nodamm_4.jpg" alt="">
-        </div>
-        <div class="slide-card">
-          <img src="Picture/Nodamm_5.jpg" alt="">
-        </div>
+        <!-- 도트를 track 밖에 배치 → pointer-events 간섭 없음 -->
         <div class="slide-dots">
-          <span class="slide-dot active" onclick="event.stopPropagation(); goSlide(0)"></span>
-          <span class="slide-dot" onclick="event.stopPropagation(); goSlide(1)"></span>
-          <span class="slide-dot" onclick="event.stopPropagation(); goSlide(2)"></span>
+          <span class="slide-dot active" onclick="goSlide(0)"></span>
+          <span class="slide-dot" onclick="goSlide(1)"></span>
+          <span class="slide-dot" onclick="goSlide(2)"></span>
         </div>
       </div>
     </div>
@@ -397,17 +396,11 @@
       /* ── 드래그 / 스와이프 ── */
       let startX = 0, isDragging = false;
 
-      function getFrontCard() {
-        return document.querySelector('.slide-card.pos-front');
-      }
-
       function onStart(x) {
-        startX = x; isDragging = true;
+        startX = x;
+        isDragging = true;
         stopTimer();
         track.style.animationPlayState = 'paused';
-      }
-      function onMove(x) {
-        if (!isDragging) return;
       }
       function onEnd(x) {
         if (!isDragging) return;
@@ -420,25 +413,40 @@
         startTimer();
       }
 
-      /* 마우스 - pos-front 카드 전체에서 시작 */
-      track.addEventListener('mousedown', e => {
-        if (e.target.closest('.slide-dot')) return;
-        onStart(e.clientX);
+      // pos-front 카드에 이벤트 직접 등록하는 함수
+      function bindDragToFront() {
+        const front = document.querySelector('.slide-card.pos-front');
+        if (!front) return;
+
+        front.onmousedown = e => {
+          if (e.target.closest('.slide-dot')) return;
+          e.preventDefault();
+          onStart(e.clientX);
+        };
+        front.ontouchstart = e => {
+          if (e.target.closest('.slide-dot')) return;
+          onStart(e.touches[0].clientX);
+        };
+      }
+
+      // 포지션 업데이트 후 항상 재바인딩
+      const _origUpdate = updatePositions;
+      updatePositions = function() {
+        _origUpdate();
+        setTimeout(bindDragToFront, 0);
+      };
+
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        e.preventDefault();
       });
-      window.addEventListener('mousemove', e => { if (isDragging) onMove(e.clientX); });
-      window.addEventListener('mouseup',   e => { if (isDragging) onEnd(e.clientX); });
-
-      /* 터치 */
-      track.addEventListener('touchstart', e => {
-        if (e.target.closest('.slide-dot')) return;
-        onStart(e.touches[0].clientX);
-      }, { passive: true });
-      track.addEventListener('touchmove',  e => onMove(e.touches[0].clientX), { passive: true });
-      track.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX));
-
-      /* hover 부유 멈춤 */
-      track.addEventListener('mouseenter', stopTimer);
-      track.addEventListener('mouseleave', () => { if (!isDragging) startTimer(); });
+      window.addEventListener('mouseup', e => {
+        if (isDragging) onEnd(e.clientX);
+      });
+      window.addEventListener('touchmove', e => {}, { passive: true });
+      window.addEventListener('touchend', e => {
+        if (isDragging) onEnd(e.changedTouches[0].clientX);
+      });
 
       updatePositions();
       startTimer();
