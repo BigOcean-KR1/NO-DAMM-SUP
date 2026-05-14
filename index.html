@@ -288,6 +288,8 @@
       background: rgba(45,106,79,0.25);
       transition: background 0.3s, transform 0.3s;
       cursor: pointer;
+      padding: 6px;
+      margin: -6px;
     }
     .slide-dot.active {
       background: var(--green);
@@ -321,9 +323,9 @@
           <img src="Picture/Nodamm_5.jpg" alt="">
         </div>
         <div class="slide-dots">
-          <span class="slide-dot active" onclick="goSlide(0)"></span>
-          <span class="slide-dot" onclick="goSlide(1)"></span>
-          <span class="slide-dot" onclick="goSlide(2)"></span>
+          <span class="slide-dot active" onclick="event.stopPropagation(); goSlide(0)"></span>
+          <span class="slide-dot" onclick="event.stopPropagation(); goSlide(1)"></span>
+          <span class="slide-dot" onclick="event.stopPropagation(); goSlide(2)"></span>
         </div>
       </div>
     </div>
@@ -606,10 +608,6 @@
           <div class="gallery-item fade-up">
             <img src="Picture/Nodamm_11.png" alt="송도 인천대역 주변에서 진행된 노담 서포터즈 활동" loading="lazy">
             <div class="gallery-overlay"><span>송도 인천대역 주변</span></div>
-            </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_12.png" alt="송도 인천대역 주변에서 진행된 노담 서포터즈 활동" loading="lazy">
-            <div class="gallery-overlay"><span>월미 문화의 거리</span></div>
           </div>
         </div>
       </div>
