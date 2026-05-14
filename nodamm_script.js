@@ -409,7 +409,9 @@ function initMap() {
     kakao.maps.event.addListener(marker, 'mouseout',  () => { if (!isPinned) infowindow.close(); });
     kakao.maps.event.addListener(marker, 'click', () => {
       isPinned = !isPinned;
-      isPinned ? infowindow.open(map, marker) : infowindow.close();
+      isPinned ? infowindow.open(map, marker) ;
+      map.panTo(latlng) ;
+        infowindow.close();
     });
   });
 
