@@ -45,7 +45,6 @@
       display: flex; align-items: center; gap: 4px;
       font-size: 15px; font-weight: 700; color: var(--text);
       text-decoration: none; letter-spacing: .5px; transition: color .2s;
-      line-height: 70px; /* navbar 높이와 동일하게 맞춤 */
     }
     .nav-dropdown-link::after { content: '▾'; font-size: 10px; transition: transform 0.3s; }
     .nav-dropdown:hover .nav-dropdown-link { color: var(--green); }
@@ -59,7 +58,6 @@
       opacity: 0; pointer-events: none;
       transition: opacity 0.2s; z-index: 200;
     }
-    /* 브릿지: 버튼~메뉴 사이 hover 끊김 방지 */
     .dropdown-menu::before {
       content: ''; position: absolute;
       top: -20px; left: 0; right: 0; height: 20px;
