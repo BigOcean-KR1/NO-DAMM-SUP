@@ -254,7 +254,10 @@
       z-index: 3;
       opacity: 1;
       transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+      pointer-events: auto;
+      cursor: grab;
     }
+    .slide-card.pos-front:active { cursor: grabbing; }
     .slide-card.pos-back1 {
       inset: 0;
       z-index: 2;
@@ -392,16 +395,19 @@
       window.goSlide = function(idx) { stopTimer(); go(idx); startTimer(); };
 
       /* ── 드래그 / 스와이프 ── */
-      let startX = 0, isDragging = false, moved = false;
+      let startX = 0, isDragging = false;
+
+      function getFrontCard() {
+        return document.querySelector('.slide-card.pos-front');
+      }
 
       function onStart(x) {
-        startX = x; isDragging = true; moved = false;
+        startX = x; isDragging = true;
         stopTimer();
         track.style.animationPlayState = 'paused';
       }
       function onMove(x) {
         if (!isDragging) return;
-        if (Math.abs(x - startX) > 8) moved = true;
       }
       function onEnd(x) {
         if (!isDragging) return;
@@ -414,14 +420,20 @@
         startTimer();
       }
 
-      /* 마우스 */
-      track.addEventListener('mousedown',  e => onStart(e.clientX));
+      /* 마우스 - pos-front 카드 전체에서 시작 */
+      track.addEventListener('mousedown', e => {
+        if (e.target.closest('.slide-dot')) return;
+        onStart(e.clientX);
+      });
       window.addEventListener('mousemove', e => { if (isDragging) onMove(e.clientX); });
-      window.addEventListener('mouseup',   e => onEnd(e.clientX));
+      window.addEventListener('mouseup',   e => { if (isDragging) onEnd(e.clientX); });
 
       /* 터치 */
-      track.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
-      track.addEventListener('touchmove',  e => onMove(e.touches[0].clientX),  { passive: true });
+      track.addEventListener('touchstart', e => {
+        if (e.target.closest('.slide-dot')) return;
+        onStart(e.touches[0].clientX);
+      }, { passive: true });
+      track.addEventListener('touchmove',  e => onMove(e.touches[0].clientX), { passive: true });
       track.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX));
 
       /* hover 부유 멈춤 */
