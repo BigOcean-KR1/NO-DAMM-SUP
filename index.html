@@ -7,6 +7,9 @@
   <title>노담 서포터즈 | 인천의 바닥을 바꾸는 1시간</title>
   <meta name="description" content="노담 서포터즈는 인천의 꽁초를 줍는 청년 환경 플로깅 캠페인입니다." />
 
+  <!-- 히어로 배경 이미지 preload → LCP 개선 -->
+  <link rel="preload" as="image" href="Picture/Nodamm_1.jpg">
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -164,7 +167,7 @@
 
       <!-- 로고 -->
       <a class="nav-logo" href="#hero">
-        <img src="Picture/Nodamm_Mark.png" alt="노담 마크" class="nav-logo-img">
+        <img src="Picture/Nodamm_Mark.png" alt="노담 마크" class="nav-logo-img" decoding="async">
         NODAM SUPPORTERS
       </a>
 
@@ -213,7 +216,7 @@
       position: absolute;
       right: 0; top: 0; bottom: 0;
       width: 50%;
-      z-index: 2;
+      z-index: 3;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -317,9 +320,9 @@
       <div id="slideWrapper">
         <div id="slideDragZone">
           <div id="slideshowTrack">
-            <div class="slide-card"><img src="Picture/Nodamm_3.jpg" alt=""></div>
-            <div class="slide-card"><img src="Picture/Nodamm_4.jpg" alt=""></div>
-            <div class="slide-card"><img src="Picture/Nodamm_5.jpg" alt=""></div>
+            <div class="slide-card"><img src="Picture/Nodamm_3.jpg" alt="노담 서포터즈 플로깅 활동 현장 1" fetchpriority="high" decoding="async"></div>
+            <div class="slide-card"><img src="Picture/Nodamm_4.jpg" alt="노담 서포터즈 플로깅 활동 현장 2" loading="lazy" decoding="async"></div>
+            <div class="slide-card"><img src="Picture/Nodamm_5.jpg" alt="노담 서포터즈 플로깅 활동 현장 3" loading="lazy" decoding="async"></div>
           </div>
         </div>
         <div class="slide-dots">
@@ -605,27 +608,27 @@
         <!-- 1페이지 -->
         <div class="gallery-page active" id="gpage-1">
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_1.jpg" alt="부평역 테마거리에서 진행된 노담 서포터즈 플로깅 활동" loading="lazy">
+            <img src="Picture/Nodamm_1.jpg" alt="부평역 테마거리에서 진행된 노담 서포터즈 플로깅 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>부평역 테마거리 플로깅</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_2.png" alt="구월동 로데오 광장에서 진행된 노담 서포터즈 정화 활동" loading="lazy">
+            <img src="Picture/Nodamm_2.png" alt="구월동 로데오 광장에서 진행된 노담 서포터즈 정화 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>구월동 로데오 광장 정화 활동</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_6.png" alt="청라 커널웨이에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_6.png" alt="청라 커널웨이에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>청라 커널웨이</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_7.png" alt="계양 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_7.png" alt="계양 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>계양 문화의 거리</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_8.png" alt="주안역 주변에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_8.png" alt="주안역 주변에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>주안역 주변</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_9.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_9.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>인하대 후문</span></div>
           </div>
         </div>
@@ -633,23 +636,23 @@
         <!-- 2페이지 -->
         <div class="gallery-page" id="gpage-2">
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_10.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_10.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>인하대 후문</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_11.png" alt="송도 인천대역 주변에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_11.png" alt="송도 인천대역 주변에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>송도 인천대역 주변</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_12.png" alt="월미 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_12.png" alt="월미 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>월미도 플로깅</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_13.png" alt="을왕리 해수욕장에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_13.png" alt="을왕리 해수욕장에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>을왕리 해수욕장</span></div>
           </div>
           <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_14.png" alt="차이나타운에서 진행된 노담 서포터즈 활동" loading="lazy">
+            <img src="Picture/Nodamm_14.png" alt="차이나타운에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
             <div class="gallery-overlay"><span>차이나타운</span></div>
           </div>
         </div>
