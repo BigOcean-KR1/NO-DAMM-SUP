@@ -266,7 +266,9 @@
       max-width: 1200px;
       margin: 0 auto;
       width: 100%;
-      pointer-events: none;   /* 오른쪽 슬라이드쇼 이벤트 통과 */
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     /* hero-content 안 실제 클릭 가능한 요소들만 복원 */
