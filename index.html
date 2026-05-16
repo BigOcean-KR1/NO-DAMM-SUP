@@ -218,6 +218,8 @@
       justify-content: center;
       padding: 2rem 5rem 2rem 1rem;
       cursor: grab;
+      user-select: none;        /* 드래그 중 텍스트 선택 방지 */
+      -webkit-user-select: none;
     }
     .hero-slideshow:active { cursor: grabbing; }
 
@@ -227,6 +229,7 @@
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
       user-select: none;
+      pointer-events: none;     /* track 자체는 이벤트 통과 → slideshow가 받음 */
     }
 
     @keyframes heroFloat {
@@ -239,13 +242,15 @@
       border-radius: 20px;
       overflow: hidden;
       transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
+      pointer-events: none;     /* 카드도 이벤트 통과 → slideshow가 일괄 수신 */
     }
     .slide-card img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
       pointer-events: none;
+      -webkit-user-drag: none;  /* 이미지 기본 드래그 방지 */
+      user-drag: none;
     }
 
     .slide-card.pos-front {
@@ -254,10 +259,7 @@
       z-index: 3;
       opacity: 1;
       transform: translateX(0) translateY(0) scale(1) rotate(0deg);
-      pointer-events: auto;
-      cursor: grab;
     }
-    .slide-card.pos-front:active { cursor: grabbing; }
     .slide-card.pos-back1 {
       inset: 0;
       z-index: 2;
@@ -265,7 +267,6 @@
       transform: translateX(26px) translateY(-16px) scale(0.88) rotate(4deg);
       box-shadow: 0 12px 32px rgba(0,0,0,0.15);
       filter: brightness(0.78);
-      pointer-events: none;
     }
     .slide-card.pos-back2 {
       inset: 0;
@@ -274,7 +275,6 @@
       transform: translateX(48px) translateY(-30px) scale(0.78) rotate(8deg);
       box-shadow: 0 8px 20px rgba(0,0,0,0.10);
       filter: brightness(0.6);
-      pointer-events: none;
     }
 
     .slide-dots {
@@ -283,18 +283,26 @@
       gap: 10px;
       margin-top: 16px;
       z-index: 10;
+      pointer-events: auto;     /* 도트는 클릭 받아야 함 */
     }
     .slide-dot {
-      width: 8px; height: 8px;
+      width: 10px; height: 10px;
       border-radius: 50%;
       background: rgba(45,106,79,0.25);
-      transition: background 0.3s, transform 0.3s;
+      transition: background 0.3s, transform 0.3s, width 0.3s;
       cursor: pointer;
       flex-shrink: 0;
+      pointer-events: auto;
+    }
+    .slide-dot:hover {
+      background: rgba(45,106,79,0.5);
+      transform: scale(1.2);
     }
     .slide-dot.active {
       background: var(--green);
       transform: scale(1.35);
+      width: 24px;              /* 활성 도트는 pill 형태로 확장 */
+      border-radius: 5px;
     }
 
     .slideshow-track:hover { animation-play-state: paused; }
@@ -327,9 +335,9 @@
         </div>
         <!-- 도트를 track 밖에 배치 → pointer-events 간섭 없음 -->
         <div class="slide-dots">
-          <span class="slide-dot active" onclick="goSlide(0)"></span>
-          <span class="slide-dot" onclick="goSlide(1)"></span>
-          <span class="slide-dot" onclick="goSlide(2)"></span>
+          <span class="slide-dot active" data-idx="0"></span>
+          <span class="slide-dot" data-idx="1"></span>
+          <span class="slide-dot" data-idx="2"></span>
         </div>
       </div>
     </div>
@@ -367,19 +375,20 @@
   <script>
     /* ── 히어로 스택 슬라이드쇼 ── */
     (function() {
-      const cards     = document.querySelectorAll('.slide-card');
-      const dots      = document.querySelectorAll('.slide-dot');
+      const cards     = Array.from(document.querySelectorAll('.slide-card'));
+      const dots      = Array.from(document.querySelectorAll('.slide-dot'));
       const slideshow = document.querySelector('.hero-slideshow');
       const track     = document.getElementById('slideshowTrack');
       const total     = cards.length;
       let current     = 0;
-      let timer;
+      let timer       = null;
 
+      /* ── 위치 갱신 ── */
       function updatePositions() {
         cards.forEach((card, i) => {
           card.classList.remove('pos-front', 'pos-back1', 'pos-back2');
           const offset = (i - current + total) % total;
-          if (offset === 0)      card.classList.add('pos-front');
+          if      (offset === 0) card.classList.add('pos-front');
           else if (offset === 1) card.classList.add('pos-back1');
           else                   card.classList.add('pos-back2');
         });
@@ -387,54 +396,120 @@
       }
 
       function go(idx) {
-        current = (idx + total) % total;
+        current = ((idx % total) + total) % total;
         updatePositions();
       }
 
-      function startTimer() { timer = setInterval(() => go(current + 1), 3000); }
-      function stopTimer()  { clearInterval(timer); }
-
-      window.goSlide = function(idx) { stopTimer(); go(idx); startTimer(); };
-
-      /* ── 드래그: hero-slideshow 영역 전체에서 잡기 ── */
-      let startX = 0, dragging = false;
-
-      slideshow.addEventListener('mousedown', e => {
-        if (e.target.closest('.slide-dot')) return;
-        dragging = true;
-        startX = e.clientX;
+      /* ── 자동 재생 ── */
+      function startTimer() {
         stopTimer();
+        timer = setInterval(() => go(current + 1), 3500);
+      }
+      function stopTimer() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+
+      /* ── 도트 클릭 → 해당 슬라이드로 이동 ── */
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', e => {
+          e.stopPropagation();
+          stopTimer();
+          go(i);
+          startTimer();
+        });
+      });
+
+      /* ── 드래그 (마우스) ── */
+      let dragStartX  = 0;
+      let dragStartY  = 0;
+      let isDragging  = false;
+      let hasMoved    = false;
+      const THRESHOLD = 35; // px — 이 거리 이상 드래그해야 슬라이드 전환
+
+      /* 카드(pos-front)에서 직접 mousedown 잡기 */
+      function onMouseDown(e) {
+        /* 도트는 제외 */
+        if (e.target.closest('.slide-dot')) return;
+        isDragging = true;
+        hasMoved   = false;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        stopTimer();
+        /* float 애니메이션 멈춤 */
         track.style.animationPlayState = 'paused';
+        /* Lenis 스크롤 차단 */
         e.preventDefault();
-      });
+      }
 
-      window.addEventListener('mouseup', e => {
-        if (!dragging) return;
-        dragging = false;
-        const diff = startX - e.clientX;
-        if (Math.abs(diff) > 40) diff > 0 ? go(current + 1) : go(current - 1);
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        const dx = Math.abs(e.clientX - dragStartX);
+        const dy = Math.abs(e.clientY - dragStartY);
+        if (dx > 5 || dy > 5) hasMoved = true;
+        /* 드래그 중 커서 변경 */
+        slideshow.style.cursor = 'grabbing';
+      }
+
+      function onMouseUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        slideshow.style.cursor = '';
         track.style.animationPlayState = '';
-        startTimer();
-      });
 
-      /* 터치 */
+        if (hasMoved) {
+          const diff = dragStartX - e.clientX;
+          if (Math.abs(diff) >= THRESHOLD) {
+            diff > 0 ? go(current + 1) : go(current - 1);
+          }
+        }
+        startTimer();
+      }
+
+      /* slideshow 전체 영역에 등록 → 카드 밖에서 잡아도 동작 */
+      slideshow.addEventListener('mousedown', onMouseDown);
+      window.addEventListener('mousemove',   onMouseMove);
+      window.addEventListener('mouseup',     onMouseUp);
+
+      /* ── 드래그 (터치) ── */
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let isTouching  = false;
+
       slideshow.addEventListener('touchstart', e => {
         if (e.target.closest('.slide-dot')) return;
-        dragging = true;
-        startX = e.touches[0].clientX;
+        isTouching  = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
         stopTimer();
         track.style.animationPlayState = 'paused';
       }, { passive: true });
 
+      slideshow.addEventListener('touchmove', e => {
+        if (!isTouching) return;
+        /* 세로 스크롤은 허용, 가로 스와이프만 차단 */
+        const dx = Math.abs(e.touches[0].clientX - touchStartX);
+        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dx > dy) e.preventDefault();
+      }, { passive: false });
+
       window.addEventListener('touchend', e => {
-        if (!dragging) return;
-        dragging = false;
-        const diff = startX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 40) diff > 0 ? go(current + 1) : go(current - 1);
+        if (!isTouching) return;
+        isTouching = false;
         track.style.animationPlayState = '';
+
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) >= THRESHOLD) {
+          diff > 0 ? go(current + 1) : go(current - 1);
+        }
         startTimer();
       });
 
+      /* ── 마우스가 슬라이드쇼 영역 벗어나면 float 재개 ── */
+      slideshow.addEventListener('mouseleave', () => {
+        if (!isDragging) track.style.animationPlayState = '';
+      });
+
+      /* ── 초기화 ── */
       updatePositions();
       startTimer();
     })();
