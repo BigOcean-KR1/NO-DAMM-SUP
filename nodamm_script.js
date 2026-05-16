@@ -1,1496 +1,634 @@
-/* ── Reset & Base ── */
-    *,
-    *::before,
-    *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --green: #2d6a4f;
-      --green-mid: #40916c;
-      --green-light: #52b788;
-      --green-pale: #d8f3dc;
-      --green-dark: #1b4332;
-      --text: #1a1a1a;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --bg: #fafaf8;
-      --white: #ffffff;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-    }
-
-    html {
-      scroll-behavior: auto;
-    }
-
-    /* Lenis recommended */
-    html.lenis,
-    html.lenis body {
-      height: auto;
-    }
-
-    .lenis.lenis-smooth {
-      scroll-behavior: auto !important;
-    }
-
-    .lenis.lenis-smooth [data-lenis-prevent] {
-      overscroll-behavior: contain;
-    }
-
-    .lenis.lenis-stopped {
-      overflow: hidden;
-    }
-
-    .lenis.lenis-scrolling iframe {
-      pointer-events: none;
-    }
-
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    /* ── Typography helpers ── */
-    .display {
-      font-family: 'Bebas Neue', sans-serif;
-      letter-spacing: 3px;
-      line-height: 1;
-    }
-
-    /* ── Utility ── */
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    .section-tag {
-      font-size: 11px;
-      letter-spacing: 2.5px;
-      color: var(--green);
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: .6rem;
-      display: block;
-    }
-
-    .section-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(30px, 5vw, 50px);
-      letter-spacing: 2px;
-      margin-bottom: 1rem;
-      line-height: 1.1;
-    }
-
-    .section-desc {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.8;
-      max-width: 560px;
-      margin-bottom: 2.5rem;
-    }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 13px 28px;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all .2s ease;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: var(--green);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--green-dark);
-      transform: translateY(-1px);
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--green);
-      border: 1.5px solid var(--green);
-    }
-
-    .btn-outline:hover {
-      background: var(--green-pale);
-    }
-
-    /* ── Scroll animation ── */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity .8s cubic-bezier(0.33, 1, 0.68, 1), transform .8s cubic-bezier(0.33, 1, 0.68, 1);
-    }
-
-    .fade-up.visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    /* ====================================================
-       NAVIGATION
-    ==================================================== */
-    #navbar {
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: rgba(250, 250, 248, 0.75); /* 투명도 높임 */
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    #navbar.nav-hidden {
-      transform: translateY(-100%);
-    }
-
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 70px; /* 더 컴팩트하게 축소 */
-      padding: 0 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .nav-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 22px;
-      letter-spacing: 3px;
-      color: var(--green);
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-size: 15px;
-      font-weight: 700; /* 더 찐하게 */
-      color: var(--text); /* 더 어둡게 */
-      text-decoration: none;
-      letter-spacing: .5px;
-      cursor: pointer;
-      transition: all .2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--green);
-    }
-
-    .nav-cta {
-      background: var(--green);
-      color: #fff;
-      border: none;
-      padding: 10px 22px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-    }
-
-    .nav-cta:hover {
-      background: var(--green-dark);
-    }
-
-    /* ====================================================
-       HERO
-    ==================================================== */
-    #hero {
-      min-height: 92vh;
-      display: flex;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(234, 245, 238, 0.8) 0%, rgba(250, 250, 248, 0.9) 70%), url('Picture/Nodamm_1.jpg') no-repeat center center;
-      background-size: cover;
-      z-index: 0;
-    }
-
-    /* decorative circle */
-    .hero-circle {
-      position: absolute;
-      right: -120px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 560px;
-      height: 560px;
-      border-radius: 50%;
-      background: var(--green-pale);
-      opacity: .35;
-      z-index: 0;
-      pointer-events: none;   /* 마우스 이벤트 통과 → 슬라이드쇼 드래그 정상 동작 */
-    }
-
-    .hero-deco-text {
-      position: absolute;
-      right: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 240px;
-      line-height: 1;
-      color: var(--green);
-      opacity: .04;
-      pointer-events: none;
-      z-index: 0;
-      letter-spacing: -4px;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      padding: 4rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      background: var(--green-pale);
-      color: var(--green);
-      font-size: 14px;
-      letter-spacing: 2px;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-      margin-bottom: 1.6rem;
-    }
-
-    .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(70px, 12vw, 125px);
-      line-height: 0.95;
-      letter-spacing: 4px;
-      margin-bottom: 1.8rem;
-    }
-
-    .hero-title .accent {
-      color: var(--green);
-    }
-
-    .hero-slogan {
-      font-size: 20px;
-      font-weight: 400;
-      color: var(--muted);
-      max-width: 520px;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
-    }
-
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem;
-      margin-bottom: 2.2rem;
-    }
-
-    .hero-tag-item {
-      font-size: 14px;
-      padding: 5px 15px;
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      color: var(--muted);
-      background: var(--white);
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    /* ====================================================
-       SECTIONS — common wrapper
-    ==================================================== */
-    .section {
-      padding: 5.5rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .section-alt {
-      background: var(--white);
-    }
-
-    /* ====================================================
-       WHY SECTION
-    ==================================================== */
-    .why-quote {
-      border-left: 3px solid var(--green);
-      padding: 1.6rem 2rem;
-      background: var(--green-pale);
-      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-      font-size: 15px;
-      line-height: 1.95;
-      color: var(--green-dark);
-      font-style: italic;
-    }
-
-    .why-quote strong {
-      font-style: normal;
-      font-weight: 700;
-    }
-
-    /* ====================================================
-       HOW SECTION — card grid
-    ==================================================== */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.2rem;
-    }
-
-    .how-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      transition: border-color .2s, transform .2s;
-    }
-
-    .how-card:hover {
-      border-color: var(--green-light);
-      transform: translateY(-2px);
-    }
-
-    .how-icon {
-      width: 44px;
-      height: 44px;
-      background: var(--green-pale);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: var(--green);
-      margin-bottom: 1rem;
-    }
-
-    .how-card h4 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: .4rem;
-    }
-
-    .how-card p {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
-      word-break: keep-all;
-    }
-
-    /* ====================================================
-       GALLERY SECTION
-    ==================================================== */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .gallery-item {
-      position: relative;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      aspect-ratio: 16 / 10;
-      cursor: pointer;
-      background: var(--border);
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform .5s cubic-bezier(0.33, 1, 0.68, 1);
-    }
-
-    .gallery-item:hover img {
-      transform: scale(1.08);
-    }
-
-    .gallery-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
-      display: flex;
-      align-items: flex-end;
-      padding: 1.5rem;
-      opacity: 0;
-      transition: opacity .3s;
-    }
-
-    .gallery-item:hover .gallery-overlay {
-      opacity: 1;
-    }
-
-    .gallery-overlay span {
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    /* ====================================================
-       DETAIL SECTION
-    ==================================================== */
-    .detail-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 3rem;
-    }
-
-    .detail-item {
-      display: flex;
-      gap: 1.2rem;
-      align-items: flex-start;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1.2rem 1.4rem;
-      transition: border-color .2s;
-    }
-
-    .detail-item:hover {
-      border-color: var(--green-light);
-    }
-
-    .detail-num {
-      min-width: 36px;
-      height: 36px;
-      background: var(--green);
-      color: #fff;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .detail-item h4 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: .3rem;
-    }
-
-    .detail-item p {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    /* Stats */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-
-    .stat-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .stat-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 44px;
-      color: var(--green);
-      letter-spacing: 2px;
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: .3rem;
-    }
-
-    /* ====================================================
-       REWARD SECTION
-    ==================================================== */
-    .reward-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.2rem;
-    }
-
-    #reward {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    #reward .container {
-      position: relative;
-      z-index: 1;
-    }
-
-    .reward-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-top: 3px solid var(--green);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      transition: transform .2s;
-    }
-
-    .reward-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .reward-card h4 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: .5rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .reward-card p {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    /* ====================================================
-       BOARD SECTION
-    ==================================================== */
-    .board-wrapper {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-
-    .board-head {
-      background: var(--green);
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-    }
-
-    .board-head span {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .board-head .total {
-      font-size: 12px;
-      opacity: .75;
-    }
-
-    .board-filters {
-      display: flex;
-      flex-direction: column;
-      gap: .2rem;
-      padding: .8rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-        flex-wrap: wrap;
-    }
-
-    .filter-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        min-width: 30px;
-    }
-
-    .select-sm {
-        padding: 4px 8px !important;
-        font-size: 11px !important;
-    }
-
-    .filter-btn {
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--white);
-      cursor: pointer;
-      font-family: inherit;
-      color: var(--muted);
-      transition: all .15s;
-    }
-
-    .filter-btn.active {
-      background: var(--green);
-      color: #fff;
-      border-color: var(--green);
-    }
-
-    .board-list {
-      list-style: none;
-    }
-
-    .board-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: .9rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background .15s;
-      gap: 1rem;
-    }
-
-    .board-item:last-child {
-      border-bottom: none;
-    }
-
-    .board-item:hover {
-      background: var(--bg);
-    }
-
-    .item-left {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 2px 9px;
-      border-radius: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .badge-join {
-      background: var(--green-pale);
-      color: var(--green);
-    }
-
-    .badge-q {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .badge-review {
-      background: #ede9fe;
-      color: #5b21b6;
-    }
-
-    .item-title {
-      font-size: 13px;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-date {
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .board-form {
-      display: flex;
-      gap: .8rem;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-      flex-wrap: wrap;
-    }
-
-    .form-select {
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: inherit;
-      background: var(--white);
-      color: var(--text);
-      cursor: pointer;
-      outline: none;
-    }
-
-    .form-select:focus {
-      border-color: var(--green);
-    }
-
-    .form-input {
-      flex: 1;
-      min-width: 180px;
-      padding: 9px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: inherit;
-      background: var(--white);
-      color: var(--text);
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--green);
-    }
-
-    .form-submit {
-      padding: 9px 20px;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background .2s;
-      white-space: nowrap;
-    }
-
-    .form-submit:hover {
-      background: var(--green-dark);
-    }
-
-    .empty-msg {
-      text-align: center;
-      padding: 2.5rem;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    /* ====================================================
-       SCHEDULE SECTION
-    ==================================================== */
-/* ── 일정 섹션 스타일 (Schedule) ── */
-.schedule-section {
-    padding: 80px 0;
-    background-color: #fcfcfc;
+/* ── Firebase 통합 (Modular SDK v10) ── */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// Firebase 설정
+const firebaseConfig = {
+  apiKey: "AIzaSyDohqK6enK4y1RSjkYnDGlxtHb5eSo3TWs",
+  authDomain: "no-damm-sup.firebaseapp.com",
+  projectId: "no-damm-sup",
+  storageBucket: "no-damm-sup.firebasestorage.app",
+  messagingSenderId: "1072430359524",
+  appId: "1:1072430359524:web:5bf91b96c3d907726a5df1",
+  measurementId: "G-ZWK7RG5Q5C"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+/* ── 0. Lenis Smooth Scroll ── */
+// Lenis는 defer로 로드되므로 로드 완료 후 초기화
+let lenis;
+
+function initLenis() {
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
+    smoothWheel: true,
+    wheelMultiplier: 1,
+    smoothTouch: false,
+    touchMultiplier: 2,
+    infinite: false,
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+  window.lenis = lenis;
+
+  // 앵커 스무스 스크롤
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const target = this.getAttribute('href');
+      if (target === '#') return;
+      e.preventDefault();
+      lenis.scrollTo(target);
+    });
+  });
 }
 
-.schedule-table-wrapper {
-    margin-top: 40px;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-    overflow: hidden;
+// Lenis가 로드됐으면 바로, 아니면 load 이벤트 후 초기화
+if (window.Lenis) {
+  initLenis();
+} else {
+  window.addEventListener('load', () => {
+    if (window.Lenis) initLenis();
+  });
 }
 
-.schedule-table {
-    width: 100%;
-    border-collapse: collapse;
+/* ── 1. 스크롤 페이드인 ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+/* ── 2. 숫자 카운터 애니메이션 ── */
+function countUp(id, target, suffix, prefix) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const steps = 60;
+  const stepTime = 1200 / steps;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current = Math.min(current + increment, target);
+    el.textContent = (prefix || '') + Math.floor(current).toLocaleString() + (suffix || '');
+    if (current >= target) clearInterval(timer);
+  }, stepTime);
 }
 
-.schedule-table th {
-    background-color: #1a3c17; /* 더 깊은 초록색 */
-    color: #fff;
-    padding: 20px;
-    font-weight: 500;
+/* ── 3. 게시판 (Firebase Firestore) ── */
+const MASTER_PW = '3141592';
+
+const BADGE = {
+  q:      { label: '질문', cls: 'badge-q' },
+  review: { label: '후기', cls: 'badge-review' },
+};
+
+let firestorePosts  = null;
+let currentFilter   = 'all';
+let currentRegion   = 'all';
+let pendingEditId   = null;
+let pendingDeleteId = null;
+let pendingReplyId  = null;
+
+function formatDate(timestamp) {
+  if (!timestamp) return '';
+  const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
-.schedule-table td {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    text-align: center;
+function renderPosts() {
+  const list    = document.getElementById('board-list');
+  const countEl = document.getElementById('post-count');
+  if (!list || !countEl) return;
+
+  const source   = firestorePosts ?? [];
+  const filtered = source.filter(p => {
+    const matchType   = currentFilter === 'all' || p.type === currentFilter;
+    const matchRegion = currentRegion === 'all' || p.region === currentRegion;
+    return matchType && matchRegion;
+  });
+
+  countEl.textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<li style="padding:40px;text-align:center;color:#999;list-style:none;">첫 번째 글을 남겨보세요!</li>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => {
+    const repliesHtml = (p.replies || []).map((r, ri) => `
+      <div class="reply-item">
+        <span class="reply-author">↳ ${r.author}</span>
+        <span>${r.content}</span>
+        <span class="reply-date">${r.date}</span>
+        <button class="reply-del" onclick="openDeleteReply('${p.id}',${ri})">삭제</button>
+      </div>`).join('');
+
+    const replyBtn = p.type === 'q'
+      ? `<button class="reply-btn" onclick="openReplyModal('${p.id}')">💬 답글</button>` : '';
+
+    return `
+      <li class="board-item" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;">
+          <div class="item-left">
+            <span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span>
+            <span class="item-region">[${p.region}]</span>
+            <span class="item-author" style="font-weight:600;font-size:13px;color:var(--green);">${p.author}</span>
+            <span class="item-title">${p.title}</span>
+          </div>
+          <div class="post-actions">
+            <span class="item-date" style="font-size:12px;color:var(--muted);">${p.date}</span>
+            ${replyBtn}
+            <button class="action-btn" onclick="openEditModal('${p.id}','${p.title.replace(/'/g,"\\'")}')">수정</button>
+            <button class="action-btn del" onclick="openDeleteModal('${p.id}')">삭제</button>
+          </div>
+        </div>
+        ${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}
+      </li>`;
+  }).join('');
 }
 
-.active-row {
-    background-color: rgba(74, 158, 67, 0.05);
-    font-weight: bold;
-    color: #4a9e43;
+function filterPosts(btn, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = type;
+  renderPosts();
 }
 
-/* Section header local overrides */
-.schedule-section .sub-title {
-    font-size: 11px;
-    letter-spacing: 2.5px;
-    color: var(--green);
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: .6rem;
-    display: block;
-    text-align: center;
-}
-.schedule-section .main-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(30px, 5vw, 50px);
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-    line-height: 1.1;
-    text-align: center;
-}
-.schedule-section .desc {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.8;
-    max-width: 560px;
-    margin: 0 auto 1.5rem;
-    text-align: center;
+function filterRegion(region) {
+  currentRegion = region;
+  renderPosts();
 }
 
-/* 월 네비게이션 스타일 */
-.month-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 0.5rem;
+// 실시간 리스너
+function setupBoardListener() {
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, snapshot => {
+    firestorePosts = snapshot.docs.map(d => ({
+      id:      d.id,
+      type:    d.data().type,
+      region:  d.data().region,
+      author:  d.data().author || '익명',
+      title:   d.data().title,
+      pw:      d.data().pw || '',
+      replies: d.data().replies || [],
+      date:    formatDate(d.data().createdAt),
+    }));
+    renderPosts();
+  }, err => {
+    console.warn('Firestore 오류:', err);
+    firestorePosts = [];
+    renderPosts();
+  });
 }
 
-.nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--white);
-  color: var(--green);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 1.1rem;
+// 글 등록
+async function addPost() {
+  const author = document.getElementById('post-author')?.value?.trim();
+  const pw     = document.getElementById('post-pw')?.value?.trim();
+  const type   = document.getElementById('post-type')?.value;
+  const region = document.getElementById('post-region')?.value;
+  const title  = document.getElementById('post-title')?.value?.trim();
+
+  if (!author) return alert('이름을 입력해주세요.');
+  if (!pw)     return alert('비밀번호를 입력해주세요.');
+  if (!title)  return alert('내용을 입력해주세요.');
+
+  try {
+    await addDoc(collection(db, 'posts'), {
+      type, region, author, title, pw,
+      replies: [],
+      createdAt: serverTimestamp(),
+    });
+    document.getElementById('post-author').value = '';
+    document.getElementById('post-pw').value     = '';
+    document.getElementById('post-title').value  = '';
+    window.closeWriteModal?.();
+  } catch(e) {
+    console.error(e);
+    alert('등록 실패. 다시 시도해주세요.');
+  }
 }
 
-.nav-btn:hover {
-  background: var(--green);
-  color: var(--white);
-  border-color: var(--green);
+// 수정
+function openEditModal(id, content) {
+  pendingEditId = id;
+  document.getElementById('edit-content').value = content;
+  document.getElementById('edit-pw').value      = '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  pendingEditId = null;
+}
+async function submitEdit() {
+  const pw      = document.getElementById('edit-pw').value.trim();
+  const content = document.getElementById('edit-content').value.trim();
+  if (!pw || !content) return alert('비밀번호와 내용을 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingEditId);
+  if (!post) return;
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    await updateDoc(doc(db, 'posts', pendingEditId), { title: content });
+    closeEditModal();
+  } catch(e) {
+    console.error(e);
+    alert('수정 실패.');
+  }
 }
 
-.current-month-text {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-  min-width: 110px;
+// 삭제
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  document.getElementById('delete-pw').value = '';
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  pendingDeleteId = null;
+}
+async function submitDelete() {
+  const pw = document.getElementById('delete-pw').value.trim();
+  if (!pw) return alert('비밀번호를 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingDeleteId);
+  if (!post) return;
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    await deleteDoc(doc(db, 'posts', pendingDeleteId));
+    closeDeleteModal();
+  } catch(e) {
+    console.error(e);
+    alert('삭제 실패.');
+  }
 }
 
-/* 모바일 대응 */
-@media (max-width: 600px) {
-    .schedule-table th, .schedule-table td {
-        padding: 12px 8px;
-        font-size: 0.9rem;
-    }
+// 답글
+function openReplyModal(id) {
+  pendingReplyId = id;
+  document.getElementById('reply-author').value  = '';
+  document.getElementById('reply-pw').value      = '';
+  document.getElementById('reply-content').value = '';
+  document.getElementById('replyModal').style.display = 'flex';
+}
+function closeReplyModal() {
+  document.getElementById('replyModal').style.display = 'none';
+  pendingReplyId = null;
+}
+async function submitReply() {
+  const author  = document.getElementById('reply-author').value.trim();
+  const pw      = document.getElementById('reply-pw').value.trim();
+  const content = document.getElementById('reply-content').value.trim();
+  if (!author || !pw || !content) return alert('모든 항목을 입력해주세요.');
+
+  const now  = new Date();
+  const date = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+
+  try {
+    await updateDoc(doc(db, 'posts', pendingReplyId), {
+      replies: arrayUnion({ author, pw, content, date }),
+    });
+    closeReplyModal();
+  } catch(e) {
+    console.error(e);
+    alert('답글 등록 실패.');
+  }
 }
 
-/* 일정 전환 애니메이션 */
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
+// 답글 삭제
+async function openDeleteReply(postId, replyIdx) {
+  const pw = prompt('비밀번호를 입력하세요 (작성자 비번 또는 마스터 비번):');
+  if (!pw) return;
+
+  const post  = firestorePosts.find(p => p.id === postId);
+  if (!post) return;
+  const reply = post.replies[replyIdx];
+  if (!reply) return;
+  if (pw !== MASTER_PW && pw !== reply.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  const newReplies = post.replies.filter((_, i) => i !== replyIdx);
+  try {
+    await updateDoc(doc(db, 'posts', postId), { replies: newReplies });
+  } catch(e) {
+    console.error(e);
+    alert('답글 삭제 실패.');
+  }
 }
 
-@keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+/* ── 4. 스크롤 네비게이션 숨김/표시 ── */
+let lastScroll = 0;
+const navbar   = document.getElementById('navbar');
 
-@keyframes slideOutLeft {
-    from { opacity: 1; transform: translateX(0); }
-    to { opacity: 0; transform: translateX(-30px); }
-}
+window.addEventListener('scroll', () => {
+  const cur = window.scrollY;
+  if (Math.abs(cur - lastScroll) < 5) return;
+  if (cur > lastScroll && cur > 100) navbar?.classList.add('nav-hidden');
+  else navbar?.classList.remove('nav-hidden');
+  lastScroll = cur;
+});
 
-@keyframes slideOutRight {
-    from { opacity: 1; transform: translateX(0); }
-    to { opacity: 0; transform: translateX(30px); }
-}
+document.addEventListener('mousemove', e => {
+  if (e.clientY < 40) navbar?.classList.remove('nav-hidden');
+  else if (e.clientY > 60 && window.scrollY > 100) navbar?.classList.add('nav-hidden');
+});
 
-.slide-out-left { animation: slideOutLeft 0.3s forwards; }
-.slide-out-right { animation: slideOutRight 0.3s forwards; }
-.slide-in-left { animation: slideInLeft 0.3s forwards; }
-.slide-in-right { animation: slideInRight 0.3s forwards; }
+/* ── 5. 카카오맵 초기화 (좌표 직접 사용) ── */
+function initMap() {
+  const container = document.getElementById('map');
+  if (!container) return;
 
-/* ── Logo Styles ── */
-.nav-logo-img {
-    height: 50px; /* 전체적인 컴팩트함에 맞춰 크기 축소 */
-    width: auto;
-    margin-right: 12px;
-    vertical-align: middle;
-}
+  const map = new kakao.maps.Map(container, {
+    center: new kakao.maps.LatLng(37.4760, 126.7160),
+    level: 10,
+  });
 
-.hero-mark-float {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 2rem;
-    animation: float 4s ease-in-out infinite;
-}
+  const markerImage = new kakao.maps.MarkerImage(
+    'Picture/Nodamm_MapPoint.png',
+    new kakao.maps.Size(80, 100),
+    { offset: new kakao.maps.Point(40, 100) }
+  );
 
-.hero-mark-float img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+  // ── 스팟 목록 (위경도 직접 지정) ──
+  const spots = [
+    { title: '구월동 로데오거리',    count: 0,   lat: 37.4519,           lng: 126.7316           },
+    { title: '인하 문화의 거리',     count: 0,   lat: 37.4508,           lng: 126.6572           },
+    { title: '주안역 주변',          count: 0,   lat: 37.4611,           lng: 126.6765           },
+    { title: '청라 커널웨이',        count: 0,   lat: 37.5391,           lng: 126.6478           },
+    { title: '계양 문화의 거리',     count: 0,   lat: 37.5378,           lng: 126.7384           },
+    { title: '송도 인천대역',        count: 0,   lat: 37.3836,           lng: 126.6561           },
+    { title: '부평 문화의 거리',     count: 124, lat: 37.49415397230344, lng: 126.72428100316051 },
+    { title: '을왕리 해수욕장',      count: 0,   lat: 37.445826,         lng: 126.372846         },
+    { title: '차이나타운',           count: 0,   lat: 37.476964,         lng: 126.619091         },
+  ];
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-}
+  spots.forEach(spot => {
+    const latlng = new kakao.maps.LatLng(spot.lat, spot.lng);
 
-.footer-logo img, .footer-logo-img {
-    height: 120px !important; /* 요청에 따라 크기 축소 */
-    width: auto;
-    opacity: 1;
-    margin-bottom: 1rem;
-    transition: opacity 0.3s;
-}
+    const marker = new kakao.maps.Marker({
+      map,
+      position: latlng,
+      title: spot.title,
+      image: markerImage,
+    });
 
-.footer-logo img:hover, .footer-logo-img:hover {
-    opacity: 1;
-}
+    const infowindow = new kakao.maps.InfoWindow({
+      content: `<div style="padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.8;border-radius:8px;">
+        📍 ${spot.title}<br>
+        <span style="color:#2d6a4f;font-size:12px;">🚬 수거량: <strong>${spot.count}개</strong></span>
+      </div>`,
+      removable: false,
+    });
 
-    /* ====================================================
-       FOOTER
-    ==================================================== */
-    #footer {
-      background: var(--green-dark);
-      color: #fff;
-    }
-
-    .footer-top {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 2.5rem;
-      padding: 4rem 2rem 3rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      border-bottom: 1px solid rgba(255, 255, 255, .1);
-    }
-
-    .footer-brand .logo-text {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 26px;
-      letter-spacing: 3px;
-      color: var(--green-light);
-      display: block;
-      margin-bottom: .5rem;
-    }
-
-    .footer-brand p {
-      font-size: 14px; /* 1.1배 조정 */
-      color: #a7f3d0;
-      line-height: 1.7;
-    }
-
-    .footer-col h5 {
-      font-size: 13px; /* 1.1배 조정 */
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--green-light);
-      margin-bottom: 1rem;
-    }
-
-    .footer-col ul {
-      list-style: none;
-    }
-
-    .footer-col ul li {
-      margin-bottom: .5rem;
-    }
-
-    .footer-col ul li a {
-      font-size: 14px; /* 1.1배 조정 */
-      color: #6ee7b7;
-      text-decoration: none;
-      cursor: pointer;
-      transition: color .15s;
-    }
-
-    .footer-col ul li a:hover {
-      color: #fff;
-    }
-    
-    /* 수정: 푸터 오른쪽 정보 섹션 스타일 (옆 섹션과 통일감 있게 수정) */
-    .footer-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start; /* 다른 컬럼처럼 왼쪽 정렬로 복구 */
-      text-align: left;
-    }
-    
-    .footer-info h4 {
-      font-size: 13px; /* 1.1배 조정 */
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--green-light); /* 타이틀 컬러 */
-      margin-top: 0;
-      margin-bottom: 1rem; /* 옆 간격과 동일하게 */
-      font-family: inherit; /* Bebas Neue 대신 기본 폰트 또는 Bebas 선택 */
-      font-weight: 700;
-    }
-    
-    .footer-info ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .footer-info ul li {
-      margin-bottom: 0.5rem;
-    }
-    
-    .footer-info ul li a {
-      font-size: 14px; /* 1.1배 조정 */
-      color: #6ee7b7; /* 링크 컬러 (타이틀과 다르게) */
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    
-    .footer-info ul li a:hover {
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding: 1.5rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .footer-bottom p {
-      font-size: 12px;
-      color: #4b7a65;
-    }
-
-    .social-links {
-      display: flex;
-      gap: .8rem;
-    }
-
-    .social-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, .08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--green-light);
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background .2s;
-      line-height: 1; /* 추가: 정렬 보정 */
-    }
-    
-    .social-btn svg, .social-btn i {
-      display: block;
-    }
-
-    .kakao-svg {
-      transform: translate(1px, 1px); /* 왼쪽 위로 치우친 느낌을 보정하기 위해 오른쪽 아래로 살짝 이동 */
-    }
-
-    .social-btn:hover {
-      background: rgba(255, 255, 255, .18);
-    }
-
-    /* ====================================================
-       APPLY SECTION
-    ==================================================== */
-    .apply-section {
-      background: #f8faf9;
-    }
-
-    .apply-container {
-        max-width: 750px;
-        margin: 0 auto;
-        background: var(--white);
-        padding: 4rem;
-        border-radius: var(--radius-lg);
-        box-shadow: 0 30px 60px rgba(0, 71, 49, 0.05);
-        border: 1px solid var(--border);
-    }
-
-    .apply-header {
-        text-align: center;
-        margin-bottom: 3.5rem;
-    }
-
-    .apply-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-    }
-
-    .form-group label {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--green-dark);
-        margin-left: 4px;
-    }
-
-    .form-group input, 
-    .form-group select, 
-    .form-group textarea {
-        padding: 16px 20px;
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-md);
-        font-size: 15px;
-        font-family: inherit;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        background: #fafafa;
-        color: var(--text);
-    }
-
-    .form-group input:focus, 
-    .form-group select:focus, 
-    .form-group textarea:focus {
-        border-color: var(--green-light);
-        background: #fff;
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(110, 231, 183, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .form-group textarea {
-        height: 140px;
-        resize: none;
-    }
-
-    .submit-btn {
-        width: 100%;
-        justify-content: center;
-        font-size: 16px;
-        padding: 18px;
-        margin-top: 1.5rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    /* ====================================================
-       RESPONSIVE
-    ==================================================== */
-    @media (max-width: 640px) {
-      .nav-links {
-        display: none;
+    let isPinned = false;
+    kakao.maps.event.addListener(marker, 'mouseover', () => { if (!isPinned) infowindow.open(map, marker); });
+    kakao.maps.event.addListener(marker, 'mouseout',  () => { if (!isPinned) infowindow.close(); });
+    kakao.maps.event.addListener(marker, 'click', () => {
+      isPinned = !isPinned;
+      if (isPinned) {
+        infowindow.open(map, marker);
+        map.panTo(latlng);
+      } else {
+        infowindow.close();
       }
+    });
+  });
 
-      .hero-title {
-        font-size: 64px;
-      }
-
-      .hero-deco-text {
-        display: none;
-      }
-
-      .board-form {
-        flex-direction: column;
-      }
-
-      .form-input {
-        min-width: 100%;
-      }
-
-      /* 커뮤니티 게시판 모바일 최적화 */
-      .board-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-      .item-left {
-        width: 100%;
-      }
-      .item-date {
-        align-self: flex-start;
-        font-size: 11px;
-      }
-    }
-
-    /* ── Map Custom Styles ── */
-    #map-section h3 {
-        font-size: 1.5rem;
-        color: var(--green-dark);
-        font-weight: 700;
-        font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    #map {
-        width: 100%;
-        height: 450px;
-        background-color: #eee;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 부드러운 그림자 */
-        transition: transform 0.3s ease;
-    }
-
-    #map:hover {
-        transform: translateY(-5px); /* 살짝 떠오르는 효과 */
-    }
-
-/* ====================================================
-   MOBILE RESPONSIVE - 종합 모바일 대응
-==================================================== */
-
-/* 태블릿 (768px 이하) */
-@media (max-width: 768px) {
-
-  /* 네비게이션 */
-  .nav-inner {
-    padding: 0 1rem;
-  }
-  .nav-links {
-    display: none !important;
-  }
-  .nav-logo {
-    font-size: 1rem;
-  }
-  .nav-logo-img {
-    height: 36px !important;
-  }
-  .nav-cta {
-    padding: 8px 16px !important;
-    font-size: 13px !important;
-  }
-
-  /* 히어로 */
-  .hero-content {
-    padding: 0 1.5rem;
-    text-align: center;
-  }
-  .hero-title {
-    font-size: 56px !important;
-  }
-  .hero-slogan {
-    font-size: 15px !important;
-  }
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  .hero-buttons .btn {
-    width: 100%;
-    max-width: 280px;
-    justify-content: center;
-  }
-  .hero-tags {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.4rem;
-  }
-  .hero-deco-text {
-    display: none;
-  }
-
-  /* 섹션 공통 */
-  .section {
-    padding: 3rem 0 !important;
-  }
-  .container {
-    padding: 0 1.2rem !important;
-  }
-  .section-title {
-    font-size: 1.6rem !important;
-  }
-
-  /* 카드 그리드 */
-  .card-grid {
-    grid-template-columns: 1fr !important;
-  }
-  .how-card {
-    padding: 1.4rem !important;
-  }
-
-  /* 활동 탭 */
-  .activity-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .activity-tabs::-webkit-scrollbar { display: none; }
-  .act-tab {
-    padding: 10px 14px !important;
-    font-size: 13px !important;
-    white-space: nowrap;
-  }
-
-  /* 일정 테이블 */
-  #schedule-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  #schedule-body td {
-    padding: 10px 12px !important;
-    font-size: 12px !important;
-  }
-  .month-nav {
-    justify-content: center;
-  }
-
-  /* 통계 카드 */
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1rem !important;
-  }
-  .stat-num {
-    font-size: 1.8rem !important;
-  }
-
-  /* 리워드 */
-  .reward-grid {
-    grid-template-columns: 1fr !important;
-  }
-  .reward-card-deco {
-    display: none !important;
-  }
-
-  /* 게시판 */
-  .board-filters {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .board-item {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.5rem !important;
-  }
-  .item-left {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  .post-actions {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  .item-title {
-    font-size: 13px !important;
-  }
-
-  /* 모달 공통 */
-  #applyModal > div,
-  #writeModal > div,
-  #editModal > div,
-  #deleteModal > div,
-  #replyModal > div {
-    margin: 0.5rem !important;
-    padding: 1.5rem !important;
-  }
-  #applyModal .form-row,
-  #writeModal .form-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* 갤러리 */
-  .gallery-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* 지도 */
-  #map {
-    height: 300px !important;
-  }
-
-  /* 푸터 */
-  .footer-top {
-    grid-template-columns: 1fr !important;
-    padding: 2rem 1.2rem !important;
-    gap: 1.5rem !important;
-  }
-  .footer-bottom {
-    flex-direction: column !important;
-    gap: 0.8rem !important;
-    padding: 1rem 1.2rem !important;
-    text-align: center;
-  }
-
-  /* 인트로 인용구 */
-  .why-quote {
-    font-size: 14px !important;
-    padding: 1.2rem !important;
-  }
+  // 지도 위 휠 → 페이지 스크롤 차단
+  container.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
 }
 
-/* 소형 모바일 (480px 이하) */
-@media (max-width: 480px) {
-
-  .hero-title {
-    font-size: 42px !important;
-  }
-  .hero-badge {
-    font-size: 10px !important;
-  }
-  .nav-cta {
-    padding: 7px 12px !important;
-    font-size: 12px !important;
-  }
-  .section-title {
-    font-size: 1.4rem !important;
-  }
-  .stat-num {
-    font-size: 1.5rem !important;
-  }
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* 글쓰기 모달 폼 2열 → 1열 */
-  #writeModal [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* 일정 테이블 작게 */
-  #schedule-body td {
-    font-size: 11px !important;
-    padding: 8px 8px !important;
-  }
+function waitForKakaoAndInit() {
+  if (window.kakao && window.kakao.maps) initMap();
+  else setTimeout(waitForKakaoAndInit, 100);
 }
+
+/* ── 6. 월별 활동 일정 ── */
+let currentViewMonth = new Date().getMonth() + 1; // 현재 달 자동 설정
+
+const scheduleByMonth = {
+  1:  [{ date: '1월 10일 (토)',  time: '10:00', region: '남동구',  place: '남동구청 앞 광장' },
+       { date: '1월 17일 (토)',  time: '10:00', region: '부평구',  place: '부평 문화의 거리' },
+       { date: '1월 24일 (토)',  time: '10:00', region: '미추홀구', place: '주안역 1번 출구' }],
+  2:  [{ date: '2월 7일 (토)',   time: '10:00', region: '연수구',  place: '스퀘어원 광장' },
+       { date: '2월 14일 (토)',  time: '10:00', region: '서구',    place: '청라 커낼웨이' },
+       { date: '2월 21일 (토)',  time: '10:00', region: '계양구',  place: '계양구청 광장' }],
+  3:  [{ date: '3월 7일 (토)',   time: '10:00', region: '중구',    place: '차이나타운 입구' },
+       { date: '3월 14일 (토)',  time: '10:00', region: '남동구',  place: '소래포구역 인근' },
+       { date: '3월 21일 (토)',  time: '10:00', region: '부평구',  place: '부평역 테마거리' }],
+  4:  [{ date: '4월 4일 (토)',   time: '10:00', region: '미추홀구', place: '인하대 후문 거리' },
+       { date: '4월 11일 (토)',  time: '10:00', region: '연수구',  place: '송도 센트럴파크' },
+       { date: '4월 18일 (토)',  time: '10:00', region: '서구',    place: '검단사거리역' }],
+  5:  [{ date: '5월 16일 (토)',  time: '10:00', region: '남동구',  place: '남동구청 앞 광장' },
+       { date: '5월 23일 (토)',  time: '10:00', region: '부평구',  place: '부평 문화의 거리 입구', active: true },
+       { date: '5월 30일 (토)',  time: '10:00', region: '미추홀구', place: '주안역 1번 출구 앞' }],
+  6:  [{ date: '6월 6일 (토)',   time: '10:00', region: '계양구',  place: '계양산 입구' },
+       { date: '6월 13일 (토)',  time: '10:00', region: '중구',    place: '월미도 광장' },
+       { date: '6월 20일 (토)',  time: '10:00', region: '연수구',  place: '연수역 광장' }],
+  7:  [{ date: '7월 4일 (토)',   time: '10:00', region: '서구',    place: '가좌동 행정복지센터' },
+       { date: '7월 11일 (토)',  time: '10:00', region: '남동구',  place: '구월 로데오 광장' },
+       { date: '7월 18일 (토)',  time: '10:00', region: '부평구',  place: '굴포천역 삼각공원' }],
+  8:  [{ date: '8월 1일 (토)',   time: '10:00', region: '미추홀구', place: '용현동 토지금고' },
+       { date: '8월 8일 (토)',   time: '10:00', region: '계양구',  place: '작전역 광장' },
+       { date: '8월 15일 (토)',  time: '10:00', region: '중구',    place: '동인천역 북광장' }],
+  9:  [{ date: '9월 5일 (토)',   time: '10:00', region: '연수구',  place: '선학역 음식거리' },
+       { date: '9월 12일 (토)',  time: '10:00', region: '서구',    place: '가정역 인근' },
+       { date: '9월 19일 (토)',  time: '10:00', region: '남동구',  place: '만수역 광장' }],
+  10: [{ date: '10월 3일 (토)',  time: '10:00', region: '부평구',  place: '산곡역 인근' },
+       { date: '10월 10일 (토)', time: '10:00', region: '미추홀구', place: '석바위 시장' },
+       { date: '10월 17일 (토)', time: '10:00', region: '계양구',  place: '계산역 인근' }],
+  11: [{ date: '11월 7일 (토)',  time: '10:00', region: '중구',    place: '영종역 광장' },
+       { date: '11월 14일 (토)', time: '10:00', region: '연수구',  place: '테크노파크역' },
+       { date: '11월 21일 (토)', time: '10:00', region: '서구',    place: '검암역 광장' }],
+  12: [{ date: '12월 5일 (토)',  time: '10:00', region: '남동구',  place: '서창동 중심상가' },
+       { date: '12월 12일 (토)', time: '10:00', region: '부평구',  place: '부개역 인근' },
+       { date: '12월 19일 (토)', time: '10:00', region: '미추홀구', place: '인천터미널역' }],
+};
+
+function renderSchedule() {
+  const body      = document.getElementById('schedule-body');
+  const monthText = document.getElementById('current-month');
+  if (!body || !monthText) return;
+
+  monthText.textContent = `2026년 ${currentViewMonth}월`;
+
+  const data = scheduleByMonth[currentViewMonth] || [];
+  body.innerHTML = data.map(item => `
+    <tr class="${item.active ? 'active-row' : ''}">
+      <td>${item.date}</td>
+      <td>${item.time}</td>
+      <td>${item.region}</td>
+      <td>${item.place}</td>
+    </tr>`).join('');
+}
+
+let isChangingMonth = false;
+function changeMonth(diff) {
+  if (isChangingMonth) return;
+  isChangingMonth = true;
+
+  const wrapper = document.getElementById('schedule-wrapper');
+  if (!wrapper) { isChangingMonth = false; return; }
+
+  const outX = diff > 0 ? '-40px' : '40px';
+  wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+  wrapper.style.opacity    = '0';
+  wrapper.style.transform  = `translateX(${outX})`;
+
+  setTimeout(() => {
+    currentViewMonth += diff;
+    if (currentViewMonth < 1)  currentViewMonth = 12;
+    if (currentViewMonth > 12) currentViewMonth = 1;
+    renderSchedule();
+
+    const inX = diff > 0 ? '40px' : '-40px';
+    wrapper.style.transition = 'none';
+    wrapper.style.transform  = `translateX(${inX})`;
+    wrapper.style.opacity    = '0';
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      wrapper.style.opacity    = '1';
+      wrapper.style.transform  = 'translateX(0)';
+      isChangingMonth = false;
+    }));
+  }, 220);
+}
+
+/* ── 7. 탭 전환 ── */
+let statsAnimated  = false;
+let mapInitialized = false;
+
+window.switchTab = function(tabName) {
+  // 탭 버튼 active
+  document.querySelectorAll('.act-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  const activeBtn = document.querySelector(`.act-tab[onclick="switchTab('${tabName}')"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.setAttribute('aria-selected', 'true');
+  }
+
+  // 콘텐츠 전환
+  ['info','schedule','spot','gallery'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`);
+    if (el) el.style.display = t === tabName ? 'block' : 'none';
+  });
+
+  // 스팟 탭: 지도 + 카운터
+  if (tabName === 'spot') {
+    if (!mapInitialized) { mapInitialized = true; waitForKakaoAndInit(); }
+    if (!statsAnimated)  {
+      statsAnimated = true;
+      setTimeout(() => {
+        countUp('s1', 124, '/10000');
+        countUp('s2', 10, '');
+        countUp('s3', 1, 'H');
+        countUp('s4', 10, '');
+      }, 200);
+    }
+  }
+};
+
+/* ── 8. 지원서 제출 (모달 폼) ── */
+document.addEventListener('DOMContentLoaded', () => {
+  setupBoardListener();
+
+  const modalForm = document.getElementById('modalApplyForm');
+  if (!modalForm) return;
+
+  modalForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const name    = document.getElementById('m_userName')?.value?.trim();
+    const age     = document.getElementById('m_userAge')?.value?.trim();
+    const gender  = document.getElementById('m_userGender')?.value;
+    const smoking = document.getElementById('m_userSmoking')?.value;
+    const area    = document.getElementById('m_userArea')?.value;
+    const message = document.getElementById('m_userMessage')?.value?.trim();
+
+    if (!name || !age || !gender || !smoking || !area) {
+      alert('필수 항목(*)을 모두 입력해주세요.');
+      return;
+    }
+
+    const btn = document.getElementById('modalSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '제출 중...'; }
+
+    try {
+      await addDoc(collection(db, 'applicants'), {
+        name, age: Number(age), gender, smoking, area,
+        message: message || '',
+        date: new Date().toISOString(),
+      });
+
+      modalForm.style.display = 'none';
+      const successMsg = document.getElementById('modalSuccessMsg');
+      const successEl  = document.getElementById('modalSuccess');
+      if (successMsg) successMsg.innerHTML = `<strong>${name}</strong>님의 지원이 접수되었습니다.<br>확인 후 연락드리겠습니다. 🌱`;
+      if (successEl)  successEl.style.display = 'block';
+    } catch(err) {
+      console.error(err);
+      alert('제출에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> 신청서 제출하기'; }
+    }
+  });
+});
+
+/* ── 전역 함수 노출 (type="module" 대응) ── */
+window.filterPosts      = filterPosts;
+window.filterRegion     = filterRegion;
+window.addPost          = addPost;
+window.openEditModal    = openEditModal;
+window.closeEditModal   = closeEditModal;
+window.submitEdit       = submitEdit;
+window.openDeleteModal  = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.submitDelete     = submitDelete;
+window.openReplyModal   = openReplyModal;
+window.closeReplyModal  = closeReplyModal;
+window.submitReply      = submitReply;
+window.openDeleteReply  = openDeleteReply;
+window.changeMonth      = changeMonth;
+
+window.openWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'block'; window.lenis?.stop(); }
+};
+window.closeWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'none'; window.lenis?.start(); }
+};
+
+/* ── 초기 렌더링 ── */
+renderPosts();
+renderSchedule();
