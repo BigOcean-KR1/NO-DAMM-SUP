@@ -217,16 +217,21 @@
       align-items: center;
       justify-content: center;
       padding: 2rem 5rem 2rem 1rem;
-      /* cursor/user-select은 dragZone에서 관리 */
+      pointer-events: none;   /* 슬라이드쇼 컨테이너는 이벤트 통과 */
+    }
+
+    /* dragZone과 dots만 이벤트 받음 */
+    #slideDragZone,
+    .slide-dots {
+      pointer-events: auto;
     }
 
     .slideshow-track {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4/3;
+      position: absolute;   /* dragZone을 꽉 채움 */
+      inset: 0;
       animation: heroFloat 4s ease-in-out infinite;
       user-select: none;
-      /* pointer-events 제거 → dragZone이 직접 이벤트 수신 */
+      pointer-events: none;
     }
 
     @keyframes heroFloat {
@@ -236,6 +241,7 @@
 
     .slide-card {
       position: absolute;
+      inset: 0;
       border-radius: 20px;
       overflow: hidden;
       transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
@@ -251,14 +257,12 @@
     }
 
     .slide-card.pos-front {
-      inset: 0;
       box-shadow: 0 28px 72px rgba(0,0,0,0.30);
       z-index: 3;
       opacity: 1;
       transform: translateX(0) translateY(0) scale(1) rotate(0deg);
     }
     .slide-card.pos-back1 {
-      inset: 0;
       z-index: 2;
       opacity: 0.55;
       transform: translateX(26px) translateY(-16px) scale(0.88) rotate(4deg);
@@ -266,7 +270,6 @@
       filter: brightness(0.78);
     }
     .slide-card.pos-back2 {
-      inset: 0;
       z-index: 1;
       opacity: 0.28;
       transform: translateX(48px) translateY(-30px) scale(0.78) rotate(8deg);
@@ -274,14 +277,11 @@
       filter: brightness(0.6);
     }
 
-    /* 도트 — dragZone 바깥에 독립 배치, 이벤트 완전 분리 */
     .slide-dots {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 16px;
-      position: relative;
-      z-index: 20;
+      margin-top: 0;
     }
     .slide-dot {
       width: 10px; height: 10px;
@@ -302,7 +302,7 @@
       border-radius: 5px;
     }
 
-    .slideshow-track:hover { animation-play-state: paused; }
+    #slideshowTrack:hover { animation-play-state: paused; }
 
     @media (max-width: 960px) {
       .hero-slideshow { display: none; }
@@ -318,10 +318,10 @@
 
     <!-- 우측 슬라이드쇼 -->
     <div class="hero-slideshow" aria-hidden="true">
-      <div style="position:relative; width:100%; max-width:540px; display:flex; flex-direction:column; align-items:center;">
+      <div style="position:relative; width:100%; max-width:540px; display:flex; flex-direction:column; align-items:center; gap:16px;">
 
-        <!-- 드래그 영역: 사진 위에만 이벤트 잡기 -->
-        <div id="slideDragZone" style="position:relative; width:100%; cursor:grab; user-select:none;">
+        <!-- 드래그 영역: aspect-ratio로 높이 확보 -->
+        <div id="slideDragZone" style="position:relative; width:100%; aspect-ratio:4/3; cursor:grab; user-select:none; -webkit-user-select:none;">
           <div class="slideshow-track" id="slideshowTrack">
             <div class="slide-card"><img src="Picture/Nodamm_3.jpg" alt=""></div>
             <div class="slide-card"><img src="Picture/Nodamm_4.jpg" alt=""></div>
@@ -329,7 +329,7 @@
           </div>
         </div>
 
-        <!-- 도트: dragZone 완전 바깥, 독립 배치 -->
+        <!-- 도트: dragZone 완전 바깥, z-index 높게 -->
         <div class="slide-dots">
           <span class="slide-dot active" data-idx="0"></span>
           <span class="slide-dot" data-idx="1"></span>
@@ -338,7 +338,6 @@
 
       </div>
     </div>
-
     <div class="hero-content">
       <span class="hero-badge">INCHEON CLEAN CAMPAIGN 2026</span>
 
