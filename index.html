@@ -217,11 +217,8 @@
       align-items: center;
       justify-content: center;
       padding: 2rem 5rem 2rem 1rem;
-      cursor: grab;
-      user-select: none;        /* 드래그 중 텍스트 선택 방지 */
-      -webkit-user-select: none;
+      /* cursor/user-select은 dragZone에서 관리 */
     }
-    .hero-slideshow:active { cursor: grabbing; }
 
     .slideshow-track {
       position: relative;
@@ -229,7 +226,7 @@
       aspect-ratio: 4/3;
       animation: heroFloat 4s ease-in-out infinite;
       user-select: none;
-      pointer-events: none;     /* track 자체는 이벤트 통과 → slideshow가 받음 */
+      /* pointer-events 제거 → dragZone이 직접 이벤트 수신 */
     }
 
     @keyframes heroFloat {
@@ -242,14 +239,14 @@
       border-radius: 20px;
       overflow: hidden;
       transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;     /* 카드도 이벤트 통과 → slideshow가 일괄 수신 */
+      pointer-events: none;
     }
     .slide-card img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
       pointer-events: none;
-      -webkit-user-drag: none;  /* 이미지 기본 드래그 방지 */
+      -webkit-user-drag: none;
       user-drag: none;
     }
 
@@ -277,13 +274,14 @@
       filter: brightness(0.6);
     }
 
+    /* 도트 — dragZone 바깥에 독립 배치, 이벤트 완전 분리 */
     .slide-dots {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-top: 16px;
-      z-index: 10;
-      pointer-events: auto;     /* 도트는 클릭 받아야 함 */
+      position: relative;
+      z-index: 20;
     }
     .slide-dot {
       width: 10px; height: 10px;
@@ -292,7 +290,6 @@
       transition: background 0.3s, transform 0.3s, width 0.3s;
       cursor: pointer;
       flex-shrink: 0;
-      pointer-events: auto;
     }
     .slide-dot:hover {
       background: rgba(45,106,79,0.5);
@@ -301,7 +298,7 @@
     .slide-dot.active {
       background: var(--green);
       transform: scale(1.35);
-      width: 24px;              /* 활성 도트는 pill 형태로 확장 */
+      width: 24px;
       border-radius: 5px;
     }
 
@@ -321,24 +318,24 @@
 
     <!-- 우측 슬라이드쇼 -->
     <div class="hero-slideshow" aria-hidden="true">
-      <div style="position:relative; width:100%; max-width:540px;">
-        <div class="slideshow-track" id="slideshowTrack">
-          <div class="slide-card">
-            <img src="Picture/Nodamm_3.jpg" alt="">
-          </div>
-          <div class="slide-card">
-            <img src="Picture/Nodamm_4.jpg" alt="">
-          </div>
-          <div class="slide-card">
-            <img src="Picture/Nodamm_5.jpg" alt="">
+      <div style="position:relative; width:100%; max-width:540px; display:flex; flex-direction:column; align-items:center;">
+
+        <!-- 드래그 영역: 사진 위에만 이벤트 잡기 -->
+        <div id="slideDragZone" style="position:relative; width:100%; cursor:grab; user-select:none;">
+          <div class="slideshow-track" id="slideshowTrack">
+            <div class="slide-card"><img src="Picture/Nodamm_3.jpg" alt=""></div>
+            <div class="slide-card"><img src="Picture/Nodamm_4.jpg" alt=""></div>
+            <div class="slide-card"><img src="Picture/Nodamm_5.jpg" alt=""></div>
           </div>
         </div>
-        <!-- 도트를 track 밖에 배치 → pointer-events 간섭 없음 -->
+
+        <!-- 도트: dragZone 완전 바깥, 독립 배치 -->
         <div class="slide-dots">
           <span class="slide-dot active" data-idx="0"></span>
           <span class="slide-dot" data-idx="1"></span>
           <span class="slide-dot" data-idx="2"></span>
         </div>
+
       </div>
     </div>
 
@@ -375,13 +372,13 @@
   <script>
     /* ── 히어로 스택 슬라이드쇼 ── */
     (function() {
-      const cards     = Array.from(document.querySelectorAll('.slide-card'));
-      const dots      = Array.from(document.querySelectorAll('.slide-dot'));
-      const slideshow = document.querySelector('.hero-slideshow');
-      const track     = document.getElementById('slideshowTrack');
-      const total     = cards.length;
-      let current     = 0;
-      let timer       = null;
+      const cards    = Array.from(document.querySelectorAll('.slide-card'));
+      const dots     = Array.from(document.querySelectorAll('.slide-dot'));
+      const dragZone = document.getElementById('slideDragZone');  // 사진 영역만
+      const track    = document.getElementById('slideshowTrack');
+      const total    = cards.length;
+      let current    = 0;
+      let timer      = null;
 
       /* ── 위치 갱신 ── */
       function updatePositions() {
@@ -401,16 +398,14 @@
       }
 
       /* ── 자동 재생 ── */
-      function startTimer() {
-        stopTimer();
-        timer = setInterval(() => go(current + 1), 3500);
-      }
-      function stopTimer() {
-        if (timer) { clearInterval(timer); timer = null; }
-      }
+      function startTimer() { stopTimer(); timer = setInterval(() => go(current + 1), 3500); }
+      function stopTimer()  { if (timer) { clearInterval(timer); timer = null; } }
 
-      /* ── 도트 클릭 → 해당 슬라이드로 이동 ── */
+      /* ── 도트 클릭 (dragZone과 완전 분리) ── */
       dots.forEach((dot, i) => {
+        dot.addEventListener('pointerdown', e => {
+          e.stopPropagation();   // dragZone mousedown으로 버블링 차단
+        });
         dot.addEventListener('click', e => {
           e.stopPropagation();
           stopTimer();
@@ -419,76 +414,54 @@
         });
       });
 
-      /* ── 드래그 (마우스) ── */
-      let dragStartX  = 0;
-      let dragStartY  = 0;
-      let isDragging  = false;
-      let hasMoved    = false;
-      const THRESHOLD = 35; // px — 이 거리 이상 드래그해야 슬라이드 전환
+      /* ── 드래그 (마우스) — dragZone(사진 위)에서만 ── */
+      let dragStartX = 0;
+      let isDragging = false;
+      let hasMoved   = false;
+      const THRESHOLD = 35;
 
-      /* 카드(pos-front)에서 직접 mousedown 잡기 */
-      function onMouseDown(e) {
-        /* 도트는 제외 */
-        if (e.target.closest('.slide-dot')) return;
+      dragZone.addEventListener('mousedown', e => {
         isDragging = true;
         hasMoved   = false;
         dragStartX = e.clientX;
-        dragStartY = e.clientY;
         stopTimer();
-        /* float 애니메이션 멈춤 */
         track.style.animationPlayState = 'paused';
-        /* Lenis 스크롤 차단 */
+        dragZone.style.cursor = 'grabbing';
         e.preventDefault();
-      }
+      });
 
-      function onMouseMove(e) {
+      window.addEventListener('mousemove', e => {
         if (!isDragging) return;
-        const dx = Math.abs(e.clientX - dragStartX);
-        const dy = Math.abs(e.clientY - dragStartY);
-        if (dx > 5 || dy > 5) hasMoved = true;
-        /* 드래그 중 커서 변경 */
-        slideshow.style.cursor = 'grabbing';
-      }
+        if (Math.abs(e.clientX - dragStartX) > 5) hasMoved = true;
+      });
 
-      function onMouseUp(e) {
+      window.addEventListener('mouseup', e => {
         if (!isDragging) return;
         isDragging = false;
-        slideshow.style.cursor = '';
+        dragZone.style.cursor = 'grab';
         track.style.animationPlayState = '';
-
         if (hasMoved) {
           const diff = dragStartX - e.clientX;
-          if (Math.abs(diff) >= THRESHOLD) {
-            diff > 0 ? go(current + 1) : go(current - 1);
-          }
+          if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
         }
         startTimer();
-      }
-
-      /* slideshow 전체 영역에 등록 → 카드 밖에서 잡아도 동작 */
-      slideshow.addEventListener('mousedown', onMouseDown);
-      window.addEventListener('mousemove',   onMouseMove);
-      window.addEventListener('mouseup',     onMouseUp);
+      });
 
       /* ── 드래그 (터치) ── */
       let touchStartX = 0;
-      let touchStartY = 0;
       let isTouching  = false;
 
-      slideshow.addEventListener('touchstart', e => {
-        if (e.target.closest('.slide-dot')) return;
+      dragZone.addEventListener('touchstart', e => {
         isTouching  = true;
         touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
         stopTimer();
         track.style.animationPlayState = 'paused';
       }, { passive: true });
 
-      slideshow.addEventListener('touchmove', e => {
+      dragZone.addEventListener('touchmove', e => {
         if (!isTouching) return;
-        /* 세로 스크롤은 허용, 가로 스와이프만 차단 */
         const dx = Math.abs(e.touches[0].clientX - touchStartX);
-        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        const dy = Math.abs(e.touches[0].clientY - touchStartX);
         if (dx > dy) e.preventDefault();
       }, { passive: false });
 
@@ -496,17 +469,9 @@
         if (!isTouching) return;
         isTouching = false;
         track.style.animationPlayState = '';
-
         const diff = touchStartX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) >= THRESHOLD) {
-          diff > 0 ? go(current + 1) : go(current - 1);
-        }
+        if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
         startTimer();
-      });
-
-      /* ── 마우스가 슬라이드쇼 영역 벗어나면 float 재개 ── */
-      slideshow.addEventListener('mouseleave', () => {
-        if (!isDragging) track.style.animationPlayState = '';
       });
 
       /* ── 초기화 ── */
