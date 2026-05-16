@@ -306,6 +306,11 @@
     }
     .slide-dot:hover  { background: rgba(45,106,79,.5); transform: scale(1.2); }
     .slide-dot.active { background: var(--green); transform: scale(1.1); width: 24px; border-radius: 5px; }
+    .slide-dot:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
     @media (max-width: 960px) { .hero-slideshow { display: none; } }
   </style>
 
@@ -325,10 +330,10 @@
             <div class="slide-card"><img src="Picture/Nodamm_5.jpg" alt="노담 서포터즈 플로깅 활동 현장 3" loading="lazy" decoding="async"></div>
           </div>
         </div>
-        <div class="slide-dots">
-          <span class="slide-dot" data-idx="0"></span>
-          <span class="slide-dot" data-idx="1"></span>
-          <span class="slide-dot" data-idx="2"></span>
+        <div class="slide-dots" role="tablist" aria-label="슬라이드 선택">
+          <span class="slide-dot" data-idx="0" role="tab" tabindex="0" aria-label="1번 슬라이드" aria-selected="true"></span>
+          <span class="slide-dot" data-idx="1" role="tab" tabindex="0" aria-label="2번 슬라이드" aria-selected="false"></span>
+          <span class="slide-dot" data-idx="2" role="tab" tabindex="0" aria-label="3번 슬라이드" aria-selected="false"></span>
         </div>
       </div>
     </div>
@@ -376,7 +381,10 @@
           else if (offset === 1) card.classList.add('pos-back1');
           else                   card.classList.add('pos-back2');
         });
-        dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === current);
+          dot.setAttribute('aria-selected', i === current ? 'true' : 'false');
+        });
       }
 
       function go(idx) { current = ((idx % total) + total) % total; updatePositions(); }
@@ -388,6 +396,16 @@
         dot.addEventListener('mousedown',  e => e.stopPropagation());
         dot.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
         dot.addEventListener('click', () => { stopTimer(); go(i); startTimer(); });
+        // 키보드 Enter/Space로도 이동
+        dot.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            stopTimer(); go(i); startTimer();
+          }
+          // 좌우 화살표로 이전/다음 이동
+          if (e.key === 'ArrowLeft')  { e.preventDefault(); stopTimer(); go(current - 1); startTimer(); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); stopTimer(); go(current + 1); startTimer(); }
+        });
       });
 
       // 드래그 — dragZone
