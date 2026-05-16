@@ -251,6 +251,7 @@
       background: var(--green-pale);
       opacity: .35;
       z-index: 0;
+      pointer-events: none;   /* 마우스 이벤트 통과 → 슬라이드쇼 드래그 정상 동작 */
     }
 
     .hero-deco-text {
