@@ -206,45 +206,59 @@
   </nav>
 
   <style>
-    /* ── 히어로 슬라이드쇼 ── */
+    /* ====================================================
+       히어로 슬라이드쇼
+    ==================================================== */
     .hero-slideshow {
       position: absolute;
-      right: 0;
-      top: 0; bottom: 0;
+      right: 0; top: 0; bottom: 0;
       width: 50%;
-      z-index: 1;
+      z-index: 2;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 2rem 5rem 2rem 1rem;
-      pointer-events: none;   /* 슬라이드쇼 컨테이너는 이벤트 통과 */
-    }
-
-    /* dragZone과 dots만 이벤트 받음 */
-    #slideDragZone,
-    .slide-dots {
-      pointer-events: auto;
-    }
-
-    .slideshow-track {
-      position: absolute;   /* dragZone을 꽉 채움 */
-      inset: 0;
-      animation: heroFloat 4s ease-in-out infinite;
-      user-select: none;
       pointer-events: none;
     }
-
+    #slideWrapper {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      pointer-events: none;
+    }
+    #slideDragZone {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+    }
+    #slideDragZone:active { cursor: grabbing; }
+    #slideshowTrack {
+      position: absolute;
+      inset: 0;
+      animation: heroFloat 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    #slideshowTrack:hover { animation-play-state: paused; }
     @keyframes heroFloat {
-      0%, 100% { transform: translateY(0px); }
+      0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-14px); }
     }
-
     .slide-card {
       position: absolute;
       inset: 0;
       border-radius: 20px;
       overflow: hidden;
-      transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity .55s cubic-bezier(.4,0,.2,1),
+                  transform .55s cubic-bezier(.4,0,.2,1),
+                  filter .55s cubic-bezier(.4,0,.2,1);
       pointer-events: none;
     }
     .slide-card img {
@@ -253,60 +267,43 @@
       display: block;
       pointer-events: none;
       -webkit-user-drag: none;
-      user-drag: none;
     }
-
     .slide-card.pos-front {
-      box-shadow: 0 28px 72px rgba(0,0,0,0.30);
-      z-index: 3;
-      opacity: 1;
+      z-index: 3; opacity: 1;
       transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+      box-shadow: 0 28px 72px rgba(0,0,0,.30);
     }
     .slide-card.pos-back1 {
-      z-index: 2;
-      opacity: 0.55;
-      transform: translateX(26px) translateY(-16px) scale(0.88) rotate(4deg);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
-      filter: brightness(0.78);
+      z-index: 2; opacity: .55;
+      transform: translateX(26px) translateY(-16px) scale(.88) rotate(4deg);
+      box-shadow: 0 12px 32px rgba(0,0,0,.15);
+      filter: brightness(.78);
     }
     .slide-card.pos-back2 {
-      z-index: 1;
-      opacity: 0.28;
-      transform: translateX(48px) translateY(-30px) scale(0.78) rotate(8deg);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
-      filter: brightness(0.6);
+      z-index: 1; opacity: .28;
+      transform: translateX(48px) translateY(-30px) scale(.78) rotate(8deg);
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+      filter: brightness(.6);
     }
-
     .slide-dots {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 0;
+      pointer-events: auto;
+      position: relative;
+      z-index: 10;
     }
     .slide-dot {
       width: 10px; height: 10px;
       border-radius: 50%;
-      background: rgba(45,106,79,0.25);
-      transition: background 0.3s, transform 0.3s, width 0.3s;
+      background: rgba(45,106,79,.25);
+      transition: background .3s, transform .3s, width .3s, border-radius .3s;
       cursor: pointer;
       flex-shrink: 0;
     }
-    .slide-dot:hover {
-      background: rgba(45,106,79,0.5);
-      transform: scale(1.2);
-    }
-    .slide-dot.active {
-      background: var(--green);
-      transform: scale(1.35);
-      width: 24px;
-      border-radius: 5px;
-    }
-
-    #slideshowTrack:hover { animation-play-state: paused; }
-
-    @media (max-width: 960px) {
-      .hero-slideshow { display: none; }
-    }
+    .slide-dot:hover  { background: rgba(45,106,79,.5); transform: scale(1.2); }
+    .slide-dot.active { background: var(--green); transform: scale(1.1); width: 24px; border-radius: 5px; }
+    @media (max-width: 960px) { .hero-slideshow { display: none; } }
   </style>
 
   <!-- ====================================================
@@ -316,47 +313,38 @@
     <div class="hero-bg" role="img" aria-label="노담 서포터즈 플로깅 활동 배경 이미지"></div>
     <div class="hero-circle" aria-hidden="true"></div>
 
-    <!-- 우측 슬라이드쇼 -->
     <div class="hero-slideshow" aria-hidden="true">
-      <div style="position:relative; width:100%; max-width:540px; display:flex; flex-direction:column; align-items:center; gap:16px;">
-
-        <!-- 드래그 영역: aspect-ratio로 높이 확보 -->
-        <div id="slideDragZone" style="position:relative; width:100%; aspect-ratio:4/3; cursor:grab; user-select:none; -webkit-user-select:none;">
-          <div class="slideshow-track" id="slideshowTrack">
+      <div id="slideWrapper">
+        <div id="slideDragZone">
+          <div id="slideshowTrack">
             <div class="slide-card"><img src="Picture/Nodamm_3.jpg" alt=""></div>
             <div class="slide-card"><img src="Picture/Nodamm_4.jpg" alt=""></div>
             <div class="slide-card"><img src="Picture/Nodamm_5.jpg" alt=""></div>
           </div>
         </div>
-
-        <!-- 도트: dragZone 완전 바깥, z-index 높게 -->
         <div class="slide-dots">
-          <span class="slide-dot active" data-idx="0"></span>
+          <span class="slide-dot" data-idx="0"></span>
           <span class="slide-dot" data-idx="1"></span>
           <span class="slide-dot" data-idx="2"></span>
         </div>
-
       </div>
     </div>
+
     <div class="hero-content">
       <span class="hero-badge">INCHEON CLEAN CAMPAIGN 2026</span>
-
       <h1 class="hero-title display">
         노담<br><span class="accent">서포터즈</span>
       </h1>
-
       <p class="hero-slogan">
         인천의 바닥을 바꾸는 1시간,<br>
         우리의 도시가 숨을 쉬게 할 수 있도록.
       </p>
-
       <div class="hero-tags" aria-label="캠페인 태그">
         <span class="hero-tag-item">#환경보호</span>
         <span class="hero-tag-item">#인천사랑</span>
         <span class="hero-tag-item">#청년네트워크</span>
         <span class="hero-tag-item">#실천하는용기</span>
       </div>
-
       <div class="hero-buttons">
         <button class="btn btn-primary" onclick="openApplyModal()">
           <i class="ti ti-arrow-right" aria-hidden="true"></i> 지금 참여하기
@@ -369,17 +357,14 @@
   </section>
 
   <script>
-    /* ── 히어로 스택 슬라이드쇼 ── */
-    (function() {
+    (function () {
       const cards    = Array.from(document.querySelectorAll('.slide-card'));
       const dots     = Array.from(document.querySelectorAll('.slide-dot'));
-      const dragZone = document.getElementById('slideDragZone');  // 사진 영역만
+      const dragZone = document.getElementById('slideDragZone');
       const track    = document.getElementById('slideshowTrack');
       const total    = cards.length;
-      let current    = 0;
-      let timer      = null;
+      let current = 0, timer = null;
 
-      /* ── 위치 갱신 ── */
       function updatePositions() {
         cards.forEach((card, i) => {
           card.classList.remove('pos-front', 'pos-back1', 'pos-back2');
@@ -391,89 +376,56 @@
         dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
       }
 
-      function go(idx) {
-        current = ((idx % total) + total) % total;
-        updatePositions();
-      }
-
-      /* ── 자동 재생 ── */
+      function go(idx) { current = ((idx % total) + total) % total; updatePositions(); }
       function startTimer() { stopTimer(); timer = setInterval(() => go(current + 1), 3500); }
-      function stopTimer()  { if (timer) { clearInterval(timer); timer = null; } }
+      function stopTimer()  { clearInterval(timer); timer = null; }
 
-      /* ── 도트 클릭 (dragZone과 완전 분리) ── */
+      // 도트: mousedown/touchstart 버블링 차단 → dragZone 이벤트와 충돌 없음
       dots.forEach((dot, i) => {
-        dot.addEventListener('pointerdown', e => {
-          e.stopPropagation();   // dragZone mousedown으로 버블링 차단
-        });
-        dot.addEventListener('click', e => {
-          e.stopPropagation();
-          stopTimer();
-          go(i);
-          startTimer();
-        });
+        dot.addEventListener('mousedown',  e => e.stopPropagation());
+        dot.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+        dot.addEventListener('click', () => { stopTimer(); go(i); startTimer(); });
       });
 
-      /* ── 드래그 (마우스) — dragZone(사진 위)에서만 ── */
-      let dragStartX = 0;
-      let isDragging = false;
-      let hasMoved   = false;
+      // 드래그 — dragZone
+      let startX = 0, dragging = false;
       const THRESHOLD = 35;
 
       dragZone.addEventListener('mousedown', e => {
-        isDragging = true;
-        hasMoved   = false;
-        dragStartX = e.clientX;
+        dragging = true; startX = e.clientX;
         stopTimer();
         track.style.animationPlayState = 'paused';
-        dragZone.style.cursor = 'grabbing';
         e.preventDefault();
       });
-
-      window.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        if (Math.abs(e.clientX - dragStartX) > 5) hasMoved = true;
-      });
-
       window.addEventListener('mouseup', e => {
-        if (!isDragging) return;
-        isDragging = false;
-        dragZone.style.cursor = 'grab';
+        if (!dragging) return;
+        dragging = false;
         track.style.animationPlayState = '';
-        if (hasMoved) {
-          const diff = dragStartX - e.clientX;
-          if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
-        }
-        startTimer();
-      });
-
-      /* ── 드래그 (터치) ── */
-      let touchStartX = 0;
-      let isTouching  = false;
-
-      dragZone.addEventListener('touchstart', e => {
-        isTouching  = true;
-        touchStartX = e.touches[0].clientX;
-        stopTimer();
-        track.style.animationPlayState = 'paused';
-      }, { passive: true });
-
-      dragZone.addEventListener('touchmove', e => {
-        if (!isTouching) return;
-        const dx = Math.abs(e.touches[0].clientX - touchStartX);
-        const dy = Math.abs(e.touches[0].clientY - touchStartX);
-        if (dx > dy) e.preventDefault();
-      }, { passive: false });
-
-      window.addEventListener('touchend', e => {
-        if (!isTouching) return;
-        isTouching = false;
-        track.style.animationPlayState = '';
-        const diff = touchStartX - e.changedTouches[0].clientX;
+        const diff = startX - e.clientX;
         if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
         startTimer();
       });
 
-      /* ── 초기화 ── */
+      // 터치 — dragZone
+      let touchX = 0, touching = false;
+      dragZone.addEventListener('touchstart', e => {
+        touching = true; touchX = e.touches[0].clientX;
+        stopTimer(); track.style.animationPlayState = 'paused';
+      }, { passive: true });
+      dragZone.addEventListener('touchmove', e => {
+        if (!touching) return;
+        const dx = Math.abs(e.touches[0].clientX - touchX);
+        const dy = Math.abs(e.touches[0].clientY - touchX);
+        if (dx > dy) e.preventDefault();
+      }, { passive: false });
+      window.addEventListener('touchend', e => {
+        if (!touching) return;
+        touching = false; track.style.animationPlayState = '';
+        const diff = touchX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
+        startTimer();
+      });
+
       updatePositions();
       startTimer();
     })();
