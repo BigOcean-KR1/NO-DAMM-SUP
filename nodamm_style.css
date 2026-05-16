@@ -241,17 +241,7 @@
 
     /* decorative circle */
     .hero-circle {
-      position: absolute;
-      right: -120px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 560px;
-      height: 560px;
-      border-radius: 50%;
-      background: var(--green-pale);
-      opacity: .35;
-      z-index: 0;
-      pointer-events: none;   /* 마우스 이벤트 통과 → 슬라이드쇼 드래그 정상 동작 */
+      display: none;
     }
 
     .hero-deco-text {
