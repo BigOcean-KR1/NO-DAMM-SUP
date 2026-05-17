@@ -308,6 +308,7 @@
       border-radius: 4px;
     }
     @media (max-width: 960px) { .hero-slideshow { display: none; } }
+    /* 모바일 슬라이드쇼는 아래 별도 섹션으로 표시 */
   </style>
 
   <!-- ====================================================
@@ -447,6 +448,22 @@
       startTimer();
     })();
   </script>
+
+  <!-- ====================================================
+       모바일 슬라이드쇼 (960px 이하에서만 표시)
+  ==================================================== -->
+  <div id="mobile-slideshow" aria-label="노담 서포터즈 활동 사진">
+    <div id="mobileSlideTrack">
+      <div class="mobile-slide-card active"><img src="Picture/Nodamm_3.png" alt="노담 서포터즈 플로깅 활동 현장 1" loading="lazy" decoding="async"></div>
+      <div class="mobile-slide-card"><img src="Picture/Nodamm_4.png" alt="노담 서포터즈 플로깅 활동 현장 2" loading="lazy" decoding="async"></div>
+      <div class="mobile-slide-card"><img src="Picture/Nodamm_5.png" alt="노담 서포터즈 플로깅 활동 현장 3" loading="lazy" decoding="async"></div>
+    </div>
+    <div class="mobile-slide-dots">
+      <span class="mobile-dot active" data-idx="0"></span>
+      <span class="mobile-dot" data-idx="1"></span>
+      <span class="mobile-dot" data-idx="2"></span>
+    </div>
+  </div>
 
   <!-- ====================================================
        INTRO (WHY)
