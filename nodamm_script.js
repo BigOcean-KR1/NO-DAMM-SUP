@@ -1,1147 +1,716 @@
-<!DOCTYPE html>
-<html lang="ko">
+/* ── Firebase 통합 (Modular SDK v10) ── */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>노담 서포터즈 | 인천의 바닥을 바꾸는 1시간</title>
-  <meta name="description" content="노담 서포터즈는 인천의 꽁초를 줍는 청년 환경 플로깅 캠페인입니다." />
-<!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+// Firebase 설정
+const firebaseConfig = {
+  apiKey: "AIzaSyDohqK6enK4y1RSjkYnDGlxtHb5eSo3TWs",
+  authDomain: "no-damm-sup.firebaseapp.com",
+  projectId: "no-damm-sup",
+  storageBucket: "no-damm-sup.firebasestorage.app",
+  messagingSenderId: "1072430359524",
+  appId: "1:1072430359524:web:5bf91b96c3d907726a5df1",
+  measurementId: "G-ZWK7RG5Q5C"
+};
 
-  <!-- Tabler Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="Picture/favicon_io/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="Picture/favicon_io/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="Picture/favicon_io/favicon-16x16.png">
-  <link rel="icon" href="Picture/favicon_io/favicon.ico" type="image/x-icon">
-  <link rel="manifest" href="Picture/favicon_io/site.webmanifest">
+/* ── 0. Lenis Smooth Scroll ── */
+// Lenis는 defer로 로드되므로 로드 완료 후 초기화
+let lenis;
 
-  <!-- Lenis (defer로 변경 → 블로킹 제거) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/lenis@latest/dist/lenis.min.js"></script>
+function initLenis() {
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
+    smoothWheel: true,
+    wheelMultiplier: 1,
+    smoothTouch: false,
+    touchMultiplier: 2,
+    infinite: false,
+  });
 
-  <!-- 카카오맵 SDK -->
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ca1b74dee88e9bb909ea0c5c8f41a15e&libraries=services"></script>
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+  window.lenis = lenis;
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="nodamm_style.css" />
+  // 앵커 스무스 스크롤
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const target = this.getAttribute('href');
+      if (target === '#') return;
+      e.preventDefault();
+      lenis.scrollTo(target);
+    });
+  });
+}
 
-  <style>
-    /* 스크롤바 */
-    html { overflow-y: scroll; scrollbar-gutter: stable; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f0f4f1; }
-    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #40916c, #2d6a4f); border-radius: 999px; }
-    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #52b788, #40916c); }
+// Lenis가 로드됐으면 바로, 아니면 load 이벤트 후 초기화
+if (window.Lenis) {
+  initLenis();
+} else {
+  window.addEventListener('load', () => {
+    if (window.Lenis) initLenis();
+  });
+}
 
-    /* ── 활동 드롭다운 (hover, a태그 기반) ── */
-    .nav-dropdown { position: relative; display: flex; align-items: center; }
-    .nav-dropdown-link {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 15px; font-weight: 700; color: var(--text);
-      text-decoration: none; letter-spacing: .5px; transition: color .2s;
+/* ── 1. 스크롤 페이드인 + 언더라인 드로잉 ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
     }
-    .nav-dropdown-link::after { content: '▾'; font-size: 10px; transition: transform 0.3s; }
-    .nav-dropdown:hover .nav-dropdown-link { color: var(--green); }
-    .nav-dropdown:hover .nav-dropdown-link::after { transform: rotate(180deg); }
-    .dropdown-menu {
-      position: absolute; top: 100%; left: 50%;
-      transform: translateX(-50%);
-      background: #fff; border: 1px solid #e0e7e3; border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
-      padding: 8px 0; min-width: 130px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s; z-index: 200;
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// section-title 언더라인 드로잉 (fade-up과 별도 감지)
+const titleObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      titleObserver.unobserve(e.target);
     }
-    .dropdown-menu::before {
-      content: ''; position: absolute;
-      top: -20px; left: 0; right: 0; height: 20px;
-    }
-    .nav-dropdown:hover .dropdown-menu { opacity: 1; pointer-events: auto; }
-    .dropdown-menu a { display: block; padding: 9px 20px; font-size: 13px; font-weight: 500; color: #1a2e22; text-decoration: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
-    .dropdown-menu a:hover { background: #d8f3dc; color: #2d6a4f; }
+  });
+}, { threshold: 0.5 });
 
-    /* ── 햄버거 메뉴 (모바일) ── */
-    .nav-hamburger {
-      display: none; flex-direction: column; justify-content: center; gap: 5px;
-      width: 36px; height: 36px; background: none; border: none; cursor: pointer; padding: 4px;
-    }
-    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--green); border-radius: 2px; transition: all 0.3s; }
-    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+document.querySelectorAll('.section-title').forEach(el => titleObserver.observe(el));
 
-    /* 모바일 드롭다운 패널 */
-    .mobile-nav-panel {
-      display: none; position: fixed; top: 70px; left: 0; right: 0;
-      background: rgba(250,250,248,0.97); backdrop-filter: blur(15px);
-      border-bottom: 1px solid #e0e7e3; z-index: 199;
-      padding: 1rem 1.5rem 1.5rem; flex-direction: column; gap: 0;
-    }
-    .mobile-nav-panel.open { display: flex; }
-    .mobile-nav-panel a { display: block; padding: 13px 0; font-size: 16px; font-weight: 700; color: var(--text); text-decoration: none; border-bottom: 1px solid #e9efec; }
-    .mobile-nav-panel a:last-child { border-bottom: none; }
-    .mobile-nav-panel .mobile-sub { padding-left: 1.2rem; font-size: 14px; font-weight: 500; color: var(--green); }
-    .mobile-nav-panel .mobile-cta {
-      margin-top: 1rem; display: block; text-align: center;
-      background: var(--green); color: #fff; border-radius: 8px;
-      padding: 13px; font-weight: 700; border-bottom: none !important;
-    }
+/* ── 2. 숫자 카운터 애니메이션 ── */
+function countUp(id, target, suffix, prefix) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const steps = 60;
+  const stepTime = 1200 / steps;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current = Math.min(current + increment, target);
+    el.textContent = (prefix || '') + Math.floor(current).toLocaleString() + (suffix || '');
+    if (current >= target) clearInterval(timer);
+  }, stepTime);
+}
 
-    /* ── 게시판 관련 ── */
-    .board-write-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-top: 1.5rem; }
-    .reply-list { margin-top: 0.5rem; }
-    .reply-item { background: #f0f7f3; border-left: 3px solid var(--green-light); border-radius: 0 8px 8px 0; padding: 8px 12px; margin-top: 6px; font-size: 13px; }
-    .reply-item .reply-author { font-weight: 700; color: var(--green); margin-right: 6px; }
-    .reply-item .reply-date { font-size: 11px; color: var(--muted); margin-left: 6px; }
-    .reply-item .reply-del { font-size: 11px; color: #e74c3c; cursor: pointer; margin-left: 8px; background: none; border: none; font-family: inherit; }
-    .reply-btn { font-size: 12px; color: var(--green); background: none; border: 1px solid var(--green-pale); border-radius: 6px; padding: 3px 8px; cursor: pointer; margin-left: 8px; font-family: inherit; font-weight: 600; }
-    .post-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .action-btn { font-size: 11px; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; color: var(--muted); font-family: inherit; transition: all 0.15s; }
-    .action-btn:hover { border-color: var(--green); color: var(--green); }
-    .action-btn.del:hover { border-color: #e74c3c; color: #e74c3c; }
+/* ── 3. 게시판 (Firebase Firestore) ── */
+const MASTER_PW = '3141592';
 
-    /* ── 활동 탭 ── */
-    .activity-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); }
-    .act-tab { padding: 12px 20px; font-size: 14px; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: inherit; transition: color 0.2s, border-color 0.2s; }
-    .act-tab:hover { color: var(--green); }
-    .act-tab.active { color: var(--green); border-color: var(--green); }
-    .tab-content { animation: tabFadeIn 0.3s ease; }
-    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+const BADGE = {
+  q:      { label: '질문', cls: 'badge-q' },
+  review: { label: '후기', cls: 'badge-review' },
+};
 
-    /* 일정 네비 */
-    .month-nav { display: flex; align-items: center; gap: 1rem; }
-    .nav-btn-dark { background: #f0f7f3; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--green); transition: background 0.2s; font-size: 16px; }
-    .nav-btn-dark:hover { background: var(--green-pale); }
-    .current-month-text-dark { font-size: 1.1rem; font-weight: 700; color: var(--text); min-width: 120px; text-align: center; }
-    #schedule-body tr { background: #fff; }
-    #schedule-body tr:nth-child(even) { background: #f8faf8; }
-    #schedule-body td { padding: 13px 20px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #schedule-body tr.active-row td { background: #d8f3dc; color: var(--green); font-weight: 600; }
+let firestorePosts  = null;
+let currentFilter   = 'all';
+let currentRegion   = 'all';
+let pendingEditId   = null;
+let pendingDeleteId = null;
+let pendingReplyId  = null;
 
-    /* 갤러리 */
-    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
-    .gallery-item { position: relative; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
-    .gallery-item:hover img { transform: scale(1.05); }
-    .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); display: flex; align-items: flex-end; padding: 1.2rem; opacity: 0; transition: opacity 0.3s; }
-    .gallery-item:hover .gallery-overlay { opacity: 1; }
-    .gallery-overlay span { color: #fff; font-size: 14px; font-weight: 600; }
+function formatDate(timestamp) {
+  if (!timestamp) return '';
+  const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
 
-    /* 리워드 장식 카드 */
-    .reward-card-deco { overflow: hidden; padding: 0 !important; border: none !important; position: relative; }
-    .reward-card-deco img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); display: block; min-height: 180px; }
 
-    /* 포커스 스타일 (접근성) */
-    :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
 
-    /* 모달 인 애니메이션 */
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-    /* ── 반응형: 모바일 햄버거 표시 ── */
-    @media (max-width: 768px) {
-      .nav-hamburger { display: flex; }
-      .nav-links { display: none !important; }
-    }
-
-    /* ── item-region 스타일 ── */
-    .item-region { font-size: 12px; color: var(--muted); }
-  </style>
-</head>
-
-<body>
-
-  <!-- ====================================================
-       NAVIGATION
-  ==================================================== -->
-  <nav id="navbar">
-    <div class="nav-inner">
-
-      <!-- 로고 -->
-      <a class="nav-logo" href="#hero">
-        <img src="Picture/Nodamm_Mark.png" alt="노담 마크" class="nav-logo-img" decoding="async">
-        NODAM SUPPORTERS
-      </a>
-
-      <!-- PC 메뉴 -->
-      <ul class="nav-links">
-        <li><a href="#intro">소개</a></li>
-        <li class="nav-dropdown" id="activityDropdown">
-          <a href="#activity-section" class="nav-dropdown-link">활동</a>
-          <div class="dropdown-menu" role="menu">
-            <a href="#activity-section" role="menuitem" onclick="switchTab('info')">활동 정보</a>
-            <a href="#activity-section" role="menuitem" onclick="switchTab('schedule')">활동 일정</a>
-            <a href="#activity-section" role="menuitem" onclick="switchTab('spot')">활동 스팟</a>
-            <a href="#activity-section" role="menuitem" onclick="switchTab('gallery')">활동 사진</a>
-          </div>
-        </li>
-        <li><a href="#reward">리워드</a></li>
-        <li><a href="#board">게시판</a></li>
-      </ul>
-
-      <!-- 모바일 햄버거 버튼 -->
-      <button class="nav-hamburger" id="hamburgerBtn" aria-label="메뉴 열기" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <button class="nav-cta" onclick="openApplyModal()">지원하기</button>
-    </div>
-
-    <!-- 모바일 전용 패널 -->
-    <div class="mobile-nav-panel" id="mobileNavPanel" role="navigation" aria-label="모바일 메뉴">
-      <a href="#intro" onclick="closeMobileNav()">소개</a>
-      <a href="#activity-section" onclick="switchTab('info'); closeMobileNav();" class="mobile-sub">활동 정보</a>
-      <a href="#activity-section" onclick="switchTab('schedule'); closeMobileNav();" class="mobile-sub">활동 일정</a>
-      <a href="#activity-section" onclick="switchTab('spot'); closeMobileNav();" class="mobile-sub">활동 스팟</a>
-      <a href="#activity-section" onclick="switchTab('gallery'); closeMobileNav();" class="mobile-sub">활동 사진</a>
-      <a href="#reward" onclick="closeMobileNav()">리워드</a>
-      <a href="#board" onclick="closeMobileNav()">게시판</a>
-      <a href="#" class="mobile-cta" onclick="openApplyModal(); closeMobileNav();">지원하기</a>
-    </div>
-  </nav>
-
-  <style>
-    /* ====================================================
-       히어로 슬라이드쇼
-    ==================================================== */
-    .hero-slideshow {
-      position: absolute;
-      right: 0; top: 0; bottom: 0;
-      width: 50%;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 5rem 2rem 1rem;
-      pointer-events: none;
-    }
-    #slideWrapper {
-      position: relative;
-      width: 100%;
-      max-width: 540px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      pointer-events: none;
-    }
-    #slideDragZone {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      cursor: grab;
-      user-select: none;
-      -webkit-user-select: none;
-      pointer-events: auto;
-    }
-    #slideDragZone:active { cursor: grabbing; }
-    #slideshowTrack {
-      position: absolute;
-      inset: 0;
-      animation: heroFloat 4s ease-in-out infinite;
-      pointer-events: none;
-    }
-    #slideshowTrack:hover { animation-play-state: paused; }
-    @keyframes heroFloat {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-14px); }
-    }
-    .slide-card {
-      position: absolute;
-      inset: 0;
-      border-radius: 20px;
-      overflow: hidden;
-      transition: opacity .55s cubic-bezier(.4,0,.2,1),
-                  transform .55s cubic-bezier(.4,0,.2,1),
-                  filter .55s cubic-bezier(.4,0,.2,1);
-      pointer-events: none;
-    }
-    .slide-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      pointer-events: none;
-      -webkit-user-drag: none;
-    }
-    .slide-card.pos-front {
-      z-index: 3; opacity: 1;
-      transform: translateX(0) translateY(0) scale(1) rotate(0deg);
-      box-shadow: 0 28px 72px rgba(0,0,0,.30);
-    }
-    .slide-card.pos-back1 {
-      z-index: 2; opacity: .55;
-      transform: translateX(26px) translateY(-16px) scale(.88) rotate(4deg);
-      box-shadow: 0 12px 32px rgba(0,0,0,.15);
-      filter: brightness(.78);
-    }
-    .slide-card.pos-back2 {
-      z-index: 1; opacity: .28;
-      transform: translateX(48px) translateY(-30px) scale(.78) rotate(8deg);
-      box-shadow: 0 8px 20px rgba(0,0,0,.10);
-      filter: brightness(.6);
-    }
-    .slide-dots {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      pointer-events: auto;
-      position: relative;
-      z-index: 10;
-    }
-    .slide-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: rgba(45,106,79,.25);
-      transition: background .3s, transform .3s, width .3s, border-radius .3s;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .slide-dot:hover  { background: rgba(45,106,79,.5); transform: scale(1.2); }
-    .slide-dot.active { background: var(--green); transform: scale(1.1); width: 24px; border-radius: 5px; }
-    .slide-dot:focus-visible {
-      outline: 2px solid var(--green);
-      outline-offset: 4px;
-      border-radius: 4px;
-    }
-    @media (max-width: 960px) { .hero-slideshow { display: none; } }
-  </style>
-
-  <!-- ====================================================
-       HERO
-  ==================================================== -->
-  <section id="hero">
-    <div class="hero-bg" role="img" aria-label="노담 서포터즈 플로깅 활동 배경 이미지"></div>
-    <div class="hero-circle" aria-hidden="true"></div>
-
-    <div class="hero-slideshow" aria-hidden="true">
-      <div id="slideWrapper">
-        <div id="slideDragZone">
-          <div id="slideshowTrack">
-            <div class="slide-card"><img src="Picture/Nodamm_3.png" alt="노담 서포터즈 플로깅 활동 현장 1" fetchpriority="high" decoding="async"></div>
-            <div class="slide-card"><img src="Picture/Nodamm_4.png" alt="노담 서포터즈 플로깅 활동 현장 2" loading="lazy" decoding="async"></div>
-            <div class="slide-card"><img src="Picture/Nodamm_5.png" alt="노담 서포터즈 플로깅 활동 현장 3" loading="lazy" decoding="async"></div>
-          </div>
-        </div>
-        <div class="slide-dots" role="tablist" aria-label="슬라이드 선택">
-          <span class="slide-dot" data-idx="0" role="tab" tabindex="0" aria-label="1번 슬라이드" aria-selected="true"></span>
-          <span class="slide-dot" data-idx="1" role="tab" tabindex="0" aria-label="2번 슬라이드" aria-selected="false"></span>
-          <span class="slide-dot" data-idx="2" role="tab" tabindex="0" aria-label="3번 슬라이드" aria-selected="false"></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-content">
-      <span class="hero-badge">INCHEON CLEAN CAMPAIGN 2026</span>
-      <h1 class="hero-title display">
-        노담<br><span class="accent">서포터즈</span>
-      </h1>
-      <p class="hero-slogan">
-        인천의 바닥을 바꾸는 1시간,<br>
-        우리의 도시가 숨을 쉬게 할 수 있도록.
-      </p>
-      <div class="hero-tags" aria-label="캠페인 태그">
-        <span class="hero-tag-item">#환경보호</span>
-        <span class="hero-tag-item">#인천사랑</span>
-        <span class="hero-tag-item">#청년네트워크</span>
-        <span class="hero-tag-item">#실천하는용기</span>
-      </div>
-      <div class="hero-buttons">
-        <button class="btn btn-primary" onclick="openApplyModal()">
-          <i class="ti ti-arrow-right" aria-hidden="true"></i> 지금 참여하기
-        </button>
-        <button class="btn btn-outline" onclick="window.lenis && lenis.scrollTo('#intro')">
-          더 알아보기
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    (function () {
-      const cards    = Array.from(document.querySelectorAll('.slide-card'));
-      const dots     = Array.from(document.querySelectorAll('.slide-dot'));
-      const dragZone = document.getElementById('slideDragZone');
-      const track    = document.getElementById('slideshowTrack');
-      const total    = cards.length;
-      let current = 0, timer = null;
-
-      function updatePositions() {
-        cards.forEach((card, i) => {
-          card.classList.remove('pos-front', 'pos-back1', 'pos-back2');
-          const offset = (i - current + total) % total;
-          if      (offset === 0) card.classList.add('pos-front');
-          else if (offset === 1) card.classList.add('pos-back1');
-          else                   card.classList.add('pos-back2');
-        });
-        dots.forEach((dot, i) => {
-          dot.classList.toggle('active', i === current);
-          dot.setAttribute('aria-selected', i === current ? 'true' : 'false');
-        });
+/* ── 관리자 답글 버튼 — Shift 5번으로 활성화 ── */
+(function() {
+  let shiftCount = 0;
+  let shiftTimer = null;
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Shift') {
+      shiftCount++;
+      clearTimeout(shiftTimer);
+      shiftTimer = setTimeout(() => { shiftCount = 0; }, 2000);
+      if (shiftCount >= 5) {
+        shiftCount = 0;
+        const btn = document.getElementById('hidden-reply-btn');
+        if (btn) {
+          const isVisible = btn.style.display !== 'none';
+          btn.style.display = isVisible ? 'none' : 'inline-block';
+        }
       }
-
-      function go(idx) { current = ((idx % total) + total) % total; updatePositions(); }
-      function startTimer() { stopTimer(); timer = setInterval(() => go(current + 1), 3500); }
-      function stopTimer()  { clearInterval(timer); timer = null; }
-
-      // 도트: mousedown/touchstart 버블링 차단 → dragZone 이벤트와 충돌 없음
-      dots.forEach((dot, i) => {
-        dot.addEventListener('mousedown',  e => e.stopPropagation());
-        dot.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
-        dot.addEventListener('click', () => { stopTimer(); go(i); startTimer(); });
-        // 키보드 Enter/Space로도 이동
-        dot.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            stopTimer(); go(i); startTimer();
-          }
-          // 좌우 화살표로 이전/다음 이동
-          if (e.key === 'ArrowLeft')  { e.preventDefault(); stopTimer(); go(current - 1); startTimer(); }
-          if (e.key === 'ArrowRight') { e.preventDefault(); stopTimer(); go(current + 1); startTimer(); }
-        });
-      });
-
-      // 드래그 — dragZone
-      let startX = 0, dragging = false;
-      const THRESHOLD = 35;
-
-      dragZone.addEventListener('mousedown', e => {
-        dragging = true; startX = e.clientX;
-        stopTimer();
-        track.style.animationPlayState = 'paused';
-        e.preventDefault();
-      });
-      window.addEventListener('mouseup', e => {
-        if (!dragging) return;
-        dragging = false;
-        track.style.animationPlayState = '';
-        const diff = startX - e.clientX;
-        if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
-        startTimer();
-      });
-
-      // 터치 — dragZone
-      let touchX = 0, touching = false;
-      dragZone.addEventListener('touchstart', e => {
-        touching = true; touchX = e.touches[0].clientX;
-        stopTimer(); track.style.animationPlayState = 'paused';
-      }, { passive: true });
-      dragZone.addEventListener('touchmove', e => {
-        if (!touching) return;
-        const dx = Math.abs(e.touches[0].clientX - touchX);
-        const dy = Math.abs(e.touches[0].clientY - touchX);
-        if (dx > dy) e.preventDefault();
-      }, { passive: false });
-      window.addEventListener('touchend', e => {
-        if (!touching) return;
-        touching = false; track.style.animationPlayState = '';
-        const diff = touchX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) >= THRESHOLD) diff > 0 ? go(current + 1) : go(current - 1);
-        startTimer();
-      });
-
-      updatePositions();
-      startTimer();
-    })();
-  </script>
-
-  <!-- ====================================================
-       INTRO (WHY)
-  ==================================================== -->
-  <section id="intro" class="section section-alt">
-    <div class="container">
-      <span class="section-tag fade-up">WHY WE EXIST</span>
-      <h2 class="section-title fade-up">왜 시작했나요?</h2>
-      <p class="section-desc fade-up">우리가 이 캠페인을 시작한 이유입니다.</p>
-
-      <blockquote class="why-quote fade-up">
-        "처음에는 동네 친구들과 가볍게 시작했습니다. 우리가 자주 걷는 골목에 버려진 꽁초들이 눈에 밟혔거든요.
-        그런데 줍다 보니 깨달았습니다. 우리가 줍는 건 단순한 쓰레기가 아니라,
-        <strong>인천의 미소</strong>라는 것을요.
-        이제 우리는 친구의 손을 넘어, 인천 전역의 동료들과 함께하려 합니다.
-        <strong>당신의 1시간이 인천을 바꿉니다.</strong>"
-      </blockquote>
-    </div>
-  </section>
-
-  <!-- ====================================================
-       ACTIVITY (탭: 정보 / 일정 / 스팟 / 사진)
-  ==================================================== -->
-  <section id="activity-section" class="section">
-    <div class="container">
-
-      <!-- 탭 헤더 -->
-      <div class="activity-tabs fade-up" role="tablist" aria-label="활동 탭">
-        <button class="act-tab active" role="tab" aria-selected="true"  aria-controls="tab-info"     onclick="switchTab('info')">활동 정보</button>
-        <button class="act-tab"        role="tab" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule')">활동 일정</button>
-        <button class="act-tab"        role="tab" aria-selected="false" aria-controls="tab-spot"     onclick="switchTab('spot')">활동 스팟</button>
-        <button class="act-tab"        role="tab" aria-selected="false" aria-controls="tab-gallery"  onclick="switchTab('gallery')">활동 사진</button>
-      </div>
-
-      <!-- ── 활동 정보 ── -->
-      <div id="tab-info" class="tab-content active-tab" role="tabpanel">
-        <div class="card-grid" style="margin-top:2rem;">
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-clock" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">시간</h3>
-            <p>매주 1시간, 우리 동네가 깨끗해지는 시간<br><strong>매주 토요일 오전 10:00</strong></p>
-          </div>
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">장소</h3>
-            <p>인천 8개 구 · 2개 군 순회<br>구월동 로데오, 주안역, 청라 커널웨이 등</p>
-            <p style="margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:700;">인천 전역 핫스팟 순회 중</p>
-          </div>
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-run" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">활동 내용</h3>
-            <p>1시간 꽁초 플로깅 후<br>수거량 측정 및 인증샷 타임</p>
-          </div>
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">팀 구성</h3>
-            <p>구역별 팀장 선정 후 인천 전역에서 동시 진행<br>
-              <span style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">🔥 미추홀구 팀장 모집 중!</span>
-            </p>
-          </div>
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-speakerphone" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">참여 대상</h3>
-            <p>환경 보호와 금연 문화 확산에 관심 있는 누구나<br>혼자서도, 친구나 가족과 함께 참여 가능<br>
-              <span style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">💚 인천을 사랑하는 마음 하나면 충분합니다!</span>
-            </p>
-          </div>
-
-          <div class="how-card fade-up">
-            <div class="how-icon"><i class="ti ti-clipboard-list" aria-hidden="true"></i></div>
-            <h3 style="font-size:14px;font-weight:700;margin-bottom:.4rem;">준비물</h3>
-            <p>가벼운 옷차림과 편안한 신발<br>환경을 생각하는 개인 텀블러 지참<br>
-              <span style="display:inline-block;margin-top:0.8rem;font-size:11px;color:var(--green);font-weight:600;background:var(--green-pale);padding:4px 8px;border-radius:4px;">✅ 활동 장비(집게·봉투) 전원 지급</span>
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── 활동 일정 ── -->
-      <div id="tab-schedule" class="tab-content" style="display:none;" role="tabpanel">
-        <div style="margin-top:2rem;">
-          <div class="month-nav" style="justify-content:center;margin-bottom:1.5rem;">
-            <button class="nav-btn-dark" onclick="changeMonth(-1)" aria-label="이전 달">
-              <i class="ti ti-chevron-left" aria-hidden="true"></i>
-            </button>
-            <span id="current-month" class="current-month-text-dark" aria-live="polite">2026년 5월</span>
-            <button class="nav-btn-dark" onclick="changeMonth(1)" aria-label="다음 달">
-              <i class="ti ti-chevron-right" aria-hidden="true"></i>
-            </button>
-          </div>
-
-          <div id="schedule-wrapper" style="border-radius:16px;overflow:hidden;border:1px solid var(--border);transition:opacity 0.25s ease;">
-            <table style="width:100%;border-collapse:collapse;table-layout:fixed;" aria-label="활동 일정표">
-              <colgroup>
-                <col style="width:35%"><col style="width:12%"><col style="width:15%"><col style="width:38%">
-              </colgroup>
-              <thead>
-                <tr style="background:var(--green);">
-                  <th scope="col" style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">날짜</th>
-                  <th scope="col" style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">시간</th>
-                  <th scope="col" style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">지역</th>
-                  <th scope="col" style="padding:14px 20px;text-align:left;font-size:13px;font-weight:600;color:#fff;">상세 장소</th>
-                </tr>
-              </thead>
-              <tbody id="schedule-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 활동 스팟 + 통계 ── -->
-      <div id="tab-spot" class="tab-content" style="display:none;" role="tabpanel">
-        <div style="margin-top:2rem;">
-          <div id="map" style="width:100%;height:450px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);" aria-label="활동 스팟 지도" role="img"></div>
-
-          <div class="stats-grid" style="margin-top:2.5rem;">
-            <div class="stat-card">
-              <div class="stat-num" id="s1">0</div>
-              <div class="stat-label">캠페인 달성 현황</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num" id="s2">0</div>
-              <div class="stat-label">활동 구역 (개)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num" id="s3">0</div>
-              <div class="stat-label">1회 봉사 시간 (H)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num" id="s4">0</div>
-              <div class="stat-label">인천 핫스팟 거점</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 활동 사진 ── -->
-      <div id="tab-gallery" class="tab-content" style="display:none;" role="tabpanel">
-
-        <style>
-          .gallery-page { display:none; }
-          .gallery-page.active { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; margin-top:2rem; }
-          .gallery-pagination {
-            display:flex; justify-content:center; align-items:center;
-            gap:8px; margin-top:1.8rem;
-          }
-          .gallery-page-btn {
-            width:36px; height:36px; border-radius:50%;
-            border:1.5px solid var(--border); background:#fff;
-            font-size:14px; font-weight:700; cursor:pointer;
-            color:var(--muted); font-family:inherit;
-            transition:all 0.2s; display:flex; align-items:center; justify-content:center;
-          }
-          .gallery-page-btn:hover { border-color:var(--green); color:var(--green); }
-          .gallery-page-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
-          .gallery-page-arrow {
-            width:36px; height:36px; border-radius:50%;
-            border:1.5px solid var(--border); background:#fff;
-            font-size:16px; cursor:pointer; color:var(--green);
-            font-family:inherit; transition:all 0.2s;
-            display:flex; align-items:center; justify-content:center;
-          }
-          .gallery-page-arrow:hover { background:var(--green-pale); }
-          .gallery-page-arrow:disabled { opacity:0.3; cursor:default; }
-        </style>
-
-        <!-- 1페이지 -->
-        <div class="gallery-page active" id="gpage-1">
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_1.jpg" alt="부평역 테마거리에서 진행된 노담 서포터즈 플로깅 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>부평역 테마거리 플로깅</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_2.png" alt="구월동 로데오 광장에서 진행된 노담 서포터즈 정화 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>구월동 로데오 광장 정화 활동</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_6.png" alt="청라 커널웨이에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>청라 커널웨이</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_7.png" alt="계양 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>계양 문화의 거리</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_8.png" alt="주안역 주변에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>주안역 주변</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_9.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>인하대 후문</span></div>
-          </div>
-        </div>
-
-        <!-- 2페이지 -->
-        <div class="gallery-page" id="gpage-2">
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_10.png" alt="인하대 후문에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>인하대 후문</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_11.png" alt="송도 인천대역 주변에서 진행된 노담 서포터즈 활동 2" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>송도 인천대역 주변</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_12.png" alt="월미 문화의 거리에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>월미도 플로깅</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_13.png" alt="을왕리 해수욕장에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>을왕리 해수욕장</span></div>
-          </div>
-          <div class="gallery-item fade-up">
-            <img src="Picture/Nodamm_14.png" alt="차이나타운에서 진행된 노담 서포터즈 활동" loading="lazy" decoding="async">
-            <div class="gallery-overlay"><span>차이나타운</span></div>
-          </div>
-        </div>
-
-        <!-- 페이지네이션 -->
-        <div class="gallery-pagination">
-          <button class="gallery-page-arrow" id="gprev" onclick="galleryPage(-1)" aria-label="이전 페이지">
-            <i class="ti ti-chevron-left" aria-hidden="true"></i>
-          </button>
-          <button class="gallery-page-btn active" onclick="galleryGoPage(1)">1</button>
-          <button class="gallery-page-btn" onclick="galleryGoPage(2)">2</button>
-          <button class="gallery-page-arrow" id="gnext" onclick="galleryPage(1)" aria-label="다음 페이지">
-            <i class="ti ti-chevron-right" aria-hidden="true"></i>
-          </button>
-        </div>
-
-        <script>
-          (function() {
-            let cur = 1;
-            const total = 2;
-
-            function render() {
-              for (let i = 1; i <= total; i++) {
-                document.getElementById('gpage-' + i).classList.toggle('active', i === cur);
-              }
-              document.querySelectorAll('.gallery-page-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', i + 1 === cur);
-              });
-              document.getElementById('gprev').disabled = cur === 1;
-              document.getElementById('gnext').disabled = cur === total;
-            }
-
-            window.galleryGoPage = function(n) { cur = n; render(); };
-            window.galleryPage   = function(d) { cur = Math.min(Math.max(cur + d, 1), total); render(); };
-
-            render();
-          })();
-        </script>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ====================================================
-       REWARD
-  ==================================================== -->
-  <section id="reward" class="section" style="position:relative;overflow:hidden;">
-    <img src="Picture/Nodamm_Mark.png" alt="" aria-hidden="true"
-      style="position:absolute;right:310px;bottom:0;width:320px;opacity:0.07;filter:grayscale(100%);pointer-events:none;user-select:none;">
-
-    <div class="container" style="position:relative;">
-      <span class="section-tag fade-up">WHAT YOU GET</span>
-      <h2 class="section-title fade-up">리워드</h2>
-      <p class="section-desc fade-up">참여하면 실질적인 혜택이 돌아옵니다.</p>
-
-      <div class="reward-grid">
-        <div class="reward-card fade-up">
-          <h3><i class="ti ti-certificate" aria-hidden="true"></i> 봉사시간 인증</h3>
-          <p>1365 자원봉사 포털과 연계하여 공식 봉사시간을 인증받을 수 있습니다.</p>
-        </div>
-        <div class="reward-card fade-up">
-          <h3><i class="ti ti-discount-2" aria-hidden="true"></i> 제휴 혜택</h3>
-          <p>인천 로컬 카페·식당과 협약하여 '노담 서포터즈' 인증 시 할인 혜택을 제공합니다.</p>
-        </div>
-        <div class="reward-card fade-up">
-          <h3><i class="ti ti-trophy" aria-hidden="true"></i> 이달의 꽁초 헌터</h3>
-          <p>매달 우수 서포터즈를 선정하여 특별 시상합니다.</p>
-        </div>
-        <div class="reward-card fade-up">
-          <h3><i class="ti ti-building-community" aria-hidden="true"></i> 지자체 협력</h3>
-          <p>인천시 환경과 등과 협력하여 캠페인 규모를 지속 확대합니다.</p>
-        </div>
-        <div class="reward-card fade-up">
-          <h3><i class="ti ti-users-group" aria-hidden="true"></i> 선한 영향력</h3>
-          <p>혼자가 아니라 함께하기에 더 즐겁습니다. 같은 뜻을 가진 동료들과 땀 흘리며 나누는 유대감과 선한 영향력의 가치를 경험할 수 있습니다.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====================================================
-       BOARD
-  ==================================================== -->
-  <section id="board" class="section section-alt">
-    <div class="container">
-      <span class="section-tag fade-up">COMMUNITY</span>
-      <h2 class="section-title fade-up">게시판</h2>
-      <p class="section-desc fade-up">질문, 활동 후기 무엇이든 남겨주세요.</p>
-
-      <div class="board-wrapper fade-up">
-        <div class="board-head">
-          <span>전체 게시글</span>
-          <span class="total">총 <span id="post-count">0</span>개</span>
-        </div>
-        <div class="board-filters">
-          <div class="filter-group">
-            <span class="filter-label">유형:</span>
-            <button class="filter-btn active" onclick="filterPosts(this,'all')">전체</button>
-            <button class="filter-btn" onclick="filterPosts(this,'q')">질문</button>
-            <button class="filter-btn" onclick="filterPosts(this,'review')">후기</button>
-          </div>
-          <div class="filter-group" style="margin-top:0.5rem;">
-            <label for="region-select" class="filter-label">지역:</label>
-            <select id="region-select" class="form-select select-sm" onchange="filterRegion(this.value)" aria-label="지역 필터">
-              <option value="all">전체 지역</option>
-              <option value="중구">중구</option>
-              <option value="동구">동구</option>
-              <option value="미추홀구">미추홀구</option>
-              <option value="연수구">연수구</option>
-              <option value="남동구">남동구</option>
-              <option value="부평구">부평구</option>
-              <option value="계양구">계양구</option>
-              <option value="서구">서구</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- 게시글 목록 -->
-      <div style="overflow-x:auto;">
-        <table class="board-table" id="board-table" aria-label="게시글 목록" aria-live="polite">
-          <thead>
-            <tr>
-              <th style="width:80px;">유형</th>
-              <th style="width:80px;">지역</th>
-              <th class="col-title">제목</th>
-              <th style="width:90px;">작성자</th>
-              <th style="width:100px;">작성일</th>
-            </tr>
-          </thead>
-          <tbody id="board-list"></tbody>
-        </table>
-      </div>
-
-      <!-- 글 작성 버튼 -->
-      <div style="text-align:center;margin-top:1.5rem;">
-        <button onclick="openWriteModal()"
-          style="padding:12px 32px;background:var(--green);color:#fff;border:none;border-radius:999px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:background 0.2s;"
-          onmouseover="this.style.background='#40916c'" onmouseout="this.style.background='var(--green)'">
-          <i class="ti ti-pencil-plus" aria-hidden="true"></i> 글 작성하기
-        </button>
-        <p style="margin-top:0.8rem;font-size:11px;color:var(--muted);">* 관리자가 부적절한 게시글은 예고 없이 삭제할 수 있습니다.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====================================================
-       FOOTER
-  ==================================================== -->
-  <footer id="footer">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <span class="logo-text">NODAM SUPPORTERS</span>
-        <p>인천의 바닥을 바꾸는 1시간.<br>우리의 도시가 숨을 쉬게 할 수 있도록.</p>
-      </div>
-      <div class="footer-col">
-        <h5>캠페인</h5>
-        <ul>
-          <li><a href="#intro">왜 시작했나요</a></li>
-          <li><a href="#activity-section" onclick="switchTab('info')">활동 정보</a></li>
-          <li><a href="#activity-section" onclick="switchTab('schedule')">활동 일정</a></li>
-          <li><a href="#reward">리워드</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>커뮤니티</h5>
-        <ul>
-          <li><a href="#board">게시판</a></li>
-          <li><a href="#" onclick="openApplyModal(); return false;">참여 신청</a></li>
-          <li><a href="#board">질문하기</a></li>
-        </ul>
-      </div>
-      <div class="footer-info">
-        <h4>NODAM SUPPORTERS</h4>
-        <ul>
-          <li><a href="https://www.1365.go.kr" target="_blank" rel="noopener">1365 자원봉사</a></li>
-          <li><a href="https://www.incheon.go.kr" target="_blank" rel="noopener">인천광역시</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <p>Copyright © 2026 NODAMM Supporters. All Rights Reserved. | 인천광역시</p>
-      <div class="social-links">
-        <a class="social-btn" href="#" aria-label="Instagram">
-          <i class="ti ti-brand-instagram" aria-hidden="true"></i>
-        </a>
-        <a class="social-btn" href="#" aria-label="KakaoTalk">
-          <svg class="kakao-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.558 1.712 4.8 4.32 6.095l-.845 3.097c-.077.282.083.57.361.662.28.093.58-.04.693-.306l1.233-2.853c.407.08.825.12 1.248.12 4.97 0 9-3.185 9-7.115S16.97 3 12 3z"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ====================================================
-       모달: 글쓰기
-  ==================================================== -->
-  <!-- ====================================================
-       모달: 글 상세 보기
-  ==================================================== -->
-  <div id="postViewModal" role="dialog" aria-modal="true" aria-labelledby="postViewTitle">
-    <div class="post-view-box">
-      <button onclick="closePostView()" aria-label="닫기"
-        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
-      <div class="post-view-header">
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span id="pv-badge" class="badge"></span>
-            <span id="pv-region" style="font-size:12px;color:var(--muted);"></span>
-          </div>
-          <div class="post-view-title" id="postViewTitle"></div>
-          <div class="post-view-meta" id="pv-meta"></div>
-        </div>
-      </div>
-      <div class="post-view-body" id="pv-body"></div>
-      <div class="post-reply-area" id="pv-replies"></div>
-      <div class="post-view-actions" id="pv-actions"></div>
-    </div>
-  </div>
-
-  <div id="writeModal" role="dialog" aria-modal="true" aria-labelledby="writeModalTitle"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);overflow-y:auto;padding:2rem 1rem;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:660px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeWriteModal()" aria-label="모달 닫기"
-        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
-      <h3 id="writeModalTitle" style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">✏️ 글 남기기</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
-        <input class="form-input" id="post-author" type="text" placeholder="이름 *" maxlength="20" aria-label="이름"/>
-        <input class="form-input" id="post-pw" type="password" placeholder="비밀번호 *" aria-label="비밀번호"/>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
-        <select class="form-select" id="post-region" aria-label="지역 선택">
-          <option value="부평구">부평구</option><option value="남동구">남동구</option>
-          <option value="연수구">연수구</option><option value="미추홀구">미추홀구</option>
-          <option value="서구">서구</option><option value="중구">중구</option>
-          <option value="동구">동구</option><option value="계양구">계양구</option>
-        </select>
-        <select class="form-select" id="post-type" aria-label="유형 선택">
-          <option value="q">질문</option>
-          <option value="review">후기</option>
-        </select>
-      </div>
-      <input class="form-input" id="post-subject" type="text" placeholder="제목 *" maxlength="60" aria-label="제목"
-        style="width:100%;margin-bottom:0.7rem;"/>
-      <textarea class="form-input" id="post-content" placeholder="내용을 입력하세요 (Ctrl+Enter로 등록)"
-        style="width:100%;margin-bottom:1rem;min-height:120px;resize:none;font-family:inherit;font-size:14px;line-height:1.6;"
-        aria-label="내용" onkeydown="if(event.ctrlKey&&event.key==='Enter'){addPost();}"></textarea>
-      <div style="display:flex;gap:0.5rem;">
-        <button onclick="addPost()" style="flex:1;padding:11px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">등록</button>
-        <button onclick="closeWriteModal()" style="flex:1;padding:11px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       모달: 수정
-  ==================================================== -->
-  <div id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeEditModal()" aria-label="모달 닫기"
-        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
-      <h3 id="editModalTitle" style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">게시글 수정</h3>
-      <input id="edit-subject" type="text" class="form-input" placeholder="제목" aria-label="제목" style="width:100%;margin-bottom:0.7rem;"/>
-      <textarea id="edit-content" class="form-input" placeholder="내용" aria-label="내용" style="width:100%;margin-bottom:0.8rem;min-height:100px;resize:none;font-family:inherit;font-size:14px;line-height:1.6;"></textarea>
-      <input id="edit-pw" type="password" class="form-input" placeholder="비밀번호 입력" aria-label="비밀번호" style="width:100%;margin-bottom:1rem;"/>
-      <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitEdit()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">수정 완료</button>
-        <button onclick="closeEditModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       모달: 삭제 확인
-  ==================================================== -->
-  <div id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:400px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeDeleteModal()" aria-label="모달 닫기"
-        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
-      <h3 id="deleteModalTitle" style="font-size:16px;font-weight:700;margin-bottom:0.5rem;">게시글 삭제</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">비밀번호를 입력하면 삭제됩니다.</p>
-      <input id="delete-pw" type="password" class="form-input" placeholder="비밀번호 입력" aria-label="비밀번호" style="width:100%;margin-bottom:1rem;"/>
-      <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitDelete()" style="flex:1;padding:10px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">삭제</button>
-        <button onclick="closeDeleteModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       모달: 답글
-  ==================================================== -->
-  <div id="replyModal" role="dialog" aria-modal="true" aria-labelledby="replyModalTitle"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
-      <button onclick="closeReplyModal()" aria-label="모달 닫기"
-        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
-      <h3 id="replyModalTitle" style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">💬 답글 달기</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;">
-        <input id="reply-author" type="text" class="form-input" placeholder="이름 *" maxlength="20" aria-label="이름"/>
-        <input id="reply-pw" type="password" class="form-input" placeholder="비밀번호 *" aria-label="비밀번호"/>
-      </div>
-      <input id="reply-content" type="text" class="form-input" placeholder="답글 내용 *" aria-label="답글 내용" style="width:100%;margin-bottom:1rem;"/>
-      <div style="display:flex;gap:0.5rem;">
-        <button onclick="submitReply()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">답글 등록</button>
-        <button onclick="closeReplyModal()" style="flex:1;padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       모달: 지원하기
-  ==================================================== -->
-  <div id="applyModal" role="dialog" aria-modal="true" aria-labelledby="applyModalTitle"
-    style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);overflow-y:auto;padding:2rem 1rem;">
-    <div style="background:#fff;border-radius:20px;width:100%;max-width:560px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;animation:modalIn 0.3s ease;">
-
-      <button onclick="closeApplyModal()" aria-label="모달 닫기"
-        style="position:sticky;top:0;float:right;margin:16px 16px 0 0;background:#f3f4f6;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;transition:background 0.2s;z-index:10;"
-        onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f3f4f6'">✕</button>
-
-      <div style="padding:2rem;">
-        <!-- 배너 -->
-        <div style="background:linear-gradient(135deg,#2d6a4f,#1b4332);border-radius:14px;padding:1.8rem;margin-bottom:1.5rem;color:#fff;position:relative;overflow:hidden;">
-          <div aria-hidden="true" style="position:absolute;right:-10px;bottom:-20px;font-family:'Bebas Neue',sans-serif;font-size:5rem;color:rgba(255,255,255,0.07);pointer-events:none;">NODAM</div>
-          <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:0.8rem;">JOIN US · 2026</span>
-          <h2 id="applyModalTitle" style="font-size:1.4rem;font-weight:700;margin-bottom:0.3rem;">노담 서포터즈 지원하기</h2>
-          <p style="font-size:13px;opacity:0.85;">인천을 바꾸는 작은 발걸음, 지금 시작하세요 🌱</p>
-        </div>
-
-        <!-- 지원서 폼 -->
-        <form id="modalApplyForm" novalidate>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-            <div>
-              <label for="m_userName" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">이름 <span style="color:#e74c3c" aria-hidden="true">*</span></label>
-              <input id="m_userName" type="text" placeholder="성함" autocomplete="name" required
-                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
-                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
-            </div>
-            <div>
-              <label for="m_userAge" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">나이 <span style="color:#e74c3c" aria-hidden="true">*</span></label>
-              <input id="m_userAge" type="number" placeholder="예: 22" min="14" max="99" required
-                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;"
-                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-            <div>
-              <label for="m_userGender" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">성별 <span style="color:#e74c3c" aria-hidden="true">*</span></label>
-              <select id="m_userGender" required
-                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
-                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
-                <option value="" disabled selected>선택</option>
-                <option value="남성">남성</option>
-                <option value="여성">여성</option>
-              </select>
-            </div>
-            <div>
-              <label for="m_userSmoking" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">흡연 여부 <span style="color:#e74c3c" aria-hidden="true">*</span></label>
-              <select id="m_userSmoking" required
-                style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
-                onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
-                <option value="" disabled selected>선택</option>
-                <option value="비흡연">비흡연</option>
-                <option value="흡연">흡연</option>
-                <option value="금연중">금연 중</option>
-              </select>
-            </div>
-          </div>
-          <div style="margin-bottom:1rem;">
-            <label for="m_userArea" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">희망 활동 지역 <span style="color:#e74c3c" aria-hidden="true">*</span></label>
-            <select id="m_userArea" required
-              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff;"
-              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'">
-              <option value="전체">전체 (무관)</option>
-              <option value="남동구">남동구</option><option value="부평구">부평구</option>
-              <option value="미추홀구">미추홀구</option><option value="연수구">연수구</option>
-              <option value="계양구">계양구</option><option value="서구">서구</option>
-              <option value="중구">중구</option><option value="동구">동구</option>
-            </select>
-          </div>
-          <div style="margin-bottom:1.5rem;">
-            <label for="m_userMessage" style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">지원 동기 <span style="font-weight:400;color:#6b7c72;">(선택)</span></label>
-            <textarea id="m_userMessage" placeholder="간단한 지원 동기를 적어주세요"
-              style="width:100%;padding:10px 12px;border:1.5px solid #e0e7e3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:none;height:80px;"
-              onfocus="this.style.borderColor='#40916c'" onblur="this.style.borderColor='#e0e7e3'"></textarea>
-          </div>
-          <button type="submit" id="modalSubmitBtn"
-            style="width:100%;padding:13px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;"
-            onmouseover="this.style.background='#40916c'" onmouseout="this.style.background='#2d6a4f'">
-            <i class="ti ti-send" aria-hidden="true"></i> 신청서 제출하기
-          </button>
-        </form>
-
-        <!-- 완료 메시지 -->
-        <div id="modalSuccess" style="display:none;text-align:center;padding:2rem 0;" aria-live="polite">
-          <div style="width:64px;height:64px;background:#d8f3dc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:#2d6a4f;" aria-hidden="true">✓</div>
-          <h3 style="color:#2d6a4f;margin-bottom:0.5rem;">지원 완료!</h3>
-          <p id="modalSuccessMsg" style="font-size:14px;color:#6b7c72;line-height:1.7;"></p>
-          <button onclick="closeApplyModal()" style="margin-top:1.2rem;padding:10px 24px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">닫기</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================================================
-       SCRIPTS
-  ==================================================== -->
-
-  <!-- 지원하기 모달 제어 (전역 함수 → JS 모듈 로드 전에도 동작) -->
-  <script>
-    function openApplyModal() {
-      document.getElementById('applyModal').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-      if (window.lenis) lenis.stop();
     }
-    function closeApplyModal() {
-      document.getElementById('applyModal').style.display = 'none';
-      document.body.style.overflow = '';
-      if (window.lenis) lenis.start();
-      document.getElementById('modalApplyForm').style.display = 'block';
-      document.getElementById('modalSuccess').style.display = 'none';
-      document.getElementById('modalApplyForm').reset();
+  });
+})();
+
+// 조회수 로컬 캐시
+const viewCounts = {};
+
+// 글 상세 보기 모달
+function openPostView(id) {
+  const p = firestorePosts.find(p => p.id === id);
+  if (!p) return;
+  viewCounts[id] = (viewCounts[id] || 0) + 1;
+  renderPosts();
+
+  const subject = p.subject || p.title || '(제목 없음)';
+  const body    = p.content || p.title || '';
+
+  document.getElementById('postViewTitle').textContent = subject;
+  document.getElementById('pv-badge').className = `badge ${BADGE[p.type]?.cls}`;
+  document.getElementById('pv-badge').textContent = BADGE[p.type]?.label;
+  document.getElementById('pv-region').textContent = `[${p.region}]`;
+  document.getElementById('pv-meta').textContent = `${p.author} · ${p.date}`;
+  document.getElementById('pv-body').textContent = body;
+
+  const replies = p.replies || [];
+  const repliesHtml = replies.length > 0
+    ? replies.map((r, ri) => `
+        <div class="reply-item-view" style="align-items:flex-start;">
+          <span style="color:var(--green);font-weight:600;white-space:nowrap;padding-top:2px;">↳ ${r.author}</span>
+          <span style="flex:1;word-break:break-all;white-space:pre-wrap;line-height:1.6;overflow-wrap:break-word;">${r.content}</span>
+          <span style="color:var(--muted);font-size:11px;white-space:nowrap;padding-top:2px;">${r.date}</span>
+          <button class="action-btn del" onclick="openDeleteReply('${id}',${ri})">삭제</button>
+        </div>`).join('')
+    : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
+
+  const replyAreaTitle = p.type === 'q' ? '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>' : '';
+  document.getElementById('pv-replies').innerHTML = replyAreaTitle + repliesHtml;
+
+  const safeSubject = (p.subject||p.title||'').replace(/'/g,"\'");
+  const safeContent = (p.content||'').replace(/'/g,"\'");
+  // 답글 버튼: 숨김 처리 (Shift 5번으로만 활성화)
+  const replyBtn = `<button id="hidden-reply-btn" onclick="closePostView();openReplyModal('${id}')"
+    style="display:none;padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">💬 답글 달기</button>`;
+
+  document.getElementById('pv-actions').innerHTML = `
+    ${replyBtn}
+    <button onclick="closePostView();openEditModal('${id}','${safeSubject}','${safeContent}')" style="padding:8px 16px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">수정</button>
+    <button onclick="closePostView();openDeleteModal('${id}')" style="padding:8px 16px;background:#fdecea;color:#e74c3c;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">삭제</button>`;
+
+  document.getElementById('postViewModal').classList.add('open');
+  window.lenis?.stop();
+}
+
+function closePostView() {
+  document.getElementById('postViewModal').classList.remove('open');
+  window.lenis?.start();
+}
+
+function renderPosts() {
+  const tbody   = document.getElementById('board-list');
+  const countEl = document.getElementById('post-count');
+  if (!tbody || !countEl) return;
+
+  const source   = firestorePosts ?? [];
+  const filtered = source.filter(p => {
+    const matchType   = currentFilter === 'all' || p.type === currentFilter;
+    const matchRegion = currentRegion === 'all' || p.region === currentRegion;
+    return matchType && matchRegion;
+  });
+
+  countEl.textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">첫 번째 글을 남겨보세요!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((p, idx) => {
+    const subject    = p.subject || p.title || '(제목 없음)';
+    const replyCount = (p.replies || []).length;
+    const replyBadge = replyCount > 0 ? ` <span style="color:var(--green);font-size:11px;">[${replyCount}]</span>` : '';
+    return `
+      <tr onclick="openPostView('${p.id}')">
+        <td><span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span></td>
+        <td class="col-region">${p.region}</td>
+        <td class="col-title"><span class="post-subject">${subject}</span>${replyBadge}</td>
+        <td class="col-author">${p.author}</td>
+        <td class="col-date">${p.date}</td>
+      </tr>`;
+  }).join('');
+}
+
+function filterPosts(btn, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = type;
+  renderPosts();
+}
+
+function filterRegion(region) {
+  currentRegion = region;
+  renderPosts();
+}
+
+// 실시간 리스너
+function setupBoardListener() {
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, snapshot => {
+    firestorePosts = snapshot.docs.map(d => ({
+      id:      d.id,
+      type:    d.data().type,
+      region:  d.data().region,
+      author:  d.data().author || '익명',
+      subject: d.data().subject || d.data().title || '',
+      content: d.data().content || d.data().title || '',
+      title:   d.data().title || d.data().subject || '',
+      pw:      d.data().pw || '',
+      replies: d.data().replies || [],
+      date:    formatDate(d.data().createdAt),
+    }));
+    renderPosts();
+  }, err => {
+    console.warn('Firestore 오류:', err);
+    firestorePosts = [];
+    renderPosts();
+  });
+}
+
+// 글 등록
+async function addPost() {
+  const author  = document.getElementById('post-author')?.value?.trim();
+  const pw      = document.getElementById('post-pw')?.value?.trim();
+  const type    = document.getElementById('post-type')?.value;
+  const region  = document.getElementById('post-region')?.value;
+  const subject = document.getElementById('post-subject')?.value?.trim();
+  const content = document.getElementById('post-content')?.value?.trim();
+
+  if (!author)  return alert('이름을 입력해주세요.');
+  if (!pw)      return alert('비밀번호를 입력해주세요.');
+  if (!subject) return alert('제목을 입력해주세요.');
+  if (!content) return alert('내용을 입력해주세요.');
+
+  try {
+    await addDoc(collection(db, 'posts'), {
+      type, region, author, subject, content,
+      title: subject,   // 구버전 호환
+      pw,
+      replies: [],
+      createdAt: serverTimestamp(),
+    });
+    document.getElementById('post-author').value  = '';
+    document.getElementById('post-pw').value      = '';
+    document.getElementById('post-subject').value = '';
+    document.getElementById('post-content').value = '';
+    window.closeWriteModal?.();
+  } catch(e) {
+    console.error(e);
+    alert('등록 실패. 다시 시도해주세요.');
+  }
+}
+
+// 수정
+function openEditModal(id, subject, content) {
+  pendingEditId = id;
+  document.getElementById('edit-subject').value = subject || '';
+  document.getElementById('edit-content').value = content || subject || '';
+  document.getElementById('edit-pw').value      = '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  pendingEditId = null;
+}
+async function submitEdit() {
+  const pw      = document.getElementById('edit-pw').value.trim();
+  const subject = document.getElementById('edit-subject').value.trim();
+  const content = document.getElementById('edit-content').value.trim();
+  if (!pw || !subject || !content) return alert('비밀번호, 제목, 내용을 모두 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingEditId);
+  if (!post) return;
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    await updateDoc(doc(db, 'posts', pendingEditId), { subject, content, title: subject });
+    closeEditModal();
+  } catch(e) {
+    console.error(e);
+    alert('수정 실패.');
+  }
+}
+
+// 삭제
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  document.getElementById('delete-pw').value = '';
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  pendingDeleteId = null;
+}
+async function submitDelete() {
+  const pw = document.getElementById('delete-pw').value.trim();
+  if (!pw) return alert('비밀번호를 입력해주세요.');
+
+  const post = firestorePosts.find(p => p.id === pendingDeleteId);
+  if (!post) return;
+  if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  try {
+    await deleteDoc(doc(db, 'posts', pendingDeleteId));
+    closeDeleteModal();
+  } catch(e) {
+    console.error(e);
+    alert('삭제 실패.');
+  }
+}
+
+// 답글
+function openReplyModal(id) {
+  pendingReplyId = id;
+  document.getElementById('reply-author').value  = '';
+  document.getElementById('reply-pw').value      = '';
+  document.getElementById('reply-content').value = '';
+  document.getElementById('replyModal').style.display = 'flex';
+}
+function closeReplyModal() {
+  document.getElementById('replyModal').style.display = 'none';
+  pendingReplyId = null;
+}
+async function submitReply() {
+  const author  = document.getElementById('reply-author').value.trim();
+  const pw      = document.getElementById('reply-pw').value.trim();
+  const content = document.getElementById('reply-content').value.trim();
+  if (!author || !pw || !content) return alert('모든 항목을 입력해주세요.');
+
+  const now  = new Date();
+  const date = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+
+  try {
+    await updateDoc(doc(db, 'posts', pendingReplyId), {
+      replies: arrayUnion({ author, pw, content, date }),
+    });
+    closeReplyModal();
+  } catch(e) {
+    console.error(e);
+    alert('답글 등록 실패.');
+  }
+}
+
+// 답글 삭제
+async function openDeleteReply(postId, replyIdx) {
+  const pw = prompt('비밀번호를 입력하세요 (작성자 비번 또는 마스터 비번):');
+  if (!pw) return;
+
+  const post  = firestorePosts.find(p => p.id === postId);
+  if (!post) return;
+  const reply = post.replies[replyIdx];
+  if (!reply) return;
+  if (pw !== MASTER_PW && pw !== reply.pw) return alert('비밀번호가 맞지 않습니다.');
+
+  const newReplies = post.replies.filter((_, i) => i !== replyIdx);
+  try {
+    await updateDoc(doc(db, 'posts', postId), { replies: newReplies });
+  } catch(e) {
+    console.error(e);
+    alert('답글 삭제 실패.');
+  }
+}
+
+/* ── 4. 스크롤 네비게이션 숨김/표시 ── */
+let lastScroll = 0;
+const navbar   = document.getElementById('navbar');
+
+window.addEventListener('scroll', () => {
+  const cur = window.scrollY;
+  if (Math.abs(cur - lastScroll) < 5) return;
+  if (cur > lastScroll && cur > 100) navbar?.classList.add('nav-hidden');
+  else navbar?.classList.remove('nav-hidden');
+  lastScroll = cur;
+});
+
+document.addEventListener('mousemove', e => {
+  if (e.clientY < 40) navbar?.classList.remove('nav-hidden');
+  else if (e.clientY > 60 && window.scrollY > 100) navbar?.classList.add('nav-hidden');
+});
+
+/* ── 5. 카카오맵 초기화 (좌표 직접 사용) ── */
+function initMap() {
+  const container = document.getElementById('map');
+  if (!container) return;
+
+  const map = new kakao.maps.Map(container, {
+    center: new kakao.maps.LatLng(37.4760, 126.7160),
+    level: 10,
+  });
+
+  const markerImage = new kakao.maps.MarkerImage(
+    'Picture/Nodamm_MapPoint.png',
+    new kakao.maps.Size(80, 100),
+    { offset: new kakao.maps.Point(40, 100) }
+  );
+
+  // ── 스팟 목록 (위경도 직접 지정) ──
+  const spots = [
+    { title: '구월동 로데오거리',    count: 0,   lat: 37.4519,           lng: 126.7316           },
+    { title: '인하 문화의 거리',     count: 0,   lat: 37.4508,           lng: 126.6572           },
+    { title: '주안역 주변',          count: 0,   lat: 37.4611,           lng: 126.6765           },
+    { title: '청라 커널웨이',        count: 0,   lat: 37.5391,           lng: 126.6478           },
+    { title: '계양 문화의 거리',     count: 0,   lat: 37.5378,           lng: 126.7384           },
+    { title: '송도 인천대역',        count: 0,   lat: 37.3836,           lng: 126.6561           },
+    { title: '부평 문화의 거리',     count: 124, lat: 37.49415397230344, lng: 126.72428100316051 },
+    { title: '을왕리 해수욕장',      count: 0,   lat: 37.445826,         lng: 126.372846         },
+    { title: '차이나타운',           count: 0,   lat: 37.476964,         lng: 126.619091         },
+  ];
+
+  spots.forEach(spot => {
+    const latlng = new kakao.maps.LatLng(spot.lat, spot.lng);
+
+    const marker = new kakao.maps.Marker({
+      map,
+      position: latlng,
+      title: spot.title,
+      image: markerImage,
+    });
+
+    const infowindow = new kakao.maps.InfoWindow({
+      content: `<div style="padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.8;border-radius:8px;">
+        📍 ${spot.title}<br>
+        <span style="color:#2d6a4f;font-size:12px;">🚬 수거량: <strong>${spot.count}개</strong></span>
+      </div>`,
+      removable: false,
+    });
+
+    let isPinned = false;
+    kakao.maps.event.addListener(marker, 'mouseover', () => { if (!isPinned) infowindow.open(map, marker); });
+    kakao.maps.event.addListener(marker, 'mouseout',  () => { if (!isPinned) infowindow.close(); });
+    kakao.maps.event.addListener(marker, 'click', () => {
+      isPinned = !isPinned;
+      if (isPinned) {
+        infowindow.open(map, marker);
+        map.panTo(latlng);
+      } else {
+        infowindow.close();
+      }
+    });
+  });
+
+  // 지도 위 휠 → 페이지 스크롤 차단
+  container.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
+}
+
+function waitForKakaoAndInit() {
+  if (window.kakao && window.kakao.maps) initMap();
+  else setTimeout(waitForKakaoAndInit, 100);
+}
+
+/* ── 6. 월별 활동 일정 ── */
+let currentViewMonth = new Date().getMonth() + 1; // 현재 달 자동 설정
+
+const scheduleByMonth = {
+  1:  [{ date: '1월 10일 (토)',  time: '10:00', region: '남동구',  place: '남동구청 앞 광장' },
+       { date: '1월 17일 (토)',  time: '10:00', region: '부평구',  place: '부평 문화의 거리' },
+       { date: '1월 24일 (토)',  time: '10:00', region: '미추홀구', place: '주안역 1번 출구' }],
+  2:  [{ date: '2월 7일 (토)',   time: '10:00', region: '연수구',  place: '스퀘어원 광장' },
+       { date: '2월 14일 (토)',  time: '10:00', region: '서구',    place: '청라 커낼웨이' },
+       { date: '2월 21일 (토)',  time: '10:00', region: '계양구',  place: '계양구청 광장' }],
+  3:  [{ date: '3월 7일 (토)',   time: '10:00', region: '중구',    place: '차이나타운 입구' },
+       { date: '3월 14일 (토)',  time: '10:00', region: '남동구',  place: '소래포구역 인근' },
+       { date: '3월 21일 (토)',  time: '10:00', region: '부평구',  place: '부평역 테마거리' }],
+  4:  [{ date: '4월 4일 (토)',   time: '10:00', region: '미추홀구', place: '인하대 후문 거리' },
+       { date: '4월 11일 (토)',  time: '10:00', region: '연수구',  place: '송도 센트럴파크' },
+       { date: '4월 18일 (토)',  time: '10:00', region: '서구',    place: '검단사거리역' }],
+  5:  [{ date: '5월 16일 (토)',  time: '10:00', region: '남동구',  place: '남동구청 앞 광장' },
+       { date: '5월 23일 (토)',  time: '10:00', region: '부평구',  place: '부평 문화의 거리 입구', active: true },
+       { date: '5월 30일 (토)',  time: '10:00', region: '미추홀구', place: '주안역 1번 출구 앞' }],
+  6:  [{ date: '6월 6일 (토)',   time: '10:00', region: '계양구',  place: '계양산 입구' },
+       { date: '6월 13일 (토)',  time: '10:00', region: '중구',    place: '월미도 광장' },
+       { date: '6월 20일 (토)',  time: '10:00', region: '연수구',  place: '연수역 광장' }],
+  7:  [{ date: '7월 4일 (토)',   time: '10:00', region: '서구',    place: '가좌동 행정복지센터' },
+       { date: '7월 11일 (토)',  time: '10:00', region: '남동구',  place: '구월 로데오 광장' },
+       { date: '7월 18일 (토)',  time: '10:00', region: '부평구',  place: '굴포천역 삼각공원' }],
+  8:  [{ date: '8월 1일 (토)',   time: '10:00', region: '미추홀구', place: '용현동 토지금고' },
+       { date: '8월 8일 (토)',   time: '10:00', region: '계양구',  place: '작전역 광장' },
+       { date: '8월 15일 (토)',  time: '10:00', region: '중구',    place: '동인천역 북광장' }],
+  9:  [{ date: '9월 5일 (토)',   time: '10:00', region: '연수구',  place: '선학역 음식거리' },
+       { date: '9월 12일 (토)',  time: '10:00', region: '서구',    place: '가정역 인근' },
+       { date: '9월 19일 (토)',  time: '10:00', region: '남동구',  place: '만수역 광장' }],
+  10: [{ date: '10월 3일 (토)',  time: '10:00', region: '부평구',  place: '산곡역 인근' },
+       { date: '10월 10일 (토)', time: '10:00', region: '미추홀구', place: '석바위 시장' },
+       { date: '10월 17일 (토)', time: '10:00', region: '계양구',  place: '계산역 인근' }],
+  11: [{ date: '11월 7일 (토)',  time: '10:00', region: '중구',    place: '영종역 광장' },
+       { date: '11월 14일 (토)', time: '10:00', region: '연수구',  place: '테크노파크역' },
+       { date: '11월 21일 (토)', time: '10:00', region: '서구',    place: '검암역 광장' }],
+  12: [{ date: '12월 5일 (토)',  time: '10:00', region: '남동구',  place: '서창동 중심상가' },
+       { date: '12월 12일 (토)', time: '10:00', region: '부평구',  place: '부개역 인근' },
+       { date: '12월 19일 (토)', time: '10:00', region: '미추홀구', place: '인천터미널역' }],
+};
+
+function renderSchedule() {
+  const body      = document.getElementById('schedule-body');
+  const monthText = document.getElementById('current-month');
+  if (!body || !monthText) return;
+
+  monthText.textContent = `2026년 ${currentViewMonth}월`;
+
+  const data = scheduleByMonth[currentViewMonth] || [];
+  body.innerHTML = data.map(item => `
+    <tr class="${item.active ? 'active-row' : ''}">
+      <td>${item.date}</td>
+      <td>${item.time}</td>
+      <td>${item.region}</td>
+      <td>${item.place}</td>
+    </tr>`).join('');
+}
+
+let isChangingMonth = false;
+function changeMonth(diff) {
+  if (isChangingMonth) return;
+  isChangingMonth = true;
+
+  const wrapper = document.getElementById('schedule-wrapper');
+  if (!wrapper) { isChangingMonth = false; return; }
+
+  const outX = diff > 0 ? '-40px' : '40px';
+  wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+  wrapper.style.opacity    = '0';
+  wrapper.style.transform  = `translateX(${outX})`;
+
+  setTimeout(() => {
+    currentViewMonth += diff;
+    if (currentViewMonth < 1)  currentViewMonth = 12;
+    if (currentViewMonth > 12) currentViewMonth = 1;
+    renderSchedule();
+
+    const inX = diff > 0 ? '40px' : '-40px';
+    wrapper.style.transition = 'none';
+    wrapper.style.transform  = `translateX(${inX})`;
+    wrapper.style.opacity    = '0';
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      wrapper.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      wrapper.style.opacity    = '1';
+      wrapper.style.transform  = 'translateX(0)';
+      isChangingMonth = false;
+    }));
+  }, 220);
+}
+
+/* ── 7. 탭 전환 ── */
+let statsAnimated  = false;
+let mapInitialized = false;
+
+window.switchTab = function(tabName) {
+  // 탭 버튼 active
+  document.querySelectorAll('.act-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  const activeBtn = document.querySelector(`.act-tab[onclick="switchTab('${tabName}')"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.setAttribute('aria-selected', 'true');
+  }
+
+  // 콘텐츠 전환
+  ['info','schedule','spot','gallery'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`);
+    if (el) el.style.display = t === tabName ? 'block' : 'none';
+  });
+
+  // 스팟 탭: 지도 + 카운터
+  if (tabName === 'spot') {
+    if (!mapInitialized) { mapInitialized = true; waitForKakaoAndInit(); }
+    if (!statsAnimated)  {
+      statsAnimated = true;
+      setTimeout(() => {
+        countUp('s1', 124, '/10000');
+        countUp('s2', 10, '');
+        countUp('s3', 1, 'H');
+        countUp('s4', 10, '');
+      }, 200);
     }
-    document.getElementById('applyModal').addEventListener('click', function(e) {
-      if (e.target === this) closeApplyModal();
-    });
+  }
+};
 
-    /* 햄버거 메뉴 토글 */
-    function closeMobileNav() {
-      const btn   = document.getElementById('hamburgerBtn');
-      const panel = document.getElementById('mobileNavPanel');
-      btn.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      panel.classList.remove('open');
+/* ── 8. 지원서 제출 (모달 폼) ── */
+document.addEventListener('DOMContentLoaded', () => {
+  setupBoardListener();
+
+  const modalForm = document.getElementById('modalApplyForm');
+  if (!modalForm) return;
+
+  modalForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const name    = document.getElementById('m_userName')?.value?.trim();
+    const age     = document.getElementById('m_userAge')?.value?.trim();
+    const gender  = document.getElementById('m_userGender')?.value;
+    const smoking = document.getElementById('m_userSmoking')?.value;
+    const area    = document.getElementById('m_userArea')?.value;
+    const message = document.getElementById('m_userMessage')?.value?.trim();
+
+    if (!name || !age || !gender || !smoking || !area) {
+      alert('필수 항목(*)을 모두 입력해주세요.');
+      return;
     }
-    document.getElementById('hamburgerBtn').addEventListener('click', function() {
-      const panel  = document.getElementById('mobileNavPanel');
-      const isOpen = panel.classList.toggle('open');
-      this.classList.toggle('open', isOpen);
-      this.setAttribute('aria-expanded', String(isOpen));
-    });
 
-    /* 바깥 클릭 시 모바일 패널 닫기 */
-    document.addEventListener('click', function(e) {
-      const hambBtn = document.getElementById('hamburgerBtn');
-      const panel   = document.getElementById('mobileNavPanel');
-      if (!hambBtn.contains(e.target) && !panel.contains(e.target)) closeMobileNav();
-    });
+    const btn = document.getElementById('modalSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '제출 중...'; }
 
-    /* ── 모달 배경 클릭 닫기 (나머지 모달) ── */
-    // 글 상세 모달 바깥 클릭 닫기
-    document.getElementById('postViewModal')?.addEventListener('click', function(e) {
-      if (e.target === this) closePostView();
-    });
-
-    ['editModal','deleteModal','replyModal'].forEach(id => {
-      document.getElementById(id)?.addEventListener('click', function(e) {
-        if (e.target === this) this.style.display = 'none';
+    try {
+      await addDoc(collection(db, 'applicants'), {
+        name, age: Number(age), gender, smoking, area,
+        message: message || '',
+        date: new Date().toISOString(),
       });
-    });
-    document.getElementById('writeModal')?.addEventListener('click', function(e) {
-      if (e.target === this) window.closeWriteModal?.();
-    });
 
-    /* ── 카카오맵 defer + autoload=false 대응 ── */
-    /* nodamm_script.js의 waitForKakaoAndInit이 폴링하므로 별도 처리 불필요 */
-  </script>
+      modalForm.style.display = 'none';
+      const successMsg = document.getElementById('modalSuccessMsg');
+      const successEl  = document.getElementById('modalSuccess');
+      if (successMsg) successMsg.innerHTML = `<strong>${name}</strong>님의 지원이 접수되었습니다.<br>확인 후 연락드리겠습니다. 🌱`;
+      if (successEl)  successEl.style.display = 'block';
+    } catch(err) {
+      console.error(err);
+      alert('제출에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> 신청서 제출하기'; }
+    }
+  });
+});
 
-  <!-- 메인 JS (type=module → defer처럼 동작) -->
-  <script type="module" src="nodamm_script.js"></script>
+/* ── 전역 함수 노출 (type="module" 대응) ── */
+window.openPostView     = openPostView;
+window.closePostView    = closePostView;
+window.filterPosts      = filterPosts;
+window.filterRegion     = filterRegion;
+window.addPost          = addPost;
+window.openEditModal    = openEditModal;
+window.closeEditModal   = closeEditModal;
+window.submitEdit       = submitEdit;
+window.openDeleteModal  = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.submitDelete     = submitDelete;
+window.openReplyModal   = openReplyModal;
+window.closeReplyModal  = closeReplyModal;
+window.submitReply      = submitReply;
+window.openDeleteReply  = openDeleteReply;
+window.changeMonth      = changeMonth;
 
-</body>
-</html>
+window.openWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'block'; window.lenis?.stop(); }
+};
+window.closeWriteModal = function() {
+  const modal = document.getElementById('writeModal');
+  if (modal) { modal.style.display = 'none'; window.lenis?.start(); }
+};
+
+/* ── 초기 렌더링 ── */
+renderPosts();
+renderSchedule();
