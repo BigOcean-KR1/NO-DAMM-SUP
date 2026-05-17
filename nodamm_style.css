@@ -234,8 +234,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(234, 245, 238, 0.8) 0%, rgba(250, 250, 248, 0.9) 70%), url('Picture/Nodamm_1.jpg') no-repeat center center;
-      background-size: cover;
+      background: linear-gradient(135deg, #ffffff 0%, #eaf5ee 50%, #d8f0e0 100%);
       z-index: 0;
       will-change: transform;     /* GPU 레이어 분리 → 렌더링 성능 향상 */
       contain: strict;            /* 레이아웃/페인트 범위 제한 */
