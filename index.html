@@ -7,6 +7,8 @@
   <title>노담 서포터즈 | 인천의 바닥을 바꾸는 1시간</title>
   <meta name="description" content="노담 서포터즈는 인천의 꽁초를 줍는 청년 환경 플로깅 캠페인입니다." />
 
+  <!-- 히어로 배경 이미지 preload → LCP 개선 -->
+  <link rel="preload" as="image" href="Picture/Nodamm_1.jpg">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -788,7 +790,20 @@
       </div>
 
       <!-- 게시글 목록 -->
-      <ul class="board-list" id="board-list" aria-label="게시글 목록" aria-live="polite"></ul>
+      <div style="overflow-x:auto;">
+        <table class="board-table" id="board-table" aria-label="게시글 목록" aria-live="polite">
+          <thead>
+            <tr>
+              <th style="width:80px;">유형</th>
+              <th class="col-title">제목</th>
+              <th style="width:90px;">작성자</th>
+              <th style="width:100px;">작성일</th>
+              <th style="width:60px;">조회</th>
+            </tr>
+          </thead>
+          <tbody id="board-list"></tbody>
+        </table>
+      </div>
 
       <!-- 글 작성 버튼 -->
       <div style="text-align:center;margin-top:1.5rem;">
@@ -855,6 +870,29 @@
   <!-- ====================================================
        모달: 글쓰기
   ==================================================== -->
+  <!-- ====================================================
+       모달: 글 상세 보기
+  ==================================================== -->
+  <div id="postViewModal" role="dialog" aria-modal="true" aria-labelledby="postViewTitle">
+    <div class="post-view-box">
+      <button onclick="closePostView()" aria-label="닫기"
+        style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+      <div class="post-view-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span id="pv-badge" class="badge"></span>
+            <span id="pv-region" style="font-size:12px;color:var(--muted);"></span>
+          </div>
+          <div class="post-view-title" id="postViewTitle"></div>
+          <div class="post-view-meta" id="pv-meta"></div>
+        </div>
+      </div>
+      <div class="post-view-body" id="pv-body"></div>
+      <div class="post-reply-area" id="pv-replies"></div>
+      <div class="post-view-actions" id="pv-actions"></div>
+    </div>
+  </div>
+
   <div id="writeModal" role="dialog" aria-modal="true" aria-labelledby="writeModalTitle"
     style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);overflow-y:auto;padding:2rem 1rem;">
     <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:660px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
@@ -877,7 +915,9 @@
           <option value="review">후기</option>
         </select>
       </div>
-      <textarea class="form-input" id="post-title" placeholder="내용을 입력하세요 (Ctrl+Enter로 등록)"
+      <input class="form-input" id="post-subject" type="text" placeholder="제목 *" maxlength="60" aria-label="제목"
+        style="width:100%;margin-bottom:0.7rem;"/>
+      <textarea class="form-input" id="post-content" placeholder="내용을 입력하세요 (Ctrl+Enter로 등록)"
         style="width:100%;margin-bottom:1rem;min-height:120px;resize:none;font-family:inherit;font-size:14px;line-height:1.6;"
         aria-label="내용" onkeydown="if(event.ctrlKey&&event.key==='Enter'){addPost();}"></textarea>
       <div style="display:flex;gap:0.5rem;">
@@ -896,7 +936,8 @@
       <button onclick="closeEditModal()" aria-label="모달 닫기"
         style="position:absolute;top:12px;right:14px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
       <h3 id="editModalTitle" style="font-size:16px;font-weight:700;margin-bottom:1.2rem;">게시글 수정</h3>
-      <input id="edit-content" type="text" class="form-input" placeholder="수정할 내용" aria-label="수정할 내용" style="width:100%;margin-bottom:0.8rem;"/>
+      <input id="edit-subject" type="text" class="form-input" placeholder="제목" aria-label="제목" style="width:100%;margin-bottom:0.7rem;"/>
+      <textarea id="edit-content" class="form-input" placeholder="내용" aria-label="내용" style="width:100%;margin-bottom:0.8rem;min-height:100px;resize:none;font-family:inherit;font-size:14px;line-height:1.6;"></textarea>
       <input id="edit-pw" type="password" class="form-input" placeholder="비밀번호 입력" aria-label="비밀번호" style="width:100%;margin-bottom:1rem;"/>
       <div style="display:flex;gap:0.5rem;">
         <button onclick="submitEdit()" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">수정 완료</button>
@@ -1085,6 +1126,11 @@
     });
 
     /* ── 모달 배경 클릭 닫기 (나머지 모달) ── */
+    // 글 상세 모달 바깥 클릭 닫기
+    document.getElementById('postViewModal')?.addEventListener('click', function(e) {
+      if (e.target === this) closePostView();
+    });
+
     ['editModal','deleteModal','replyModal'].forEach(id => {
       document.getElementById(id)?.addEventListener('click', function(e) {
         if (e.target === this) this.style.display = 'none';
