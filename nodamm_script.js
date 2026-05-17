@@ -213,7 +213,7 @@ function renderPosts() {
     return `
       <tr onclick="openPostView('${p.id}')">
         <td><span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span></td>
-        <td class="col-title"><span class="post-subject">${subject}</span>${replyBadge}</td>
+        <td class="col-title"><span class="post-region">[${p.region}]</span> <span class="post-subject">${subject}</span>${replyBadge}</td>
         <td class="col-author">${p.author}</td>
         <td class="col-date">${p.date}</td>
         <td class="col-views">${views}</td>
