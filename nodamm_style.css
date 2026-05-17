@@ -55,6 +55,13 @@
       color: var(--text);
       font-size: 15px;
       line-height: 1.7;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* 게시판 입력창/텍스트는 선택 허용 */
+    input, textarea, .post-view-body, .reply-item-view span {
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     /* ── Typography helpers ── */
