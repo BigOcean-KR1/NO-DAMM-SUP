@@ -1577,3 +1577,89 @@
     padding: 8px 8px !important;
   }
 }
+
+/* ── 모바일 슬라이드쇼 ── */
+#mobile-slideshow {
+  display: none;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+#mobileSlideTrack {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+}
+.mobile-slide-card {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.mobile-slide-card.active { opacity: 1; }
+.mobile-slide-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.mobile-slide-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0;
+  background: var(--bg);
+}
+.mobile-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(45,106,79,.25);
+  transition: background .3s, width .3s, border-radius .3s;
+  cursor: pointer;
+}
+.mobile-dot.active {
+  background: var(--green);
+  width: 20px;
+  border-radius: 4px;
+}
+
+@media (max-width: 960px) {
+  #mobile-slideshow { display: block; }
+}
+
+
+/* ── 게시판 테이블 모바일 카드형 ── */
+@media (max-width: 640px) {
+  .board-table thead { display: none; }
+  .board-table tbody tr {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+  }
+  .board-table td {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    text-align: left;
+    white-space: normal;
+    font-size: 13px;
+  }
+  .board-table td.col-title {
+    font-size: 14px;
+    font-weight: 600;
+    max-width: 100%;
+    order: 1;
+  }
+  .board-table td.col-title::before { content: ''; }
+  .board-table td[class="badge"]:first-child { order: 0; }
+  .board-table td.col-region { order: 2; color: var(--muted); font-size: 12px; }
+  .board-table td.col-region::before { content: '📍 '; }
+  .board-table td.col-author { order: 3; color: var(--muted); font-size: 12px; }
+  .board-table td.col-author::before { content: '✍️ '; }
+  .board-table td.col-date { order: 4; color: var(--muted); font-size: 11px; }
+  .board-table td:first-child { order: 0; }
+}
