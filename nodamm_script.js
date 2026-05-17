@@ -179,9 +179,9 @@ function openPostView(id) {
   const repliesHtml = replies.length > 0
     ? replies.map((r, ri) => `
         <div class="reply-item-view">
-          <span style="color:var(--green);font-weight:600;">↳ ${r.author}</span>
-          <span style="flex:1;">${r.content}</span>
-          <span style="color:var(--muted);font-size:11px;">${r.date}</span>
+          <span style="color:var(--green);font-weight:600;white-space:nowrap;">↳ ${r.author}</span>
+          <span style="flex:1;word-break:break-word;white-space:normal;line-height:1.6;">${r.content}</span>
+          <span style="color:var(--muted);font-size:11px;white-space:nowrap;">${r.date}</span>
           <button class="action-btn del" onclick="openDeleteReply('${id}',${ri})">삭제</button>
         </div>`).join('')
     : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
