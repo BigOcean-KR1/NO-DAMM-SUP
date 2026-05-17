@@ -155,6 +155,42 @@ function formatDate(timestamp) {
   });
 })();
 
+
+/* ── 모바일 슬라이드쇼 ── */
+(function() {
+  const cards  = Array.from(document.querySelectorAll('.mobile-slide-card'));
+  const dots   = Array.from(document.querySelectorAll('.mobile-dot'));
+  const track  = document.getElementById('mobileSlideTrack');
+  if (!track) return;
+
+  let current = 0, timer = null;
+
+  function go(idx) {
+    cards[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = ((idx % cards.length) + cards.length) % cards.length;
+    cards[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+  function startTimer() { stopTimer(); timer = setInterval(() => go(current + 1), 3500); }
+  function stopTimer()  { clearInterval(timer); timer = null; }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => { stopTimer(); go(i); startTimer(); });
+  });
+
+  // 스와이프
+  let touchX = 0;
+  track.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; stopTimer(); }, { passive: true });
+  track.addEventListener('touchend',   e => {
+    const diff = touchX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 35) diff > 0 ? go(current + 1) : go(current - 1);
+    startTimer();
+  });
+
+  startTimer();
+})();
+
 // 조회수 로컬 캐시
 const viewCounts = {};
 
