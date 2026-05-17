@@ -133,6 +133,28 @@ function formatDate(timestamp) {
 }
 
 
+
+/* ── 관리자 답글 버튼 — Shift 5번으로 활성화 ── */
+(function() {
+  let shiftCount = 0;
+  let shiftTimer = null;
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Shift') {
+      shiftCount++;
+      clearTimeout(shiftTimer);
+      shiftTimer = setTimeout(() => { shiftCount = 0; }, 2000);
+      if (shiftCount >= 5) {
+        shiftCount = 0;
+        const btn = document.getElementById('hidden-reply-btn');
+        if (btn) {
+          const isVisible = btn.style.display !== 'none';
+          btn.style.display = isVisible ? 'none' : 'inline-block';
+        }
+      }
+    }
+  });
+})();
+
 // 조회수 로컬 캐시
 const viewCounts = {};
 
@@ -164,13 +186,14 @@ function openPostView(id) {
         </div>`).join('')
     : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
 
-  const replyAreaTitle = p.type === 'q' ? '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>' : '';
+  const replyAreaTitle = '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>';
   document.getElementById('pv-replies').innerHTML = replyAreaTitle + repliesHtml;
 
   const safeSubject = (p.subject||p.title||'').replace(/'/g,"\'");
   const safeContent = (p.content||'').replace(/'/g,"\'");
-  const replyBtn = p.type === 'q'
-    ? `<button onclick="closePostView();openReplyModal('${id}')" style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">💬 답글 달기</button>` : '';
+  // 답글 버튼: 숨김 처리 (Shift 5번으로만 활성화)
+  const replyBtn = `<button id="hidden-reply-btn" onclick="closePostView();openReplyModal('${id}')"
+    style="display:none;padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">💬 답글 달기</button>`;
 
   document.getElementById('pv-actions').innerHTML = `
     ${replyBtn}
