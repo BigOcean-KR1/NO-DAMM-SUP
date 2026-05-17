@@ -186,9 +186,7 @@ function openPostView(id) {
         </div>`).join('')
     : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
 
-  const replyAreaTitle = p.type === 'q'
-    ? '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>'
-    : '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">답글</div>';
+  const replyAreaTitle = p.type === 'q' ? '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>' : '';
   document.getElementById('pv-replies').innerHTML = replyAreaTitle + repliesHtml;
 
   const safeSubject = (p.subject||p.title||'').replace(/'/g,"\'");
