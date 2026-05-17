@@ -178,11 +178,13 @@ function openPostView(id) {
   const replies = p.replies || [];
   const repliesHtml = replies.length > 0
     ? replies.map((r, ri) => `
-        <div class="reply-item-view" style="align-items:flex-start;">
-          <span style="color:var(--green);font-weight:600;white-space:nowrap;padding-top:2px;">↳ ${r.author}</span>
-          <span style="flex:1;word-break:break-all;white-space:pre-wrap;line-height:1.6;overflow-wrap:break-word;">${r.content}</span>
-          <span style="color:var(--muted);font-size:11px;white-space:nowrap;padding-top:2px;">${r.date}</span>
-          <button class="action-btn del" onclick="openDeleteReply('${id}',${ri})">삭제</button>
+        <div class="reply-item-view" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:var(--green);font-weight:600;">↳ ${r.author}</span>
+            <span style="color:var(--muted);font-size:11px;">${r.date}</span>
+            <button class="action-btn del" onclick="openDeleteReply('${id}',${ri})">삭제</button>
+          </div>
+          <div style="word-break:break-word;white-space:pre-wrap;line-height:1.6;overflow-wrap:break-word;font-size:13px;padding-left:4px;">${r.content}</div>
         </div>`).join('')
     : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
 
