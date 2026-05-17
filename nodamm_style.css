@@ -798,9 +798,15 @@
     .post-view-actions { display: flex; gap: 0.5rem; margin-top: 1.5rem; justify-content: flex-end; }
     .post-reply-area { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
     .reply-item-view {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: flex-start; gap: 8px;
       padding: 8px 0; border-bottom: 1px solid var(--border);
       font-size: 13px;
+    }
+    .reply-item-view span:nth-child(2) {
+      flex: 1;
+      word-break: break-word;
+      white-space: normal;
+      line-height: 1.6;
     }
     .reply-item-view:last-child { border-bottom: none; }
 
