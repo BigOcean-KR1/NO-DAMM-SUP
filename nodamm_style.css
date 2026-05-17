@@ -718,7 +718,7 @@
       white-space: nowrap;
     }
     .board-table thead th.col-title { text-align: center; }
-    .post-region { font-size: 11px; color: var(--muted); font-weight: 500; flex-shrink: 0; }
+    .board-table td.col-region { color: var(--muted); font-size: 12px; }
     .board-table tbody tr {
       border-bottom: 1px solid var(--border);
       transition: background .15s;
@@ -744,7 +744,6 @@
     .post-subject { font-weight: 600; }
     .board-table td.col-author { color: var(--muted); }
     .board-table td.col-date   { color: var(--muted); font-size: 12px; }
-    .board-table td.col-views  { color: var(--muted); }
 
     .badge {
       display: inline-block;
