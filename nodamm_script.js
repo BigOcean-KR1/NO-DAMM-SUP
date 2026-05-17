@@ -206,17 +206,16 @@ function renderPosts() {
   }
 
   tbody.innerHTML = filtered.map((p, idx) => {
-    const views      = viewCounts[p.id] || 0;
     const subject    = p.subject || p.title || '(제목 없음)';
     const replyCount = (p.replies || []).length;
     const replyBadge = replyCount > 0 ? ` <span style="color:var(--green);font-size:11px;">[${replyCount}]</span>` : '';
     return `
       <tr onclick="openPostView('${p.id}')">
         <td><span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span></td>
-        <td class="col-title"><span class="post-region">[${p.region}]</span> <span class="post-subject">${subject}</span>${replyBadge}</td>
+        <td class="col-region">${p.region}</td>
+        <td class="col-title"><span class="post-subject">${subject}</span>${replyBadge}</td>
         <td class="col-author">${p.author}</td>
         <td class="col-date">${p.date}</td>
-        <td class="col-views">${views}</td>
       </tr>`;
   }).join('');
 }
