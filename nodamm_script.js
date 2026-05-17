@@ -72,7 +72,7 @@ if (window.Lenis) {
   });
 }
 
-/* ── 1. 스크롤 페이드인 ── */
+/* ── 1. 스크롤 페이드인 + 언더라인 드로잉 ── */
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -80,9 +80,21 @@ const observer = new IntersectionObserver(entries => {
       observer.unobserve(e.target);
     }
   });
-}, { threshold: 0.1 });
+}, { threshold: 0.15 });
 
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// section-title 언더라인 드로잉 (fade-up과 별도 감지)
+const titleObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      titleObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.section-title').forEach(el => titleObserver.observe(el));
 
 /* ── 2. 숫자 카운터 애니메이션 ── */
 function countUp(id, target, suffix, prefix) {
