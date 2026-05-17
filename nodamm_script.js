@@ -120,10 +120,64 @@ function formatDate(timestamp) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
+
+// 조회수 로컬 캐시
+const viewCounts = {};
+
+// 글 상세 보기 모달
+function openPostView(id) {
+  const p = firestorePosts.find(p => p.id === id);
+  if (!p) return;
+  viewCounts[id] = (viewCounts[id] || 0) + 1;
+  renderPosts();
+
+  const subject = p.subject || p.title || '(제목 없음)';
+  const body    = p.content || p.title || '';
+
+  document.getElementById('postViewTitle').textContent = subject;
+  document.getElementById('pv-badge').className = `badge ${BADGE[p.type]?.cls}`;
+  document.getElementById('pv-badge').textContent = BADGE[p.type]?.label;
+  document.getElementById('pv-region').textContent = `[${p.region}]`;
+  document.getElementById('pv-meta').textContent = `${p.author} · ${p.date}`;
+  document.getElementById('pv-body').textContent = body;
+
+  const replies = p.replies || [];
+  const repliesHtml = replies.length > 0
+    ? replies.map((r, ri) => `
+        <div class="reply-item-view">
+          <span style="color:var(--green);font-weight:600;">↳ ${r.author}</span>
+          <span style="flex:1;">${r.content}</span>
+          <span style="color:var(--muted);font-size:11px;">${r.date}</span>
+          <button class="action-btn del" onclick="openDeleteReply('${id}',${ri})">삭제</button>
+        </div>`).join('')
+    : '<p style="color:var(--muted);font-size:13px;">아직 답글이 없습니다.</p>';
+
+  const replyAreaTitle = p.type === 'q' ? '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">💬 답글</div>' : '';
+  document.getElementById('pv-replies').innerHTML = replyAreaTitle + repliesHtml;
+
+  const safeSubject = (p.subject||p.title||'').replace(/'/g,"\'");
+  const safeContent = (p.content||'').replace(/'/g,"\'");
+  const replyBtn = p.type === 'q'
+    ? `<button onclick="closePostView();openReplyModal('${id}')" style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">💬 답글 달기</button>` : '';
+
+  document.getElementById('pv-actions').innerHTML = `
+    ${replyBtn}
+    <button onclick="closePostView();openEditModal('${id}','${safeSubject}','${safeContent}')" style="padding:8px 16px;background:#f3f4f6;color:#555;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">수정</button>
+    <button onclick="closePostView();openDeleteModal('${id}')" style="padding:8px 16px;background:#fdecea;color:#e74c3c;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;">삭제</button>`;
+
+  document.getElementById('postViewModal').classList.add('open');
+  window.lenis?.stop();
+}
+
+function closePostView() {
+  document.getElementById('postViewModal').classList.remove('open');
+  window.lenis?.start();
+}
+
 function renderPosts() {
-  const list    = document.getElementById('board-list');
+  const tbody   = document.getElementById('board-list');
   const countEl = document.getElementById('post-count');
-  if (!list || !countEl) return;
+  if (!tbody || !countEl) return;
 
   const source   = firestorePosts ?? [];
   const filtered = source.filter(p => {
@@ -135,40 +189,23 @@ function renderPosts() {
   countEl.textContent = filtered.length;
 
   if (filtered.length === 0) {
-    list.innerHTML = '<li style="padding:40px;text-align:center;color:#999;list-style:none;">첫 번째 글을 남겨보세요!</li>';
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:#999;">첫 번째 글을 남겨보세요!</td></tr>`;
     return;
   }
 
-  list.innerHTML = filtered.map(p => {
-    const repliesHtml = (p.replies || []).map((r, ri) => `
-      <div class="reply-item">
-        <span class="reply-author">↳ ${r.author}</span>
-        <span>${r.content}</span>
-        <span class="reply-date">${r.date}</span>
-        <button class="reply-del" onclick="openDeleteReply('${p.id}',${ri})">삭제</button>
-      </div>`).join('');
-
-    const replyBtn = p.type === 'q'
-      ? `<button class="reply-btn" onclick="openReplyModal('${p.id}')">💬 답글</button>` : '';
-
+  tbody.innerHTML = filtered.map((p, idx) => {
+    const views      = viewCounts[p.id] || 0;
+    const subject    = p.subject || p.title || '(제목 없음)';
+    const replyCount = (p.replies || []).length;
+    const replyBadge = replyCount > 0 ? ` <span style="color:var(--green);font-size:11px;">[${replyCount}]</span>` : '';
     return `
-      <li class="board-item" style="flex-direction:column;align-items:flex-start;gap:6px;">
-        <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;">
-          <div class="item-left">
-            <span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span>
-            <span class="item-region">[${p.region}]</span>
-            <span class="item-author" style="font-weight:600;font-size:13px;color:var(--green);">${p.author}</span>
-            <span class="item-title">${p.title}</span>
-          </div>
-          <div class="post-actions">
-            <span class="item-date" style="font-size:12px;color:var(--muted);">${p.date}</span>
-            ${replyBtn}
-            <button class="action-btn" onclick="openEditModal('${p.id}','${p.title.replace(/'/g,"\\'")}')">수정</button>
-            <button class="action-btn del" onclick="openDeleteModal('${p.id}')">삭제</button>
-          </div>
-        </div>
-        ${repliesHtml ? `<div class="reply-list">${repliesHtml}</div>` : ''}
-      </li>`;
+      <tr onclick="openPostView('${p.id}')">
+        <td><span class="badge ${BADGE[p.type]?.cls}">${BADGE[p.type]?.label}</span></td>
+        <td class="col-title"><span class="post-subject">${subject}</span>${replyBadge}</td>
+        <td class="col-author">${p.author}</td>
+        <td class="col-date">${p.date}</td>
+        <td class="col-views">${views}</td>
+      </tr>`;
   }).join('');
 }
 
@@ -193,7 +230,9 @@ function setupBoardListener() {
       type:    d.data().type,
       region:  d.data().region,
       author:  d.data().author || '익명',
-      title:   d.data().title,
+      subject: d.data().subject || d.data().title || '',
+      content: d.data().content || d.data().title || '',
+      title:   d.data().title || d.data().subject || '',
       pw:      d.data().pw || '',
       replies: d.data().replies || [],
       date:    formatDate(d.data().createdAt),
@@ -208,25 +247,30 @@ function setupBoardListener() {
 
 // 글 등록
 async function addPost() {
-  const author = document.getElementById('post-author')?.value?.trim();
-  const pw     = document.getElementById('post-pw')?.value?.trim();
-  const type   = document.getElementById('post-type')?.value;
-  const region = document.getElementById('post-region')?.value;
-  const title  = document.getElementById('post-title')?.value?.trim();
+  const author  = document.getElementById('post-author')?.value?.trim();
+  const pw      = document.getElementById('post-pw')?.value?.trim();
+  const type    = document.getElementById('post-type')?.value;
+  const region  = document.getElementById('post-region')?.value;
+  const subject = document.getElementById('post-subject')?.value?.trim();
+  const content = document.getElementById('post-content')?.value?.trim();
 
-  if (!author) return alert('이름을 입력해주세요.');
-  if (!pw)     return alert('비밀번호를 입력해주세요.');
-  if (!title)  return alert('내용을 입력해주세요.');
+  if (!author)  return alert('이름을 입력해주세요.');
+  if (!pw)      return alert('비밀번호를 입력해주세요.');
+  if (!subject) return alert('제목을 입력해주세요.');
+  if (!content) return alert('내용을 입력해주세요.');
 
   try {
     await addDoc(collection(db, 'posts'), {
-      type, region, author, title, pw,
+      type, region, author, subject, content,
+      title: subject,   // 구버전 호환
+      pw,
       replies: [],
       createdAt: serverTimestamp(),
     });
-    document.getElementById('post-author').value = '';
-    document.getElementById('post-pw').value     = '';
-    document.getElementById('post-title').value  = '';
+    document.getElementById('post-author').value  = '';
+    document.getElementById('post-pw').value      = '';
+    document.getElementById('post-subject').value = '';
+    document.getElementById('post-content').value = '';
     window.closeWriteModal?.();
   } catch(e) {
     console.error(e);
@@ -235,9 +279,10 @@ async function addPost() {
 }
 
 // 수정
-function openEditModal(id, content) {
+function openEditModal(id, subject, content) {
   pendingEditId = id;
-  document.getElementById('edit-content').value = content;
+  document.getElementById('edit-subject').value = subject || '';
+  document.getElementById('edit-content').value = content || subject || '';
   document.getElementById('edit-pw').value      = '';
   document.getElementById('editModal').style.display = 'flex';
 }
@@ -247,15 +292,16 @@ function closeEditModal() {
 }
 async function submitEdit() {
   const pw      = document.getElementById('edit-pw').value.trim();
+  const subject = document.getElementById('edit-subject').value.trim();
   const content = document.getElementById('edit-content').value.trim();
-  if (!pw || !content) return alert('비밀번호와 내용을 입력해주세요.');
+  if (!pw || !subject || !content) return alert('비밀번호, 제목, 내용을 모두 입력해주세요.');
 
   const post = firestorePosts.find(p => p.id === pendingEditId);
   if (!post) return;
   if (pw !== MASTER_PW && pw !== post.pw) return alert('비밀번호가 맞지 않습니다.');
 
   try {
-    await updateDoc(doc(db, 'posts', pendingEditId), { title: content });
+    await updateDoc(doc(db, 'posts', pendingEditId), { subject, content, title: subject });
     closeEditModal();
   } catch(e) {
     console.error(e);
@@ -605,6 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── 전역 함수 노출 (type="module" 대응) ── */
+window.openPostView     = openPostView;
+window.closePostView    = closePostView;
 window.filterPosts      = filterPosts;
 window.filterRegion     = filterRegion;
 window.addPost          = addPost;
