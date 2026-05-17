@@ -87,6 +87,23 @@
       letter-spacing: 2px;
       margin-bottom: 1rem;
       line-height: 1.1;
+      position: relative;
+      display: inline-block;
+    }
+    /* 언더라인 드로잉 — 스크롤 진입 시 왼→오른쪽으로 그어짐 */
+    .section-title::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      height: 4px;
+      width: 0;
+      background: linear-gradient(90deg, var(--green), var(--green-mid));
+      border-radius: 2px;
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+    }
+    .section-title.visible::after {
+      width: 100%;
     }
 
     .section-desc {
@@ -375,6 +392,14 @@
       gap: 1.2rem;
     }
 
+    /* how-card 순서 딜레이 */
+    .how-grid .how-card:nth-child(1) { transition-delay: 0s; }
+    .how-grid .how-card:nth-child(2) { transition-delay: 0.1s; }
+    .how-grid .how-card:nth-child(3) { transition-delay: 0.2s; }
+    .how-grid .how-card:nth-child(4) { transition-delay: 0.3s; }
+    .how-grid .how-card:nth-child(5) { transition-delay: 0.4s; }
+    .how-grid .how-card:nth-child(6) { transition-delay: 0.5s; }
+
     .how-card {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -562,6 +587,13 @@
       position: relative;
       z-index: 1;
     }
+
+    /* reward-card 순서 딜레이 */
+    .reward-grid .reward-card:nth-child(1) { transition-delay: 0s; }
+    .reward-grid .reward-card:nth-child(2) { transition-delay: 0.12s; }
+    .reward-grid .reward-card:nth-child(3) { transition-delay: 0.24s; }
+    .reward-grid .reward-card:nth-child(4) { transition-delay: 0.36s; }
+    .reward-grid .reward-card:nth-child(5) { transition-delay: 0.48s; }
 
     .reward-card {
       background: var(--white);
