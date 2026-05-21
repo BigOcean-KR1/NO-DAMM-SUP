@@ -327,11 +327,18 @@
     .hero-title .accent {
       color: var(--green);
     }
-    .hero-title .title-indent {
+    .title-dam-wrap {
+      position: relative;
       display: inline-block;
-      margin-left: clamp(80px, 15vw, 220px);
-      line-height: 0.85;
-      text-shadow: 4px 4px 0px rgba(45,106,79,0.15);
+    }
+    .title-sprout {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(28px, 3.5vw, 48px);
+      height: auto;
+      pointer-events: none;
     }
 
     .hero-slogan {
