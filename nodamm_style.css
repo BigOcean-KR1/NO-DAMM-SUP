@@ -333,10 +333,10 @@
     }
     .title-sprout {
       position: absolute;
-      bottom: -4px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: clamp(28px, 3.5vw, 48px);
+      width: clamp(16px, 1.8vw, 26px);
       height: auto;
       pointer-events: none;
     }
@@ -1676,3 +1676,8 @@
   .board-table td.col-date { order: 4; color: var(--muted); font-size: 11px; }
   .board-table td:first-child { order: 0; }
 }
+
+    .hero-emblem {
+      width: clamp(160px, 22vw, 260px);
+      margin-bottom: 1.8rem;
+    }
